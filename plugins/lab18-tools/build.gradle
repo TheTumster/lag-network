@@ -1,0 +1,8 @@
+// 1.8.8 plugin: built against the old Spigot API, Java 8 bytecode
+repositories {
+	maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+}
+dependencies {
+	compileOnly('org.spigotmc:spigot-api:1.8.8-R0.1-SNAPSHOT') { transitive = false }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 8 }

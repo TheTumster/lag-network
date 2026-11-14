@@ -95,6 +95,13 @@ if (Test-Path $pw) {
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Turned on explosion optimizer." Green }
 }
 
+$lc = "$Root\factions\plugins\laGCannons\config.yml"
+if (Test-Path $lc) {
+    $t = Get-Content $lc -Raw
+    $n = $t -replace 'radius-max:\s*25\b', 'radius-max: 64'
+    if ($n -ne $t) { Set-Content $lc $n -NoNewline; Say "Raised /tntfill radius to 64." Green }
+}
+
 # ---- First run: replace the placeholder secret so only YOUR proxy can talk to the servers
 $secretFile = "$Root\proxy\forwarding.secret"
 if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {

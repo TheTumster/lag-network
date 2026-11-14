@@ -327,6 +327,8 @@ def main():
     if missing:
         raise SystemExit("Required plugins missing:\n" + "\n".join(map(str, missing)))
 
+    build_lab18(local_dir)
+
     log("== First start (generate configs)")
     for s in SERVERS:
         run_until_done(os.path.join(DIST, s), java("2G") + ["paper.jar", "--nogui"])
@@ -403,9 +405,10 @@ def main():
     shutil.copy(os.path.join(ROOT, "network", "network.json"), os.path.join(DIST, "network.json"))
 
     log("== Update manifest")
-    for f in ("START.bat", "TUNNEL.bat", "README.txt"):
+    for f in ("START.bat", "TUNNEL.bat", "README.txt", "START-1.8-LAB.bat"):
         manage(".", f, RELEASE_DL + f)
     manage(".", os.path.join("tools", "start.ps1"), RELEASE_DL + "start.ps1")
+    manage(".", os.path.join("tools", "start-lab.ps1"), RELEASE_DL + "start-lab.ps1")
     build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
     json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
     for srv, files in MANAGED.items():
@@ -413,6 +416,42 @@ def main():
     open(os.path.join(DIST, "BUILD.txt"), "w").write(build)
 
     log("All good.")
+
+
+WE18 = [  # WorldEdit 6.1.7.2 (works on Spigot/Paper 1.8.8)
+    "https://mediafilez.forgecdn.net/files/2431/372/worldedit-bukkit-6.1.7.2.jar",
+    "https://edge.forgecdn.net/files/2431/372/worldedit-bukkit-6.1.7.2.jar",
+    "https://dev.bukkit.org/projects/worldedit/files/2431372/download",
+]
+WE18_MD5 = "1b64e31c38fc140016ef5a35e390f17c"
+
+
+def build_lab18(local_dir):
+    """1.8.8 cannon lab: jars only. Configs are written by tools/start-lab.ps1 on the PC (so updates never reset them)."""
+    log("== 1.8.8 cannon lab")
+    lab = os.path.join(DIST, "lab18")
+    os.makedirs(os.path.join(lab, "plugins"), exist_ok=True)
+    url, name = papermc("paper", "1.8.8")
+    download(url, os.path.join(lab, "paper.jar"))
+    manage("lab18", "paper.jar", url)
+    dest = os.path.join(lab, "plugins", "worldedit-bukkit-6.1.7.2.jar")
+    for u in WE18:
+        try:
+            download(u, dest)
+            if hashlib.md5(open(dest, "rb").read()).hexdigest() == WE18_MD5:
+                manage("lab18", os.path.join("plugins", "worldedit-bukkit-6.1.7.2.jar"), u)
+                log(f"  lab18     + WorldEdit 6.1.7.2 ({u})")
+                break
+            log(f"  ! WorldEdit md5 mismatch from {u}")
+        except Exception as e:
+            log(f"  ! WorldEdit from {u}: {e}")
+        if os.path.exists(dest):
+            os.remove(dest)
+    else:
+        raise SystemExit("Couldn't download WorldEdit 6.1.7.2 for the 1.8 lab")
+    shutil.copy(os.path.join(local_dir, "laGLab.jar"), os.path.join(lab, "plugins", "laGLab.jar"))
+    manage("lab18", os.path.join("plugins", "laGLab.jar"), RELEASE_DL + "laGLab.jar")
+    log(f"  lab18     + {name}, laGLab")
 
 
 def _write_secret(secret):

@@ -1,0 +1,9 @@
+name: laGLab
+version: ${version}
+main: net.lag.lab.LabTools
+description: laG 1.8 cannon lab helpers
+commands:
+  tntfill:
+    description: Fill dispensers around you with TNT
+    usage: /tntfill [radius] [amount per dispenser]
+    aliases: [tf]

@@ -50,7 +50,7 @@ final class RedstoneFix implements Listener {
 		long delay = plugin.getConfig().getLong("redstone-fix.delay-ticks", 40);
 		// FAWE pastes asynchronously; give it a moment to finish
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-			int fixed = fix(at, r);
+			int fixed = fix(at, r, true);
 			if (fixed > 0) p.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>[laG] <gray>Reconnected <white>" + fixed + "<gray> redstone."));
 		}, delay);
 	}
@@ -83,9 +83,15 @@ final class RedstoneFix implements Listener {
 
 	/** Returns how many dust blocks were rewired. */
 	int fix(Location center, int r) {
+		return fix(center, r, false);
+	}
+
+	/** fullHeight: scan the whole column (tall cannons pasted from the ground reach far above you). */
+	int fix(Location center, int r, boolean fullHeight) {
 		World w = center.getWorld();
 		int cx = center.getBlockX(), cy = center.getBlockY(), cz = center.getBlockZ();
-		int minY = Math.max(w.getMinHeight(), cy - r), maxY = Math.min(w.getMaxHeight() - 1, cy + r);
+		int minY = fullHeight ? w.getMinHeight() : Math.max(w.getMinHeight(), cy - r);
+		int maxY = fullHeight ? w.getMaxHeight() - 1 : Math.min(w.getMaxHeight() - 1, cy + r);
 		List<Block> wires = new ArrayList<>();
 		for (int x = cx - r; x <= cx + r; x++) {
 			for (int z = cz - r; z <= cz + r; z++) {

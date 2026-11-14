@@ -190,8 +190,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 
 	private boolean tntfill(CommandSender sender, String[] args) {
 		if (!(sender instanceof Player p)) return true;
-		int maxR = getConfig().getInt("tntfill.radius-max", 25);
-		int radius = 10, amount = 64;
+		int maxR = getConfig().getInt("tntfill.radius-max", 64);
+		int radius = 32, amount = 64;
 		try {
 			if (args.length > 0) radius = Math.min(maxR, Integer.parseInt(args[0]));
 			if (args.length > 1) amount = Math.min(getConfig().getInt("tntfill.per-dispenser-max", 576), Integer.parseInt(args[1]));

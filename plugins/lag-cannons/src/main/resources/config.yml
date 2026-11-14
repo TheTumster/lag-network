@@ -34,7 +34,7 @@ durability:
 checker-item: POTATO
 
 tntfill:
-  radius-max: 25
+  radius-max: 64
   per-dispenser-max: 576
 
 # Flowing water/lava normally washes away redstone. Cannon servers turn that off so water-based cannons don't break themselves.
