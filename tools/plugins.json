@@ -92,7 +92,8 @@
       "loader": "paper"
     },
     {
-      "github": "GriefPrevention/GriefPrevention"
+      "modrinth": "griefprevention",
+      "loader": "paper"
     },
     {
       "local": "laGCore"
