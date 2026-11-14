@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
-          - { name: "ours-nomerge", kind: "121", fix: "true", cannons: "true", merge: "false" }
+          - { name: "lag-paper-stale", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper", stale: "true" }
           - { name: "lag-paper", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
     steps:
@@ -54,6 +54,7 @@ jobs:
             echo "fix-redstone=${{ matrix.fix }}"
             echo "record-ticks=600"
             echo "settle-ticks=100"
+            echo "stale-comparators=${{ matrix.stale || 'false' }}"
           } >> /tmp/prep/harness.properties
           cat /tmp/prep/harness.properties
 

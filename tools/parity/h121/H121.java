@@ -64,6 +64,27 @@ public class H121 extends Harness {
 					}
 				}
 		say("redstone dust after paste: " + wires + " (" + dot + " with no connections)");
+		if (stale()) Bukkit.getScheduler().runTaskLater(this, () -> {
+			int n = 0;
+			for (int x = 0; x < sw; x++)
+				for (int y = 0; y < sh; y++)
+					for (int z = 0; z < sl; z++) {
+						Block b = world.getBlockAt(ox + x, oy + y, oz + z);
+						if (b.getBlockData() instanceof org.bukkit.block.data.type.Comparator c && c.isPowered()) {
+							c.setPowered(false);
+							b.setBlockData(c, false);
+							try {
+								Object lvl = world.getClass().getMethod("getHandle").invoke(world);
+								Class<?> bpC = Class.forName("net.minecraft.core.BlockPos");
+								Object pos = bpC.getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
+								Object be = Class.forName("net.minecraft.world.level.Level").getMethod("getBlockEntity", bpC).invoke(lvl, pos);
+								be.getClass().getMethod("setOutputSignal", int.class).invoke(be, 0);
+							} catch (Throwable t) { say("comparator reset failed: " + t); }
+							n++;
+						}
+					}
+			say("stale comparators: switched " + n + " off (like a 1.8 paste)");
+		}, 30L);
 		if (Boolean.parseBoolean(cfg.getProperty("fix-redstone", "false"))) {
 			int cx = ox + sw / 2, cz = oz + sl / 2;
 			for (int y = oy; y < oy + sh; y += 64) {
@@ -84,6 +105,34 @@ public class H121 extends Harness {
 						}
 				say("after fix: " + ext + " pistons extended (" + extPowered + " of them powered)");
 			}, 20L);
+		}
+	}
+
+	private boolean stale() {
+		return Boolean.parseBoolean(cfg.getProperty("stale-comparators", "false"));
+	}
+
+	@Override
+	protected boolean fillQuietly(Block b) {
+		if (!stale()) return false;
+		try {
+			Object lvl = world.getClass().getMethod("getHandle").invoke(world);
+			Class<?> bpC = Class.forName("net.minecraft.core.BlockPos");
+			Object pos = bpC.getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
+			Object be = Class.forName("net.minecraft.world.level.Level").getMethod("getBlockEntity", bpC).invoke(lvl, pos);
+			java.lang.reflect.Method getItems = null;
+			for (Class<?> c = be.getClass(); c != null && getItems == null; c = c.getSuperclass())
+				for (java.lang.reflect.Method m : c.getDeclaredMethods())
+					if (m.getName().equals("getItems") && m.getParameterCount() == 0) getItems = m;
+			getItems.setAccessible(true);
+			@SuppressWarnings("unchecked") java.util.List<Object> items = (java.util.List<Object>) getItems.invoke(be);
+			Object tnt = Class.forName("org.bukkit.craftbukkit.inventory.CraftItemStack").getMethod("asNMSCopy", ItemStack.class).invoke(null, new ItemStack(Material.TNT, 64));
+			java.lang.reflect.Method copy = tnt.getClass().getMethod("copy");
+			for (int i = 0; i < items.size(); i++) items.set(i, copy.invoke(tnt));
+			return true;
+		} catch (Throwable t) {
+			say("quiet fill failed: " + t);
+			return false;
 		}
 	}
 

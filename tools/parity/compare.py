@@ -5,7 +5,7 @@ falling sand and explosions, then explosion spread and how much of the cannon su
 """
 import collections, os, statistics, sys
 
-ORDER = ["1.8.8", "lag-paper", "ours-nomerge", "ours-no-laGCannons"]
+ORDER = ["1.8.8", "lag-paper-stale", "lag-paper", "ours-no-laGCannons"]
 
 
 def load(path):

@@ -55,6 +55,8 @@ public abstract class Harness extends JavaPlugin implements Listener {
 	protected abstract void makeWater(Block b);
 	/** Redstone-relevant state of a block in a version-neutral form ("wire:7", "disp:T", "pist:E", "rep:on"...), or null. */
 	protected abstract String rsState(Block b);
+	/** Fill a dispenser without notifying comparators (experiment); false = use the normal API fill. */
+	protected boolean fillQuietly(Block b) { return false; }
 
 	protected int[] xyz(String s) {
 		String[] p = s.split(",");
@@ -114,7 +116,7 @@ public abstract class Harness extends JavaPlugin implements Listener {
 							if (b.getType() == Material.DISPENSER) {
 								BlockState st = b.getState();
 								if (st instanceof Dispenser) {
-									for (int i = 0; i < 9; i++) ((Dispenser) st).getInventory().setItem(i, new ItemStack(Material.TNT, 64));
+									if (!fillQuietly(b)) for (int i = 0; i < 9; i++) ((Dispenser) st).getInventory().setItem(i, new ItemStack(Material.TNT, 64));
 									d++;
 								}
 							}
