@@ -112,6 +112,12 @@ def main():
         tf = d["tnt_first"]
         if tf:
             print(f"  TNT spawn |vx| {stats([abs(v[3]) for v in tf])}  vy {stats([v[4] for v in tf])}  |vz| {stats([abs(v[5]) for v in tf])}")
+        sand_paths = [v for k, v in d["paths"].items() if k.startswith("S")]
+        if sand_paths:
+            firsts = collections.Counter((p[0][0] // 10) * 10 for p in sand_paths)
+            print("  sand starts falling (tick bucket: count): " + ", ".join(f"t{k}:{v}" for k, v in sorted(firsts.items())))
+            spots = collections.Counter((int(p[0][1] // 1), int(p[0][2] // 1), int(p[0][3] // 1)) for p in sand_paths)
+            print("  sand starts at (top spots): " + ", ".join(f"{k}:{v}" for k, v in spots.most_common(10)))
         sl = list(d["sand_last"].values())
         if sl:
             print(f"  sand entities {len(sl)}; last seen x {stats([s[1] for s in sl])} y {stats([s[2] for s in sl])} z {stats([s[3] for s in sl])}")
