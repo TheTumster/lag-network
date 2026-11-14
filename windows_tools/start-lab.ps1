@@ -43,6 +43,24 @@ if (-not (Test-Path "$Lab\spigot.yml")) {
     $n = $t -replace 'max-tnt-per-tick:\s*\d+', 'max-tnt-per-tick: 20000'
     if ($n -ne $t) { Set-Content "$Lab\spigot.yml" $n -NoNewline }
 }
+# PaperSpigot cannon settings (what 1.8 cannon servers run): fix-cannons, no explosion knockback,
+# and TNT/sand keep flying into unloaded chunks instead of being deleted
+$pp = "$Lab\paper.yml"
+if (-not (Test-Path $pp)) {
+    @("world-settings:", "  default:", "    fix-cannons: true", "    disable-explosion-knockback: true", "    optimize-explosions: true",
+      "    remove-unloaded:", "      tnt-entities: false", "      falling-blocks: false",
+      "    load-chunks:", "      tnt-entities: true", "      falling-blocks: true") | Set-Content $pp
+} else {
+    $t = Get-Content $pp -Raw
+    $n = $t -replace 'fix-cannons:\s*false', 'fix-cannons: true' `
+            -replace 'disable-explosion-knockback:\s*false', 'disable-explosion-knockback: true' `
+            -replace 'optimize-explosions:\s*false', 'optimize-explosions: true'
+    $n = [regex]::Replace($n, '(?m)(remove-unloaded:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+tnt-entities:)\s*true', '$1 false')
+    $n = [regex]::Replace($n, '(?m)(remove-unloaded:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+falling-blocks:)\s*true', '$1 false')
+    $n = [regex]::Replace($n, '(?m)(load-chunks:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+tnt-entities:)\s*false', '$1 true')
+    $n = [regex]::Replace($n, '(?m)(load-chunks:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+falling-blocks:)\s*false', '$1 true')
+    if ($n -ne $t) { Set-Content $pp $n -NoNewline; Say "Applied cannon settings (fix-cannons on)." Green }
+}
 New-Item -ItemType Directory -Force -Path "$Lab\plugins\WorldEdit\schematics" | Out-Null
 
 Say "Join with a 1.8.9 client at:  localhost:25570" Green
