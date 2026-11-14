@@ -158,3 +158,25 @@ edit("net/minecraft/world/entity/Entity.java", r"(\w+) = this\.limitPistonMoveme
      r"if (!((Object) this instanceof net.minecraft.world.entity.item.PrimedTnt || (Object) this instanceof net.minecraft.world.entity.item.FallingBlockEntity)) \1 = this.limitPistonMovement(\2); // laG: 1.8 had no piston cap",
      regex=True)
 print("laG Paper patches applied")
+
+# 7) Double piston extenders: a sticky retracting with an extended, unpowered piston of the same facing
+#    two blocks ahead retracts that piston first, then pulls it (what 1.8 sand comps rely on).
+#    Vanilla 1.21 can't pull an extended piston, so the sticky retracted empty and left the front piston out.
+pb = "net/minecraft/world/level/block/piston/PistonBaseBlock.java"
+edit(pb, """        // Paper end - Protect Bedrock and End Portal/Frames from being destroyed
+        BlockState blockState = state.setValue(EXTENDED, true);""",
+"""        // Paper end - Protect Bedrock and End Portal/Frames from being destroyed
+        if (!level.isClientSide() && this.isSticky && id == TRIGGER_CONTRACT && !this.getNeighborSignal(level, pos, direction)) { // laG: double piston retract
+            BlockPos lagFront = pos.relative(direction, 2);
+            BlockState lagFs = level.getBlockState(lagFront);
+            if ((lagFs.is(Blocks.PISTON) || lagFs.is(Blocks.STICKY_PISTON)) && lagFs.getValue(EXTENDED) && lagFs.getValue(FACING) == direction
+                && !((PistonBaseBlock) lagFs.getBlock()).getNeighborSignal(level, lagFront, direction)) {
+                level.setBlock(lagFront, lagFs.setValue(EXTENDED, false), Block.UPDATE_ALL);
+                BlockPos lagHead = lagFront.relative(direction);
+                BlockState lagHs = level.getBlockState(lagHead);
+                if (lagHs.is(Blocks.PISTON_HEAD) && lagHs.getValue(FACING) == direction) {
+                    level.setBlock(lagHead, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                }
+            }
+        }
+        BlockState blockState = state.setValue(EXTENDED, true);""")

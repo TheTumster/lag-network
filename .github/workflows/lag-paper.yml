@@ -39,6 +39,7 @@ jobs:
           awk '/private static void moveCollidedEntities/,/^    }$/' $F | head -80
           awk '/public static void tick\(/,/^    }$/' $F | head -40
           grep -n -A16 "private Vec3 limitPistonMovement" net/minecraft/world/entity/Entity.java | head -30
+          awk '/protected boolean triggerEvent/,/^    }$/' net/minecraft/world/level/block/piston/PistonBaseBlock.java | head -90
       - name: Apply laG cannon patches
         working-directory: paper
         run: python3 ../tools/lagpaper/patch.py paper-server/src/minecraft/java
