@@ -33,6 +33,54 @@ if (-not (Test-Path $java)) {
     }
 }
 
+
+# ---- Auto-update: pull any new server/plugin jars from the latest build. Worlds and configs are never touched.
+function Update-Network {
+    try {
+        $m = Invoke-RestMethod "https://github.com/TheTumster/lag-network/releases/latest/download/update-manifest.json" -TimeoutSec 15
+    } catch {
+        Say "Couldn't check for updates (offline or repo private) - starting what you have." DarkGray
+        return
+    }
+    $current = if (Test-Path "$Root\BUILD.txt") { (Get-Content "$Root\BUILD.txt" -Raw).Trim() } else { "?" }
+    if ("$($m.build)" -eq $current) { Say "Up to date (build $current)." DarkGray; return }
+    Say "Updating build $current -> $($m.build)..." Yellow
+    $changed = 0
+    foreach ($srv in $m.servers.PSObject.Properties) {
+        $dir = "$Root\$($srv.Name)"
+        $stateFile = "$dir\.lag-managed.json"
+        $old = if (Test-Path $stateFile) { @(Get-Content $stateFile -Raw | ConvertFrom-Json) } else { @() }
+        $new = @()
+        foreach ($f in $srv.Value) {
+            $new += $f.path
+            $dest = Join-Path $dir ($f.path -replace '/', '\')
+            $have = if (Test-Path $dest) { (Get-FileHash $dest -Algorithm SHA256).Hash.ToLower() } else { "" }
+            if ($have -ne $f.sha256) {
+                Say "  $($srv.Name): $($f.path)" White
+                New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+                Invoke-WebRequest $f.url -OutFile "$dest.download" -UseBasicParsing -Headers @{ "User-Agent" = "laG-Network-updater" }
+                if ((Get-FileHash "$dest.download" -Algorithm SHA256).Hash.ToLower() -ne $f.sha256) {
+                    Remove-Item "$dest.download" -Force
+                    throw "Checksum mismatch on $($f.path)"
+                }
+                Move-Item "$dest.download" $dest -Force
+                $changed++
+            }
+        }
+        # remove old versions of plugins the network manages (your own extra plugins are left alone)
+        foreach ($p in $old) {
+            if ($new -notcontains $p) {
+                $gone = Join-Path $dir ($p -replace '/', '\')
+                if (Test-Path $gone) { Remove-Item $gone -Force; Say "  $($srv.Name): removed old $p" DarkGray }
+            }
+        }
+        $new | ConvertTo-Json | Set-Content $stateFile
+    }
+    Set-Content "$Root\BUILD.txt" "$($m.build)" -NoNewline
+    Say "Updated ($changed files)." Green
+}
+Update-Network
+
 # ---- First run: replace the placeholder secret so only YOUR proxy can talk to the servers
 $secretFile = "$Root\proxy\forwarding.secret"
 if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {

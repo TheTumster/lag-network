@@ -40,6 +40,7 @@ jobs:
       - name: Assemble + boot-test the whole network
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
           pip install -q pyyaml
           python3 tools/bake.py localjars
@@ -57,6 +58,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest laG-Network.zip dist/bake-report.json localjars/laGCannons.jar localjars/laGCore.jar \
+          gh release create latest laG-Network.zip dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGCore.jar localjars/FactionsUUID.jar \
             --title "laG Network (build ${{ github.run_number }})" \
             --notes "Download laG-Network.zip, extract it anywhere, double-click START.bat." --latest

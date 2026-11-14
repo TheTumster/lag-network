@@ -54,6 +54,19 @@ def get_json(url):
     raise SystemExit(f"Gave up on {url}")
 
 
+MANAGED = {}  # server -> list of {"path","url","sha256"}
+RELEASE_DL = "https://github.com/TheTumster/lag-network/releases/download/latest/"
+
+
+def sha256(path):
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()
+
+
+def manage(server, rel_path, url):
+    MANAGED.setdefault(server, []).append({"path": rel_path.replace(os.sep, "/"), "url": url,
+                                           "sha256": sha256(os.path.join(DIST, server, rel_path))})
+
+
 def download(url, dest, sha1=None):
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120) as r, open(dest, "wb") as f:
@@ -266,10 +279,12 @@ def main():
     purl, pname = papermc("paper", MC)
     log(f"  {vname}\n  {pname}")
     download(vurl, os.path.join(DIST, "proxy", "velocity.jar"))
+    manage("proxy", "velocity.jar", vurl)
     download(purl, os.path.join(DIST, "_paper.jar"))
     for s in SERVERS:
         os.makedirs(os.path.join(DIST, s, "plugins"), exist_ok=True)
         shutil.copy(os.path.join(DIST, "_paper.jar"), os.path.join(DIST, s, "paper.jar"))
+        manage(s, "paper.jar", purl)
         open(os.path.join(DIST, s, "eula.txt"), "w").write("eula=true\n")
     os.remove(os.path.join(DIST, "_paper.jar"))
 
@@ -284,6 +299,7 @@ def main():
         for it in items:
             if "local" in it:
                 shutil.copy(os.path.join(local_dir, it["local"] + ".jar"), os.path.join(pdir, it["local"] + ".jar"))
+                manage(server, os.path.join("plugins", it["local"] + ".jar"), RELEASE_DL + it["local"] + ".jar")
                 manifest["plugins"].setdefault(server, []).append(it["local"] + " (built)")
                 continue
             try:
@@ -301,6 +317,7 @@ def main():
                 continue
             url, fname, sha1 = res
             download(url, os.path.join(pdir, fname), sha1)
+            manage(server, os.path.join("plugins", fname), url)
             manifest["plugins"].setdefault(server, []).append(fname)
             log(f"  {server:9} + {fname}")
     if missing:
@@ -364,6 +381,13 @@ def main():
                 shutil.rmtree(pth)
             elif os.path.isfile(pth):
                 os.remove(pth)
+
+    log("== Update manifest")
+    build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
+    json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
+    for srv, files in MANAGED.items():
+        json.dump([f["path"] for f in files], open(os.path.join(DIST, srv, ".lag-managed.json"), "w"))
+    open(os.path.join(DIST, "BUILD.txt"), "w").write(build)
 
     log("== Start scripts")
     for f in os.listdir(os.path.join(ROOT, "windows")):
