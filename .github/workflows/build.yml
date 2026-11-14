@@ -3,6 +3,10 @@ on:
   push:
   workflow_dispatch:
 
+concurrency:
+  group: network-build
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
