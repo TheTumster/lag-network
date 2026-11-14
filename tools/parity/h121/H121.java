@@ -70,6 +70,20 @@ public class H121 extends Harness {
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "fixredstone 64 " + world.getName() + " " + cx + " " + (y + 32) + " " + cz);
 			}
 			say("ran /fixredstone over the whole cannon");
+			Bukkit.getScheduler().runTaskLater(this, () -> {
+				int ext = 0, extPowered = 0;
+				for (int x = 0; x < sw; x++)
+					for (int y = 0; y < sh; y++)
+						for (int z = 0; z < sl; z++) {
+							Block b = world.getBlockAt(ox + x, oy + y, oz + z);
+							if (b.getBlockData() instanceof org.bukkit.block.data.type.Piston p && p.isExtended()) {
+								ext++;
+								if (b.isBlockIndirectlyPowered() || b.getRelative(org.bukkit.block.BlockFace.UP).isBlockIndirectlyPowered()) extPowered++;
+								else if (ext - extPowered <= 5) say("extended but unpowered piston at " + b.getX() + "," + b.getY() + "," + b.getZ() + " " + p.getAsString());
+							}
+						}
+				say("after fix: " + ext + " pistons extended (" + extPowered + " of them powered)");
+			}, 20L);
 		}
 	}
 

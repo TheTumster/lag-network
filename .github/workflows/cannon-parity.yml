@@ -135,7 +135,7 @@ jobs:
           grep -a "\[PARITY\]" server.log || (echo "--- no harness output; tail:"; tail -60 server.log)
           mkdir -p ../out/${{ matrix.name }}
           cp plugins/ParityHarness/trace.csv ../out/${{ matrix.name }}/ 2>/dev/null || touch ../out/${{ matrix.name }}/trace.csv
-          grep -a "\[PARITY\]\|Exception\|ERROR" server.log | head -80 > ../out/${{ matrix.name }}/server.log || true
+          grep -a "\[PARITY\]\|Exception\|ERROR\|laGCannons\]\|WARN" server.log | head -120 > ../out/${{ matrix.name }}/server.log || true
           wc -l ../out/${{ matrix.name }}/trace.csv
 
       - uses: actions/upload-artifact@v4
