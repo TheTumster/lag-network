@@ -85,3 +85,7 @@ piston-order-fix: true
 # players could make unraidable walls. Example: worlds: [cannontest]
 cannon-protect:
   worlds: []
+
+# Falling sand/gravel that breaks (lands on a slab, piston head, carpet...) drops nothing. true = vanilla item drops.
+falling-blocks:
+  drop-items: false

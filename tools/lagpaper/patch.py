@@ -134,4 +134,27 @@ edit(cu,
 edit("net/minecraft/world/entity/Entity.java",
      "final Vec3 collided = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.performCollisions(movement, currentBox, potentialCollisionsVoxel, potentialCollisionsBB);",
      "final Vec3 collided = ((Object)this instanceof net.minecraft.world.entity.item.PrimedTnt || (Object)this instanceof net.minecraft.world.entity.item.FallingBlockEntity) ? ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.performCollisionsCannon(movement, currentBox, potentialCollisionsVoxel, potentialCollisionsBB) : ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.performCollisions(movement, currentBox, potentialCollisionsVoxel, potentialCollisionsBB); // laG")
+# 4) pistons push TNT / falling blocks like 1.8: a fixed 0.5625 per tick (progress step + 1/16), a final 0.25 nudge when
+#    the piston finishes, and no 0.51-per-tick piston movement cap (1.8 had none)
+CANNON = "(entity instanceof net.minecraft.world.entity.item.PrimedTnt || entity instanceof net.minecraft.world.entity.item.FallingBlockEntity)"
+pm = "net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java"
+edit(pm, "d4 = Math.min(d4, d) + 0.01;", f"d4 = {CANNON} ? d + 0.0625 : Math.min(d4, d) + 0.01; // laG: 1.8 piston push")
+edit(pm, "    public static void tick(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity) {",
+     """    // laG: 1.8 TileEntityPiston pushes entities in the finished block's box once more by 0.25 when it completes
+    private static void lagFinalPush(Level level, BlockPos pos, PistonMovingBlockEntity piston) {
+        VoxelShape shape = piston.getCollisionRelatedBlockState().getCollisionShape(level, pos);
+        if (shape.isEmpty()) return;
+        AABB box = moveByPositionAndProgress(pos, shape.bounds(), piston);
+        Direction dir = piston.getMovementDirection();
+        for (Entity entity : level.getEntities((Entity) null, box)) {
+            if (""" + CANNON + """) moveEntityByPiston(dir, entity, 0.25, dir);
+        }
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, PistonMovingBlockEntity blockEntity) {""")
+edit(pm, "        if (blockEntity.progressO >= 1.0F) {\n",
+     "        if (blockEntity.progressO >= 1.0F) {\n            if (!level.isClientSide()) lagFinalPush(level, pos, blockEntity); // laG\n")
+edit("net/minecraft/world/entity/Entity.java", r"(\w+) = this\.limitPistonMovement\((\w+)\);",
+     r"if (!((Object) this instanceof net.minecraft.world.entity.item.PrimedTnt || (Object) this instanceof net.minecraft.world.entity.item.FallingBlockEntity)) \1 = this.limitPistonMovement(\2); // laG: 1.8 had no piston cap",
+     regex=True)
 print("laG Paper patches applied")
