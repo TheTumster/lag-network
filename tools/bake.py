@@ -243,6 +243,8 @@ def patch_backend(name):
         # Cannon server settings: let big cannons tick every TNT, and use Paper's explosion cache
         yaml_set(os.path.join(d, "spigot.yml"), "world-settings.default.max-tnt-per-tick", 20000)
         yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "environment.optimize-explosions", True)
+        # 1.8 fix-cannons: flowing water doesn't push TNT
+        yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "fixes.prevent-tnt-from-moving-in-water", True)
         fc = next((c for c in (os.path.join(d, "plugins", n, "config", "main.conf") for n in ("FactionsUUID", "Factions"))
                    if os.path.exists(c)), None)
         if not fc:

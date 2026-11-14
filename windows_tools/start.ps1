@@ -91,8 +91,9 @@ if (Test-Path $sp) {
 $pw = "$Root\factions\config\paper-world-defaults.yml"
 if (Test-Path $pw) {
     $t = Get-Content $pw -Raw
-    $n = $t -replace 'optimize-explosions:\s*false', 'optimize-explosions: true'
-    if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Turned on explosion optimizer." Green }
+    $n = $t -replace 'optimize-explosions:\s*false', 'optimize-explosions: true' `
+            -replace 'prevent-tnt-from-moving-in-water:\s*false', 'prevent-tnt-from-moving-in-water: true'
+    if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Applied cannon settings (explosion optimizer, water doesn't push TNT)." Green }
 }
 
 # ---- FactionsUUID: turn on faction TNT banks (/f tnt, /f tntfill) and allow a bigger fill radius
