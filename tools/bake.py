@@ -404,6 +404,9 @@ def main():
             log("  " + p)
         raise SystemExit(1)
 
+    log("== 1.8-height datapack (factions overworld y 0..255)")
+    make_255_datapack()
+
     log("== Cleaning test worlds/logs")
     for s in SERVERS + ["proxy"]:
         for junk in ("world", "world_nether", "world_the_end", "logs", "cache", "usercache.json",
@@ -414,6 +417,12 @@ def main():
                 shutil.rmtree(pth)
             elif os.path.isfile(pth):
                 os.remove(pth)
+
+    # fresh installs: the factions world is created 0..255 (datapack must exist before the world does)
+    pack = os.path.join(ROOT, "build", "laG-255")
+    if os.path.isdir(pack):
+        shutil.copytree(pack, os.path.join(DIST, "factions", "world", "datapacks", "laG-255"))
+        log("  factions/world/datapacks/laG-255 added")
 
     log("== Start scripts")
     for f in os.listdir(os.path.join(ROOT, "windows")):
@@ -473,6 +482,59 @@ def build_lab18(local_dir):
     shutil.copy(os.path.join(local_dir, "laGLab.jar"), os.path.join(lab, "plugins", "laGLab.jar"))
     manage("lab18", os.path.join("plugins", "laGLab.jar"), RELEASE_DL + "laGLab.jar")
     log(f"  lab18     + {name}, laGLab")
+
+
+def make_255_datapack():
+    """Overworld dimension type with 1.8's height (min_y 0, height 256), built from the real 1.21.11 data."""
+    import zipfile
+    d = os.path.join(DIST, "factions")
+    jars = [os.path.join(r, f) for base in ("versions", "libraries") for r, _, fs in os.walk(os.path.join(d, base)) for f in fs if f.endswith(".jar")]
+    dim = ver = None
+    for j in jars:
+        try:
+            with zipfile.ZipFile(j) as z:
+                names = set(z.namelist())
+                if dim is None and "data/minecraft/dimension_type/overworld.json" in names:
+                    dim = json.loads(z.read("data/minecraft/dimension_type/overworld.json"))
+                if ver is None and "version.json" in names:
+                    v = json.loads(z.read("version.json"))
+                    if "pack_version" in v:
+                        ver = v
+        except zipfile.BadZipFile:
+            continue
+    if dim is None:
+        raise SystemExit("couldn't find vanilla dimension_type/overworld.json in the factions server jars")
+    dim["min_y"], dim["height"], dim["logical_height"] = 0, 256, 256
+    pv = (ver or {}).get("pack_version", {})
+    fmt = pv.get("data_major", pv.get("data")) if isinstance(pv, dict) else pv
+    log(f"  vanilla overworld dimension type found; data pack format {fmt}")
+    pack = os.path.join(ROOT, "build", "laG-255")
+    shutil.rmtree(pack, ignore_errors=True)
+    os.makedirs(os.path.join(pack, "data", "minecraft", "dimension_type"))
+    json.dump(dim, open(os.path.join(pack, "data", "minecraft", "dimension_type", "overworld.json"), "w"), indent=2)
+    meta = {"pack": {"description": "laG: 1.8 build height (y 0-255)"}}
+    if fmt is not None:
+        meta["pack"].update({"pack_format": fmt, "min_format": fmt, "max_format": fmt})
+    json.dump(meta, open(os.path.join(pack, "pack.mcmeta"), "w"), indent=2)
+    shutil.make_archive(os.path.join(ROOT, "build", "laG-255-datapack"), "zip", pack)
+    # prove it: boot factions on a throwaway world that has the pack, check it loaded and the world is 0..255
+    test = os.path.join(d, "laGtest")
+    shutil.rmtree(test, ignore_errors=True)
+    shutil.copytree(pack, os.path.join(test, "datapacks", "laG-255"))
+    _, lines = run_until_done(d, java("2G") + ["paper.jar", "--nogui", "--world", "laGtest"])
+    bad = [l for l in lines if ("laG-255" in l or "dimension_type" in l) and ("rror" in l or "ailed" in l or "nvalid" in l)]
+    packs = [l for l in lines if "data pack" in l.lower() or "datapack" in l.lower()]
+    for l in packs[:6]:
+        log("    " + l[-160:])
+    if bad:
+        raise SystemExit("laG-255 datapack failed to load:\n" + "\n".join(bad[:20]))
+    lvl = os.path.join(test, "level.dat")
+    if os.path.exists(lvl):
+        import gzip
+        raw = gzip.open(lvl).read()
+        log("  level.dat mentions laG-255: " + str(b"laG-255" in raw or b"file/laG-255" in raw))
+    shutil.rmtree(test, ignore_errors=True)
+    log("  laG-255 datapack verified on a test world")
 
 
 def _write_secret(secret):
