@@ -54,8 +54,8 @@ if (-not (Test-Path $pp)) {
       "    load-chunks:", "      tnt-entities: true", "      falling-blocks: true") | Set-Content $pp
 } else {
     $t = Get-Content $pp -Raw
-    $n = $t -replace 'fix-cannons:\s*false', 'fix-cannons: true' `
-            -replace 'disable-explosion-knockback:\s*false', 'disable-explosion-knockback: true' `
+    # fix-cannons is left as you set it (it changes redstone update order, some cannons need it off)
+    $n = $t -replace 'disable-explosion-knockback:\s*false', 'disable-explosion-knockback: true' `
             -replace 'optimize-explosions:\s*false', 'optimize-explosions: true'
     $n = [regex]::Replace($n, '(?m)(remove-unloaded:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+tnt-entities:)\s*true', '$1 false')
     $n = [regex]::Replace($n, '(?m)(remove-unloaded:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+falling-blocks:)\s*true', '$1 false')
