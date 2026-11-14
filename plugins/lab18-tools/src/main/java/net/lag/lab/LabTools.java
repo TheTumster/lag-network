@@ -16,6 +16,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class LabTools extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (cmd.getName().equalsIgnoreCase("/upload")) {
+			Upload.run(this, sender, args);
+			return true;
+		}
 		if (!(sender instanceof Player)) return true;
 		Player p = (Player) sender;
 		int r = 32, amount = 576;
