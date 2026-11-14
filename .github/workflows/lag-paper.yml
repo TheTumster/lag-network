@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   build:
@@ -59,3 +60,5 @@ jobs:
           gh release delete lag-paper -y --cleanup-tag 2>/dev/null || true
           gh release create lag-paper lag-paper-1.21.11.jar --title "laG Paper 1.21.11 (cannon patches)" \
             --notes "Paper 1.21.11 (ver/1.21.11) + tools/lagpaper/patch.py: 1.8-style TNT explosion center, explosion aim at TNT/sand middle, east/west cannoning axis order."
+          # rebuild the network bundle so START.bat picks up this jar (the push-triggered build may have grabbed the old one)
+          gh workflow run build.yml -R ${{ github.repository }} --ref main

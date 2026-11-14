@@ -27,6 +27,8 @@ jobs:
           - { name: "lag-paper-merge", kind: "121", fix: "true", cannons: "true", merge: "true", jar: "lagpaper" }
           - { name: "lag-paper", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
+          - { name: "sakura-legacy", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "sakura", smerge: "none" }
+          - { name: "sakura-legacy-strict", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "sakura", smerge: "strict" }
     steps:
       - uses: actions/checkout@v4
         with:
@@ -102,8 +104,20 @@ jobs:
             curl -fsSL -o paper.jar https://github.com/${{ github.repository }}/releases/download/lag-paper/lag-paper-1.21.11.jar
             rm -rf versions; echo "using laG Paper"
           fi
+          if [ "${{ matrix.jar }}" = "sakura" ]; then
+            curl -fsSL -o paper.jar https://github.com/${{ github.repository }}/releases/download/lag-sakura/sakura-1.21.11.jar
+            rm -rf versions; echo "using Sakura"
+            mkdir -p config
+            # Sakura: 1.8 (legacy) cannon mechanics + its cannon lag options
+            printf '%s\n' "_version: 12" "cannons:" "  merge-level: ${{ matrix.smerge }}" "  explosion:" \
+              "    optimise-protected-regions: true" "    avoid-redundant-block-searches: true" "    reuse-block-cache-across-explosions: true" \
+              "  mechanics:" "    mechanics-target:" "      mechanic-version: legacy" "      server-type: paper" \
+              "technical:" "  redstone:" "    redstone-cache: true" > config/sakura-world-defaults.yml
+            cat config/sakura-world-defaults.yml
+          fi
           cat ../laG-Network/BUILD.txt 2>/dev/null || true
           java -Dpaperclip.patchonly=true -jar paper.jar > patch.log 2>&1 || tail -20 patch.log
+          ls versions
           sed -i 's/^pause-when-empty-seconds=.*//' server.properties && echo "pause-when-empty-seconds=-1" >> server.properties
           grep -n "max-tnt-per-tick" spigot.yml || true
           if [ "${{ matrix.cannons }}" = "false" ]; then rm -f plugins/laGCannons.jar; echo "laGCannons removed"; fi
@@ -114,6 +128,9 @@ jobs:
           c = yaml.safe_load(open(p)) if os.path.exists(p) else {}
           c = c or {}
           c.setdefault("cannon-protect", {})["worlds"] = ["parity"]
+          if "${{ matrix.jar }}" == "sakura":
+              c.setdefault("tnt", {})["legacy-fuse"] = False  # Sakura's legacy mechanics already add the 1.8 fuse tick
+              print("legacy-fuse: off (Sakura handles it)")
           if "${{ matrix.merge }}" in ("false", "true"):
               c.setdefault("tnt", {})["merge"] = "${{ matrix.merge }}" == "true"
               print("TNT merge:", c["tnt"]["merge"])
