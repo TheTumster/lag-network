@@ -1,0 +1,48 @@
+name: lag-paper
+# laG Paper: Paper 1.21.11 + a few cannon patches (tools/lagpaper/patch.py). Published as release "lag-paper".
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/lag-paper.yml', 'tools/lagpaper/**']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+      - name: Paper 1.21.11 source
+        run: |
+          git config --global user.email "ci@lag.local"
+          git config --global user.name "laG CI"
+          git clone -q --depth 1 -b ver/1.21.11 https://github.com/PaperMC/Paper paper
+          cd paper && echo "Paper commit: $(git rev-parse HEAD)"
+      - name: Apply Paper's patches
+        working-directory: paper
+        run: ./gradlew applyAllPatches --no-daemon -q 2>&1 | tail -30
+      - name: Apply laG cannon patches
+        working-directory: paper
+        run: python3 ../tools/lagpaper/patch.py paper-server/src/minecraft/java
+      - name: Build
+        working-directory: paper
+        run: |
+          ./gradlew createMojmapPaperclipJar --no-daemon -q 2>&1 | tail -40
+          ls -la paper-server/build/libs/
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls paper/paper-server/build/libs/*paperclip*mojmap*.jar | head -1)
+          cp "$JAR" lag-paper-1.21.11.jar
+          sha256sum lag-paper-1.21.11.jar
+          gh release delete lag-paper -y --cleanup-tag 2>/dev/null || true
+          gh release create lag-paper lag-paper-1.21.11.jar --title "laG Paper 1.21.11 (cannon patches)" \
+            --notes "Paper 1.21.11 (ver/1.21.11) + tools/lagpaper/patch.py: 1.8-style TNT explosion center, explosion aim at TNT/sand middle, east/west cannoning axis order."
