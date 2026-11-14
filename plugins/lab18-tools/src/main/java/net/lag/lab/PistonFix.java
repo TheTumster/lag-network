@@ -3,6 +3,9 @@ package net.lag.lab;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -14,6 +17,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.plugin.Plugin;
 
 /**
  * 1.8 pistons powered "from above" (quasi-connectivity) only react if something happens to update them; when the
@@ -34,6 +40,54 @@ final class PistonFix implements Listener {
 	}
 
 	boolean enabled = true;
+	/** pistons that are being pushed/pulled: where they'll land -> ticks left to wait */
+	private final Map<Block, Integer> landing = new HashMap<Block, Integer>();
+
+	PistonFix(Plugin plugin) {
+		// fallback: if a landing wasn't caught by the physics hook, check it once it's there (expires after 8 ticks)
+		Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+			public void run() {
+				for (Iterator<Map.Entry<Block, Integer>> it = landing.entrySet().iterator(); it.hasNext(); ) {
+					Map.Entry<Block, Integer> en = it.next();
+					if (isPiston(en.getKey().getType())) {
+						it.remove();
+						update(en.getKey());
+					} else if (en.getValue() <= 1) it.remove();
+					else en.setValue(en.getValue() - 1);
+				}
+			}
+		}, 1L, 1L);
+	}
+
+	private static boolean isPiston(Material t) {
+		return t == Material.PISTON_BASE || t == Material.PISTON_STICKY_BASE;
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onExtend(BlockPistonExtendEvent e) {
+		if (!enabled) return;
+		for (Block b : e.getBlocks()) if (isPiston(b.getType())) landing.put(b.getRelative(e.getDirection()), 8);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onRetract(BlockPistonRetractEvent e) {
+		if (!enabled || !e.isSticky()) return;
+		BlockFace back = e.getDirection().getOppositeFace();
+		for (Block b : e.getBlocks()) if (isPiston(b.getType())) landing.put(b.getRelative(back), 8);
+	}
+
+	/** A pushed piston lands and updates its neighbors (changed type = piston): make the landed pistons check power now. */
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onLand(BlockPhysicsEvent e) {
+		if (!enabled || busy || landing.isEmpty() || !isPiston(e.getChangedType())) return;
+		for (Iterator<Block> it = landing.keySet().iterator(); it.hasNext(); ) {
+			Block b = it.next();
+			if (isPiston(b.getType())) {
+				it.remove();
+				update(b);
+			}
+		}
+	}
 	private boolean busy = false;
 	private boolean broken = false;
 	private Method getHandle, getType, getBlock, doPhysics;
@@ -58,11 +112,16 @@ final class PistonFix implements Listener {
 		Block below = e.getBlock().getRelative(BlockFace.DOWN);
 		Material t = below.getType();
 		if (t != Material.PISTON_BASE && t != Material.PISTON_STICKY_BASE) return;
+		update(below);
+	}
+
+	private void update(Block b) {
+		if (busy || broken) return;
 		busy = true;
 		try {
-			if (doPhysics == null) init(below.getWorld());
-			Object nw = getHandle.invoke(below.getWorld());
-			Object pos = posCtor.newInstance(below.getX(), below.getY(), below.getZ());
+			if (doPhysics == null) init(b.getWorld());
+			Object nw = getHandle.invoke(b.getWorld());
+			Object pos = posCtor.newInstance(b.getX(), b.getY(), b.getZ());
 			Object state = getType.invoke(nw, pos);
 			Object block = getBlock.invoke(state);
 			doPhysics.invoke(block, nw, pos, state, block);
