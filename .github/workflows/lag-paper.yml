@@ -31,6 +31,14 @@ jobs:
           set -o pipefail
           ./gradlew applyPatches --no-daemon 2>&1 | tail -30
           ls paper-server/src/minecraft/java/net/minecraft/world/entity/item/ | head -5
+      - name: Show code we patch (for reference)
+        working-directory: paper/paper-server/src/minecraft/java
+        run: |
+          F=net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java
+          grep -n "moveCollidedEntities\|Math.min(d\|finalTick\|moveEntityByPiston\|progressO >= 1\|public static void tick" $F | head -20
+          awk '/private static void moveCollidedEntities/,/^    }$/' $F | head -80
+          awk '/public static void tick\(/,/^    }$/' $F | head -40
+          grep -n -A16 "private Vec3 limitPistonMovement" net/minecraft/world/entity/Entity.java | head -30
       - name: Apply laG cannon patches
         working-directory: paper
         run: python3 ../tools/lagpaper/patch.py paper-server/src/minecraft/java
