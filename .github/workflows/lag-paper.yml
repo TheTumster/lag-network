@@ -27,14 +27,18 @@ jobs:
           cd paper && echo "Paper commit: $(git rev-parse HEAD)"
       - name: Apply Paper's patches
         working-directory: paper
-        run: ./gradlew applyAllPatches --no-daemon -q 2>&1 | tail -30
+        run: |
+          set -o pipefail
+          ./gradlew applyPatches --no-daemon 2>&1 | tail -30
+          ls paper-server/src/minecraft/java/net/minecraft/world/entity/item/ | head -5
       - name: Apply laG cannon patches
         working-directory: paper
         run: python3 ../tools/lagpaper/patch.py paper-server/src/minecraft/java
       - name: Build
         working-directory: paper
         run: |
-          ./gradlew createMojmapPaperclipJar --no-daemon -q 2>&1 | tail -40
+          set -o pipefail
+          ./gradlew createMojmapPaperclipJar --no-daemon 2>&1 | tail -40
           ls -la paper-server/build/libs/
       - name: Publish
         env:
