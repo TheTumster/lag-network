@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 /** 1.8 cannon lab: /tntfill [radius] [amount] fills every dispenser near you (creative test server, no cost). */
 public class LabTools extends JavaPlugin {
 	private Sandbots sandbots;
+	private PistonFix pistonFix;
 
 	@Override
 	public void onEnable() {
@@ -22,6 +23,9 @@ public class LabTools extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(sandbots, this);
 		getServer().getPluginManager().registerEvents(new WaterProof(), this);
 		getServer().getPluginManager().registerEvents(new CannonProtect(this), this);
+		pistonFix = new PistonFix();
+		pistonFix.enabled = getConfig().getBoolean("piston-fix", true);
+		getServer().getPluginManager().registerEvents(pistonFix, this);
 	}
 
 	@Override
@@ -38,6 +42,16 @@ public class LabTools extends JavaPlugin {
 		if (!(sender instanceof Player)) return true;
 		Player p = (Player) sender;
 		if (cmd.getName().equalsIgnoreCase("sandbot")) return sandbots.command(p, args);
+		if (cmd.getName().equalsIgnoreCase("pistonfix")) {
+			if (args.length > 0) pistonFix.enabled = args[0].equalsIgnoreCase("on") || args[0].equalsIgnoreCase("true");
+			else pistonFix.enabled = !pistonFix.enabled;
+			getConfig().set("piston-fix", pistonFix.enabled);
+			saveConfig();
+			p.sendMessage(ChatColor.LIGHT_PURPLE + "[laG Lab] " + ChatColor.GRAY + "Piston fix is now "
+					+ (pistonFix.enabled ? ChatColor.GREEN + "ON" : ChatColor.RED + "OFF") + ChatColor.GRAY
+					+ " (pistons under a redstone change always re-check their power)");
+			return true;
+		}
 		int r = 32, amount = 576;
 		try {
 			if (args.length > 0) r = Math.max(1, Math.min(128, Integer.parseInt(args[0])));

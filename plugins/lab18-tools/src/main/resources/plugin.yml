@@ -10,6 +10,9 @@ commands:
   sandbot:
     description: Sand bots that refill sand at marked spots
     aliases: [sandbots, sb]
+  pistonfix:
+    description: Toggle the 1.8 piston update fix (pistons under a redstone change always re-check power)
+    usage: /pistonfix [on|off]
   /upload:
     description: Download a schematic from a link into WorldEdit's schematics folder
     usage: //upload <link> [name]
