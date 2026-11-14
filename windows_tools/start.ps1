@@ -95,11 +95,13 @@ if (Test-Path $pw) {
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Turned on explosion optimizer." Green }
 }
 
-$lc = "$Root\factions\plugins\laGCannons\config.yml"
-if (Test-Path $lc) {
-    $t = Get-Content $lc -Raw
-    $n = $t -replace 'radius-max:\s*25\b', 'radius-max: 64'
-    if ($n -ne $t) { Set-Content $lc $n -NoNewline; Say "Raised /tntfill radius to 64." Green }
+# ---- FactionsUUID: turn on faction TNT banks (/f tnt, /f tntfill) and allow a bigger fill radius
+$fc = "$Root\factions\plugins\Factions\config\main.conf"
+if (Test-Path $fc) {
+    $t = Get-Content $fc -Raw
+    $n = [regex]::Replace($t, '(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false', '${1}enable=true')
+    $n = [regex]::Replace($n, '(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b', '${1}maxRadius=48')
+    if ($n -ne $t) { Set-Content $fc $n -NoNewline; Say "Turned on faction TNT banks (/f tnt, /f tntfill)." Green }
 }
 
 # ---- First run: replace the placeholder secret so only YOUR proxy can talk to the servers
@@ -116,20 +118,36 @@ if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {
     Say "Network secured (first run)." Green
 }
 
-# ---- Start everything, each in its own window
+# ---- Start everything: one Windows Terminal window with a tab per server (separate windows if Terminal isn't installed)
 $flags = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20"
+$runs = [ordered]@{}
 foreach ($s in "hub", "factions", "smp") {
     $mem = $net.servers.$s.memory
-    Say "Starting $s ($mem)..."
-    Start-Process cmd -WorkingDirectory "$Root\$s" -ArgumentList "/k title laG $s && `"$java`" -Xms$mem -Xmx$mem $flags -jar paper.jar --nogui"
+    $runs[$s] = "`"$java`" -Xms$mem -Xmx$mem $flags -jar paper.jar --nogui"
 }
-Start-Sleep -Seconds 3
-Say "Starting proxy..."
-Start-Process cmd -WorkingDirectory "$Root\proxy" -ArgumentList "/k title laG proxy && `"$java`" -Xms$($net.proxy_memory) -Xmx$($net.proxy_memory) -jar velocity.jar"
+$runs["proxy"] = "`"$java`" -Xms$($net.proxy_memory) -Xmx$($net.proxy_memory) -jar velocity.jar"
+foreach ($s in $runs.Keys) {
+    # tiny per-server launcher so the tab/window command stays simple (no quoting headaches)
+    Set-Content "$Root\$s\run-laG.cmd" "@echo off`r`ntitle laG $s`r`n$($runs[$s])" -Encoding ASCII
+}
+$wt = Get-Command wt.exe -ErrorAction SilentlyContinue
+if ($wt) {
+    $tabs = @()
+    foreach ($s in $runs.Keys) { $tabs += "new-tab --title `"laG $s`" --suppressApplicationTitle -d `"$Root\$s`" cmd /k run-laG.cmd" }
+    Say "Starting hub, factions, smp and proxy in one window (tabs)..."
+    Start-Process wt.exe -ArgumentList ("-w laG " + ($tabs -join " ; "))
+} else {
+    foreach ($s in $runs.Keys) {
+        Say "Starting $s..."
+        Start-Process cmd -WorkingDirectory "$Root\$s" -ArgumentList "/k run-laG.cmd"
+        if ($s -eq "smp") { Start-Sleep -Seconds 3 }
+    }
+    Say "Tip: install Windows Terminal (Microsoft Store) to get everything in one window with tabs." DarkGray
+}
 
 Write-Host ""
-Say "All 4 windows are starting. When they say 'Done', join:" Green
+Say "All 4 servers are starting. When each tab says 'Done', join:" Green
 Say "   You:      localhost" White
 Say "   Friends:  run TUNNEL.bat and send them the address it gives you" White
-Say "To stop: type 'stop' in each server window (and 'end' in the proxy)." DarkGray
+Say "To stop: type 'stop' in each server tab (and 'end' in the proxy tab)." DarkGray
 Write-Host ""

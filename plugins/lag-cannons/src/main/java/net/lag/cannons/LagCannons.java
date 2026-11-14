@@ -188,43 +188,10 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		return true;
 	}
 
+	/** One TNT fill on factions: /tntfill and /tf just run /f tnt fill (from the faction TNT bank). */
 	private boolean tntfill(CommandSender sender, String[] args) {
 		if (!(sender instanceof Player p)) return true;
-		int maxR = getConfig().getInt("tntfill.radius-max", 64);
-		int radius = 32, amount = 64;
-		try {
-			if (args.length > 0) radius = Math.min(maxR, Integer.parseInt(args[0]));
-			if (args.length > 1) amount = Math.min(getConfig().getInt("tntfill.per-dispenser-max", 576), Integer.parseInt(args[1]));
-		} catch (NumberFormatException ex) {
-			send(p, "<gray>/tntfill [radius] [amount per dispenser]");
-			return true;
-		}
-		boolean free = p.getGameMode() == GameMode.CREATIVE;
-		int filled = 0, used = 0;
-		Block c = p.getLocation().getBlock();
-		outer:
-		for (int dx = -radius; dx <= radius; dx++) {
-			for (int dy = -radius; dy <= radius; dy++) {
-				for (int dz = -radius; dz <= radius; dz++) {
-					Block b = c.getRelative(dx, dy, dz);
-					if (!(b.getState() instanceof Dispenser d)) continue;
-					int want = amount;
-					if (!free) {
-						int have = count(p);
-						if (have <= 0) break outer;
-						want = Math.min(want, have);
-					}
-					var left = ((Container) d).getInventory().addItem(new ItemStack(Material.TNT, want));
-					int added = want - left.values().stream().mapToInt(ItemStack::getAmount).sum();
-					if (added > 0) {
-						if (!free) p.getInventory().removeItem(new ItemStack(Material.TNT, added));
-						used += added;
-						filled++;
-					}
-				}
-			}
-		}
-		send(p, "<gradient:#38E0FF:#B040FF>TNT fill</gradient> <gray>loaded <white>" + used + "<gray> TNT into <white>" + filled + "<gray> dispensers.");
+		p.performCommand("f tnt fill" + ClassicFactions.fillDefaults(String.join(" ", args)));
 		return true;
 	}
 

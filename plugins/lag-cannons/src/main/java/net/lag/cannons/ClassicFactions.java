@@ -101,12 +101,20 @@ final class ClassicFactions implements Listener {
 		}
 		if (sub.equals("tnt") && parts.length > 2) {
 			String mapped = TNT.get(parts[2].toLowerCase(Locale.ROOT));
-			if (mapped != null) {
-				e.setMessage("/f tnt " + mapped + (parts.length > 3 ? " " + String.join(" ", java.util.Arrays.copyOfRange(parts, 3, parts.length)) : ""));
-			}
+			String tsub = mapped != null ? mapped : parts[2].toLowerCase(Locale.ROOT);
+			String args = parts.length > 3 ? " " + String.join(" ", java.util.Arrays.copyOfRange(parts, 3, parts.length)) : "";
+			e.setMessage("/f tnt " + tsub + (tsub.equals("fill") ? fillDefaults(args) : args));
 			return;
 		}
 		String target = MAP.get(sub);
-		if (target != null) e.setMessage("/f " + target + rest);
+		if (target != null) e.setMessage("/f " + target + (target.equals("tnt fill") ? fillDefaults(rest) : rest));
+	}
+
+	/** /f tnt fill needs radius + amount; classic servers let you leave them off. */
+	static String fillDefaults(String args) {
+		String[] a = args.trim().isEmpty() ? new String[0] : args.trim().split("\\s+");
+		String radius = a.length > 0 ? a[0] : "32";
+		String amount = a.length > 1 ? a[1] : "64";
+		return " " + radius + " " + amount;
 	}
 }

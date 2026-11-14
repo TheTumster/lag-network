@@ -9,7 +9,8 @@ commands:
     aliases: [lc]
     permission: lag.cannons.admin
   tntfill:
-    description: Fill nearby dispensers with TNT
+    description: Fill nearby dispensers from your faction's TNT bank (same as /f tntfill)
+    aliases: [tf]
     permission: lag.cannons.tntfill
   sandbot:
     description: Sand bots that refill sand at marked spots

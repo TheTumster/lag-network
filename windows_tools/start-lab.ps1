@@ -48,4 +48,9 @@ New-Item -ItemType Directory -Force -Path "$Lab\plugins\WorldEdit\schematics" | 
 Say "Join with a 1.8.9 client at:  localhost:25570" Green
 Say "First time: type  op YourName  in the lab window to get WorldEdit." White
 Say "Schematics go in:  lab18\plugins\WorldEdit\schematics  then  //schem load name" White
-Start-Process cmd -WorkingDirectory $Lab -ArgumentList "/k title laG 1.8 lab && `"$java`" -Xms3G -Xmx3G -XX:+UseG1GC -jar paper.jar"
+Set-Content "$Lab\run-laG.cmd" "@echo off`r`ntitle laG 1.8 lab`r`n`"$java`" -Xms3G -Xmx3G -XX:+UseG1GC -jar paper.jar" -Encoding ASCII
+if (Get-Command wt.exe -ErrorAction SilentlyContinue) {
+    Start-Process wt.exe -ArgumentList "-w laG new-tab --title `"laG 1.8 lab`" --suppressApplicationTitle -d `"$Lab`" cmd /k run-laG.cmd"
+} else {
+    Start-Process cmd -WorkingDirectory $Lab -ArgumentList "/k run-laG.cmd"
+}
