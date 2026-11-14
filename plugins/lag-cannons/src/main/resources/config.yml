@@ -8,6 +8,8 @@ tnt:
   prime-y-velocity: 0.2
   # Merge TNT stacked in the exact same spot into one entity (fires all its explosions together). Massive lag saver.
   merge: true
+  # TNT lives 1 tick longer, like 1.8 (1.8 explodes after 81 ticks, modern after 80). Cannons are timed to the tick.
+  legacy-fuse: true
 
 # Blocks that take several hits instead of being immune (classic "obby breaking").
 durability:

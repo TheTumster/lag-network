@@ -91,6 +91,9 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onTntSpawn(EntitySpawnEvent e) {
 		if (!(e.getEntity() instanceof TNTPrimed tnt)) return;
+		// 1.8 counts the fuse down past zero before exploding (81 ticks for an 80 fuse); modern versions explode at
+		// zero (80). Cannons are timed to the tick, so give TNT the 1.8 fuse length.
+		if (getConfig().getBoolean("tnt.legacy-fuse", true)) tnt.setFuseTicks(tnt.getFuseTicks() + 1);
 		if (getConfig().getBoolean("tnt.random-kick", false)) return;
 		double y = getConfig().getDouble("tnt.prime-y-velocity", 0.2);
 		Vector v = tnt.getVelocity();
