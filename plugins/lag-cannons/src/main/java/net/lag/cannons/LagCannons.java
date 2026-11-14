@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -194,9 +195,41 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	}
 
 	/** One TNT fill on factions: /tntfill and /tf just run /f tnt fill (from the faction TNT bank). */
+	/**
+	 * /tntfill [radius] [amount]: ops in creative get a free test fill (like the 1.8 lab); everyone else fills from
+	 * their faction's TNT bank (/f tnt fill), which needs a faction.
+	 */
 	private boolean tntfill(CommandSender sender, String[] args) {
 		if (!(sender instanceof Player p)) return true;
-		p.performCommand("f tnt fill" + ClassicFactions.fillDefaults(String.join(" ", args)));
+		if (p.hasPermission("lagcannons.tntfill.free") && p.getGameMode() == org.bukkit.GameMode.CREATIVE) {
+			int r = 32, amount = 576;
+			try {
+				if (args.length > 0) r = Math.max(1, Math.min(64, Integer.parseInt(args[0])));
+				if (args.length > 1) amount = Math.max(1, Math.min(576, Integer.parseInt(args[1])));
+			} catch (NumberFormatException e) {
+				p.sendMessage(ChatColor.RED + "Usage: /tntfill [radius] [amount per dispenser]");
+				return true;
+			}
+			org.bukkit.Location c = p.getLocation();
+			int n = 0;
+			for (int x = c.getBlockX() - r; x <= c.getBlockX() + r; x++)
+				for (int z = c.getBlockZ() - r; z <= c.getBlockZ() + r; z++)
+					for (int y = Math.max(c.getWorld().getMinHeight(), c.getBlockY() - r); y <= Math.min(c.getWorld().getMaxHeight() - 1, c.getBlockY() + r); y++) {
+						org.bukkit.block.Block b = c.getWorld().getBlockAt(x, y, z);
+						if (b.getType() == Material.DISPENSER) {
+							QuietFill.fill(b, amount);
+							n++;
+						}
+					}
+			p.sendMessage(ChatColor.LIGHT_PURPLE + "[laG] " + ChatColor.GRAY + "Test fill: " + ChatColor.WHITE + n + ChatColor.GRAY
+					+ " dispensers, " + amount + " TNT each (radius " + r + "). Free because you're op in creative.");
+			return true;
+		}
+		try {
+			p.performCommand("f tnt fill" + ClassicFactions.fillDefaults(String.join(" ", args)));
+		} catch (RuntimeException e) {
+			p.sendMessage(ChatColor.RED + "TNT fill uses your faction's TNT bank: you need to be in a faction (/f create) with TNT in /f tnt.");
+		}
 		return true;
 	}
 

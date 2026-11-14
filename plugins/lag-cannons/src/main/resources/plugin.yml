@@ -26,6 +26,8 @@ commands:
     aliases: [schemupload]
     permission: lag.cannons.upload
 permissions:
+  lagcannons.tntfill.free:
+    default: op
   lag.cannons.admin:
     default: op
   lag.cannons.tntfill:
