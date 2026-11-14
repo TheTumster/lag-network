@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
-          - { name: "plain-paper", kind: "121", fix: "true", cannons: "true", merge: "false" }
+          - { name: "lag-paper-merge", kind: "121", fix: "true", cannons: "true", merge: "true", jar: "lagpaper" }
           - { name: "lag-paper", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
     steps:
@@ -114,9 +114,9 @@ jobs:
           c = yaml.safe_load(open(p)) if os.path.exists(p) else {}
           c = c or {}
           c.setdefault("cannon-protect", {})["worlds"] = ["parity"]
-          if "${{ matrix.merge }}" == "false":
-              c.setdefault("tnt", {})["merge"] = False
-              print("TNT merge off for this run")
+          if "${{ matrix.merge }}" in ("false", "true"):
+              c.setdefault("tnt", {})["merge"] = "${{ matrix.merge }}" == "true"
+              print("TNT merge:", c["tnt"]["merge"])
           os.makedirs(os.path.dirname(p), exist_ok=True)
           yaml.safe_dump(c, open(p, "w"), sort_keys=False)
           print("cannon-protect:", c["cannon-protect"])
