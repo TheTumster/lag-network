@@ -1,0 +1,48 @@
+name: lag-sakura
+# Builds Sakura (MIT, github.com/Samsuik/Sakura, 1.21.11 branch): a Paper fork with configurable 1.8 cannon
+# mechanics and cannon lag optimisations. Published as release "lag-sakura" so the parity test can compare it to 1.8.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/lag-sakura.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+      - name: Get Sakura 1.21.11
+        run: |
+          git clone --depth 1 -b 1.21.11 https://github.com/Samsuik/Sakura sakura
+          cd sakura && git log -1 --format='%H %cd %s' | tee ../SAKURA_COMMIT.txt
+          git config --global user.email "ci@lag.network"; git config --global user.name "laG CI"
+      - name: Apply patches
+        working-directory: sakura
+        run: |
+          set -o pipefail
+          ./gradlew applyAllPatches --no-daemon 2>&1 | tail -30
+      - name: Build
+        working-directory: sakura
+        run: |
+          set -o pipefail
+          ./gradlew createMojmapPaperclipJar --no-daemon 2>&1 | tail -30
+          ls -la sakura-server/build/libs/
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(ls sakura/sakura-server/build/libs/*paperclip*mojmap*.jar | head -1)
+          cp "$JAR" sakura-1.21.11.jar
+          sha256sum sakura-1.21.11.jar
+          gh release delete lag-sakura -y --cleanup-tag 2>/dev/null || true
+          gh release create lag-sakura sakura-1.21.11.jar --title "Sakura 1.21.11 (test build)" \
+            --notes "Unmodified Sakura (MIT, https://github.com/Samsuik/Sakura) 1.21.11 branch, built for cannon parity testing. $(cat SAKURA_COMMIT.txt)"
