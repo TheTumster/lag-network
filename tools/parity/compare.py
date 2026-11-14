@@ -158,7 +158,7 @@ def redstone_diff(a, b, an, bn):
     sa, sb = a["snap"], b["snap"]
     diff = [(p, sa.get(p), sb.get(p)) for p in sorted(set(sa) | set(sb)) if sa.get(p) != sb.get(p)]
     print(f"  state before the button: {len(diff)} of {len(set(sa) | set(sb))} redstone parts differ")
-    for p, x, y in diff[:25]:
+    for p, x, y in diff[:70]:
         print(f"    {p}: {an} {x} | {bn} {y}")
     # first ticks where redstone power changes differ
     shown = 0

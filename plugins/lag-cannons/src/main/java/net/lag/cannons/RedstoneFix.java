@@ -95,6 +95,7 @@ final class RedstoneFix implements Listener {
 		List<Block> wires = new ArrayList<>();
 		List<Block> dispensers = new ArrayList<>();
 		List<Block> pistons = new ArrayList<>();
+		List<Block> diodes = new ArrayList<>();
 		for (int x = cx - r; x <= cx + r; x++) {
 			for (int z = cz - r; z <= cz + r; z++) {
 				if (!w.isChunkLoaded(x >> 4, z >> 4)) continue;
@@ -104,6 +105,7 @@ final class RedstoneFix implements Listener {
 					if (m == Material.REDSTONE_WIRE) wires.add(b);
 					else if (m == Material.DISPENSER || m == Material.DROPPER) dispensers.add(b);
 					else if (m == Material.PISTON || m == Material.STICKY_PISTON) pistons.add(b);
+					else if (m == Material.COMPARATOR || m == Material.REPEATER || m == Material.REDSTONE_TORCH || m == Material.REDSTONE_WALL_TORCH) diodes.add(b);
 				}
 			}
 		}
@@ -140,6 +142,9 @@ final class RedstoneFix implements Listener {
 				b.setBlockData(d, false);
 			}
 		}
+		// 3b) comparators / repeaters / torches saved mid-shot (e.g. a comparator saved "on"): make each re-check its
+		//     inputs so they settle to what the circuit really says, like 1.8's paste updates do
+		for (Block b : diodes) PistonOrder.update(b);
 		// 4) pistons saved extended with nothing powering them: let them notice and retract (1.8's paste does this)
 		for (Block b : pistons) {
 			if (b.getBlockData() instanceof org.bukkit.block.data.type.Piston pd && pd.isExtended()
