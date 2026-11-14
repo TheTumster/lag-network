@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
-          - { name: "ours-as-pasted", kind: "121", fix: "false", cannons: "true" }
+          - { name: "ours-nomerge", kind: "121", fix: "true", cannons: "true", merge: "false" }
           - { name: "ours-fixredstone", kind: "121", fix: "true", cannons: "true" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
     steps:
@@ -109,6 +109,9 @@ jobs:
           c = yaml.safe_load(open(p)) if os.path.exists(p) else {}
           c = c or {}
           c.setdefault("cannon-protect", {})["worlds"] = ["parity"]
+          if "${{ matrix.merge }}" == "false":
+              c.setdefault("tnt", {})["merge"] = False
+              print("TNT merge off for this run")
           os.makedirs(os.path.dirname(p), exist_ok=True)
           yaml.safe_dump(c, open(p, "w"), sort_keys=False)
           print("cannon-protect:", c["cannon-protect"])

@@ -5,7 +5,7 @@ falling sand and explosions, then explosion spread and how much of the cannon su
 """
 import collections, os, statistics, sys
 
-ORDER = ["1.8.8", "ours-as-pasted", "ours-fixredstone", "ours-no-laGCannons"]
+ORDER = ["1.8.8", "ours-nomerge", "ours-fixredstone", "ours-no-laGCannons"]
 
 
 def load(path):
