@@ -63,6 +63,26 @@ final class PistonFix implements Listener {
 		return t == Material.PISTON_BASE || t == Material.PISTON_STICKY_BASE;
 	}
 
+	/**
+	 * Double piston extenders: a piston with a powered, retracted piston right behind it (facing the same way) must
+	 * wait to be pushed. On 1.8 both get powered in the same tick and whichever is first in the (location-based)
+	 * queue wins; if the front one extends first, the back one can't push it and the comp stays open.
+	 * The front piston extends once it lands (see the landing check below).
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onExtendOrder(BlockPistonExtendEvent e) {
+		if (!enabled) return;
+		Block front = e.getBlock();
+		Block behind = front.getRelative(e.getDirection().getOppositeFace());
+		if (!isPiston(behind.getType())) return;
+		int fd = front.getData() & 7, bd = behind.getData();
+		if ((bd & 7) != fd || (bd & 8) != 0) return; // not facing the same way, or already extended
+		if (behind.isBlockIndirectlyPowered() || behind.getRelative(BlockFace.UP).isBlockIndirectlyPowered()) {
+			e.setCancelled(true);
+			landing.put(front.getRelative(e.getDirection()), 8);
+		}
+	}
+
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onExtend(BlockPistonExtendEvent e) {
 		if (!enabled) return;
