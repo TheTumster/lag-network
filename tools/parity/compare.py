@@ -164,6 +164,12 @@ def redstone_diff(a, b, an, bn):
     pdiff = [(p, pa.get(p), pb.get(p)) for p in sorted(set(pa) | set(pb)) if pa.get(p) != pb.get(p)]
     print(f"  state after paste (before TNT fill): {len(pdiff)} redstone parts differ: " + ", ".join(f"{p}:{x}|{y}" for p, x, y in pdiff[:12]))
     print(f"  state before the button: {len(diff)} of {len(set(sa) | set(sb))} redstone parts differ")
+    # neighbourhood of the first differing dust: every redstone part within 2 blocks, both versions
+    first = next((p for p, x, y in diff if (x or y or "").startswith("wire")), None)
+    if first:
+        fx, fy, fz = first
+        near = sorted(p for p in set(sa) | set(sb) if abs(p[0] - fx) <= 2 and abs(p[1] - fy) <= 2 and abs(p[2] - fz) <= 2)
+        print(f"  around {first}: " + ", ".join(f"{p}:{sa.get(p)}|{sb.get(p)}" for p in near))
     for p, x, y in diff[:70]:
         print(f"    {p}: {an} {x} | {bn} {y}")
     # first ticks where redstone power changes differ
