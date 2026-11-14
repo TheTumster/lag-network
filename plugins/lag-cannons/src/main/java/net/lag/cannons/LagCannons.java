@@ -57,6 +57,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
 		getServer().getPluginManager().registerEvents(new ClassicFactions(), this); // only rewrites /f commands
 		getServer().getPluginManager().registerEvents(new TntMerge(this), this);
+		getServer().getPluginManager().registerEvents(new CannonProtect(this), this);
+		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		redstoneFix = new RedstoneFix(this);
 		getServer().getPluginManager().registerEvents(redstoneFix, this);
 		sandbots = new Sandbots(this);

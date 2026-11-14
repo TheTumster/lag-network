@@ -72,3 +72,13 @@ redstone-fix:
   after-paste: true
   radius: 48
   delay-ticks: 40
+
+# Sand comps / double piston extenders: front piston waits to be pushed, and resets in the right order.
+# Without it, every other piston in a comp row jams (block update order depends on location).
+piston-order-fix: true
+
+# Cannon testing: in these worlds, blocks with a diamond block somewhere below them can't be blown up
+# (put diamond under a test cannon instead of watering it). Keep it OFF on real factions worlds:
+# players could make unraidable walls. Example: worlds: [cannontest]
+cannon-protect:
+  worlds: []
