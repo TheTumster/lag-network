@@ -441,7 +441,9 @@ def build_lab18(local_dir):
     log("== 1.8.8 cannon lab")
     lab = os.path.join(DIST, "lab18")
     os.makedirs(os.path.join(lab, "plugins"), exist_ok=True)
-    url, name = papermc("paper", "1.8.8")
+    # SulphurSpigot: open-source 1.8.8 TacoSpigot fork for cannons, built from source by the cannon-jar workflow
+    url = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/releases/download/cannon-jar/sulphurspigot-1.8.8.jar"
+    name = "SulphurSpigot 1.8.8"
     download(url, os.path.join(lab, "paper.jar"))
     manage("lab18", "paper.jar", url)
     dest = os.path.join(lab, "plugins", "worldedit-bukkit-6.1.7.2.jar")

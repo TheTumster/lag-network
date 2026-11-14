@@ -63,6 +63,12 @@ if (-not (Test-Path $pp)) {
     $n = [regex]::Replace($n, '(?m)(load-chunks:\s*\r?\n(?:[ \t]+\S+:.*\r?\n)*?[ \t]+falling-blocks:)\s*false', '$1 true')
     if ($n -ne $t) { Set-Content $pp $n -NoNewline; Say "Applied cannon settings (fix-cannons on)." Green }
 }
+# SulphurSpigot (TacoSpigot) cannon options: east/west fix (trajectories), faster TNT/sand movement (lag)
+$ty = "$Lab\taco.yml"
+if (-not (Test-Path $ty)) {
+    @("world-settings:", "  default:", "    fix-east-west-cannoning: true", "    tnt:", "      optimize-movement: true",
+      "      optimize-liquid-explosions: true", "    redstone-fire-BlockPhysicsEvent: true") | Set-Content $ty
+}
 New-Item -ItemType Directory -Force -Path "$Lab\plugins\WorldEdit\schematics" | Out-Null
 
 Say "Join with a 1.8.9 client at:  localhost:25570" Green
