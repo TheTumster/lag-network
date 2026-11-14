@@ -79,6 +79,20 @@ public class H121 extends Harness {
 	}
 
 	@Override
+	protected String rsState(Block b) {
+		org.bukkit.block.data.BlockData d = b.getBlockData();
+		Material m = b.getType();
+		if (m == Material.REDSTONE_WIRE) return "wire:" + ((org.bukkit.block.data.AnaloguePowerable) d).getPower();
+		if (d instanceof org.bukkit.block.data.type.Dispenser disp) return "disp:" + (disp.isTriggered() ? "T" : "-");
+		if (d instanceof org.bukkit.block.data.type.Piston p) return "pist:" + (p.isExtended() ? "E" : "-");
+		if (d instanceof org.bukkit.block.data.type.Repeater r) return "rep:" + (r.isPowered() ? "on" : "off");
+		if (d instanceof org.bukkit.block.data.type.Comparator c) return "comp:" + (c.isPowered() ? "on" : "off");
+		if (m == Material.REDSTONE_TORCH || m == Material.REDSTONE_WALL_TORCH) return "torch:" + (((org.bukkit.block.data.Lightable) d).isLit() ? "on" : "off");
+		if (m == Material.LEVER || m.name().endsWith("_BUTTON")) return "sw:" + (((org.bukkit.block.data.Powerable) d).isPowered() ? "on" : "off");
+		return null;
+	}
+
+	@Override
 	protected boolean press(Block b) throws Exception {
 		Object lvl = world.getClass().getMethod("getHandle").invoke(world);
 		Class<?> bpC = Class.forName("net.minecraft.core.BlockPos");

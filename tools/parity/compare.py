@@ -12,12 +12,18 @@ def load(path):
     d = {"D": collections.Counter(), "P": collections.Counter(), "T": collections.Counter(), "S": collections.Counter(),
          "X": collections.Counter(), "Xblocks": 0, "Xcancel": 0, "xs": [], "first": {}, "sand_last": {}, "integrity": None,
          "tnt_first": [], "paths": collections.defaultdict(list), "disp": collections.defaultdict(list),
-         "pist": collections.defaultdict(list)}
+         "pist": collections.defaultdict(list), "snap": {}, "rs": collections.defaultdict(dict)}
     seen_tnt = set()
     with open(path) as fh:
         for line in fh:
             p = line.rstrip("\n").split(",")
             k = p[0]
+            if k == "S":
+                d["snap"][(int(p[2]), int(p[3]), int(p[4]))] = p[5]
+                continue
+            if k == "R":
+                d["rs"][int(p[1])][(int(p[2]), int(p[3]), int(p[4]))] = int(p[6])
+                continue
             if k == "I":
                 d["integrity"] = (int(p[1]), int(p[2]))
                 if len(p) >= 9:
@@ -140,6 +146,22 @@ def main():
 def redstone_diff(a, b, an, bn):
     """Which dispensers / pistons fire differently (count or timing)."""
     print(f"\n=== REDSTONE {an} vs {bn} ===")
+    sa, sb = a["snap"], b["snap"]
+    diff = [(p, sa.get(p), sb.get(p)) for p in sorted(set(sa) | set(sb)) if sa.get(p) != sb.get(p)]
+    print(f"  state before the button: {len(diff)} of {len(set(sa) | set(sb))} redstone parts differ")
+    for p, x, y in diff[:25]:
+        print(f"    {p}: {an} {x} | {bn} {y}")
+    # first ticks where redstone power changes differ
+    shown = 0
+    for t in sorted(set(a["rs"]) | set(b["rs"])):
+        ra, rb = a["rs"].get(t, {}), b["rs"].get(t, {})
+        dd = [(p, ra.get(p), rb.get(p)) for p in sorted(set(ra) | set(rb)) if ra.get(p) != rb.get(p)]
+        if dd:
+            print(f"  t{t}: {len(dd)} redstone changes differ (pos: {an} new power | {bn} new power): "
+                  + ", ".join(f"{p}:{x}|{y}" for p, x, y in dd[:12]))
+            shown += 1
+            if shown >= 8:
+                break
     for what, key in (("dispensers", "disp"), ("pistons", "pist")):
         da, db = a[key], b[key]
         diffs = []

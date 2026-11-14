@@ -94,6 +94,24 @@ public class H18 extends Harness {
 	}
 
 	@Override
+	protected String rsState(Block b) {
+		int id = b.getTypeId(), d = b.getData();
+		switch (id) {
+			case 55: return "wire:" + d;
+			case 23: case 158: return "disp:" + ((d & 8) != 0 ? "T" : "-");
+			case 29: case 33: return "pist:" + ((d & 8) != 0 ? "E" : "-");
+			case 93: return "rep:off";
+			case 94: return "rep:on";
+			case 75: return "torch:off";
+			case 76: return "torch:on";
+			case 149: return "comp:off";
+			case 150: return "comp:on";
+			case 69: case 77: case 143: return "sw:" + ((d & 8) != 0 ? "on" : "off");
+			default: return null;
+		}
+	}
+
+	@Override
 	protected boolean press(Block b) throws Exception {
 		String v = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 		String nms = "net.minecraft.server." + v + ".";

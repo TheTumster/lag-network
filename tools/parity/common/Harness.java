@@ -24,6 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -52,6 +53,8 @@ public abstract class Harness extends JavaPlugin implements Listener {
 	protected abstract boolean press(Block b) throws Exception;
 	protected abstract void afterPaste();
 	protected abstract void makeWater(Block b);
+	/** Redstone-relevant state of a block in a version-neutral form ("wire:7", "disp:T", "pist:E", "rep:on"...), or null. */
+	protected abstract String rsState(Block b);
 
 	protected int[] xyz(String s) {
 		String[] p = s.split(",");
@@ -130,6 +133,7 @@ public abstract class Harness extends JavaPlugin implements Listener {
 					say("lever " + b.getType() + " pressed=" + press(b) + " at " + lever);
 				}
 			} else if (tick == 180 + settleTicks()) {
+				snapshot("pre");
 				String button = cfg.getProperty("button", "");
 				t0 = tick;
 				if (!button.isEmpty()) {
@@ -174,6 +178,23 @@ public abstract class Harness extends JavaPlugin implements Listener {
 			line("E," + r + "," + kind + "," + e.getEntityId() + "," + f(l.getX()) + "," + f(l.getY()) + "," + f(l.getZ()) + ","
 					+ f(v.getX()) + "," + f(v.getY()) + "," + f(v.getZ()) + "," + fuse);
 		}
+	}
+
+	private void snapshot(String phase) {
+		for (int x = 0; x < sw; x++)
+			for (int y = 0; y < sh; y++)
+				for (int z = 0; z < sl; z++) {
+					Block b = world.getBlockAt(ox + x, oy + y, oz + z);
+					String st = rsState(b);
+					if (st != null) line("S," + phase + "," + b.getX() + "," + b.getY() + "," + b.getZ() + "," + st);
+				}
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onRedstone(BlockRedstoneEvent e) {
+		if (!recording || e.getBlock().getWorld() != world) return;
+		Block b = e.getBlock();
+		line("R," + rel() + "," + b.getX() + "," + b.getY() + "," + b.getZ() + "," + e.getOldCurrent() + "," + e.getNewCurrent());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
