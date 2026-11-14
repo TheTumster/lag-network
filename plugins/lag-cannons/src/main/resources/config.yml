@@ -65,3 +65,10 @@ sandbots:
   range: 16
   # What they place. SAND, RED_SAND, GRAVEL, or any *_CONCRETE_POWDER.
   material: SAND
+
+# WorldEdit/FAWE pastes leave redstone dust unconnected. This reconnects it automatically after //paste,
+# and on demand with /fixredstone [radius].
+redstone-fix:
+  after-paste: true
+  radius: 48
+  delay-ticks: 40

@@ -42,6 +42,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	private record Hit(String world, int hits, long last) { }
 
 	private Sandbots sandbots;
+	private RedstoneFix redstoneFix;
 
 	@Override
 	public void onDisable() {
@@ -54,6 +55,9 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		loadDurable();
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
+		getServer().getPluginManager().registerEvents(new ClassicFactions(), this); // only rewrites /f commands
+		redstoneFix = new RedstoneFix(this);
+		getServer().getPluginManager().registerEvents(redstoneFix, this);
 		sandbots = new Sandbots(this);
 		getServer().getPluginManager().registerEvents(sandbots, this);
 		// sweep healed blocks once a minute
@@ -166,6 +170,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("tntfill")) return tntfill(sender, args);
 		if (cmd.getName().equalsIgnoreCase("/upload")) return SchemUpload.run(this, sender, args);
 		if (cmd.getName().equalsIgnoreCase("sandbot")) return sandbots.command(sender, args);
+		if (cmd.getName().equalsIgnoreCase("fixredstone")) return redstoneFix.command(sender, args);
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
 			loadDurable();

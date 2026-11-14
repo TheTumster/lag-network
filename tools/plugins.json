@@ -40,6 +40,11 @@
       "hangar": "HelpChat/PlaceholderAPI"
     },
     {
+      "modrinth": "playervaultsx",
+      "loader": "paper",
+      "optional": true
+    },
+    {
       "modrinth": "fastasyncworldedit",
       "loader": "paper"
     },
