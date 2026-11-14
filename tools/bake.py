@@ -239,6 +239,10 @@ def patch_backend(name):
         "server-ip": "127.0.0.1", "server-port": port, "online-mode": "false", "enforce-secure-profile": "false",
         "motd": NET["name"], "spawn-protection": "0", "max-players": "100", "allow-flight": "true",
         **SERVER_PROPS[name]})
+    if name == "factions":
+        # Cannon server settings: let big cannons tick every TNT, and use Paper's explosion cache
+        yaml_set(os.path.join(d, "spigot.yml"), "world-settings.default.max-tnt-per-tick", 20000)
+        yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "environment.optimize-explosions", True)
     pg = os.path.join(d, "config", "paper-global.yml")
     yaml_set(pg, "proxies.velocity.enabled", True)
     yaml_set(pg, "proxies.velocity.online-mode", True)
@@ -390,13 +394,6 @@ def main():
             elif os.path.isfile(pth):
                 os.remove(pth)
 
-    log("== Update manifest")
-    build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
-    json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
-    for srv, files in MANAGED.items():
-        json.dump([f["path"] for f in files], open(os.path.join(DIST, srv, ".lag-managed.json"), "w"))
-    open(os.path.join(DIST, "BUILD.txt"), "w").write(build)
-
     log("== Start scripts")
     for f in os.listdir(os.path.join(ROOT, "windows")):
         shutil.copy(os.path.join(ROOT, "windows", f), os.path.join(DIST, f))
@@ -404,6 +401,17 @@ def main():
     for f in os.listdir(os.path.join(ROOT, "windows_tools")):
         shutil.copy(os.path.join(ROOT, "windows_tools", f), os.path.join(DIST, "tools", f))
     shutil.copy(os.path.join(ROOT, "network", "network.json"), os.path.join(DIST, "network.json"))
+
+    log("== Update manifest")
+    for f in ("START.bat", "TUNNEL.bat", "README.txt"):
+        manage(".", f, RELEASE_DL + f)
+    manage(".", os.path.join("tools", "start.ps1"), RELEASE_DL + "start.ps1")
+    build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
+    json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
+    for srv, files in MANAGED.items():
+        json.dump([f["path"] for f in files], open(os.path.join(DIST, srv, ".lag-managed.json"), "w"))
+    open(os.path.join(DIST, "BUILD.txt"), "w").write(build)
+
     log("All good.")
 
 

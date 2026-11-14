@@ -81,6 +81,20 @@ function Update-Network {
 }
 Update-Network
 
+# ---- Cannon settings for the factions server (safe to run every start; only touches these two values)
+$sp = "$Root\factions\spigot.yml"
+if (Test-Path $sp) {
+    $t = Get-Content $sp -Raw
+    $n = $t -replace 'max-tnt-per-tick:\s*\d+', 'max-tnt-per-tick: 20000'
+    if ($n -ne $t) { Set-Content $sp $n -NoNewline; Say "Raised TNT-per-tick limit for cannons." Green }
+}
+$pw = "$Root\factions\config\paper-world-defaults.yml"
+if (Test-Path $pw) {
+    $t = Get-Content $pw -Raw
+    $n = $t -replace 'optimize-explosions:\s*false', 'optimize-explosions: true'
+    if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Turned on explosion optimizer." Green }
+}
+
 # ---- First run: replace the placeholder secret so only YOUR proxy can talk to the servers
 $secretFile = "$Root\proxy\forwarding.secret"
 if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {

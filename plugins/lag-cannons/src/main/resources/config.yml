@@ -6,6 +6,8 @@ tnt:
   random-kick: false
   # Keep vanilla's little upward pop when TNT is lit (0.2). Set 0 for a pure drop.
   prime-y-velocity: 0.2
+  # Merge TNT stacked in the exact same spot into one entity (fires all its explosions together). Massive lag saver.
+  merge: true
 
 # Blocks that take several hits instead of being immune (classic "obby breaking").
 durability:
