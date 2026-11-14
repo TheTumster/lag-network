@@ -20,6 +20,7 @@ public class LabTools extends JavaPlugin {
 	public void onEnable() {
 		sandbots = new Sandbots(this);
 		getServer().getPluginManager().registerEvents(sandbots, this);
+		getServer().getPluginManager().registerEvents(new WaterProof(), this);
 	}
 
 	@Override
