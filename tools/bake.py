@@ -357,7 +357,8 @@ def main():
     log("== Cleaning test worlds/logs")
     for s in SERVERS + ["proxy"]:
         for junk in ("world", "world_nether", "world_the_end", "logs", "cache", "usercache.json",
-                     "banned-ips.json", "banned-players.json", "ops.json", "whitelist.json", "libraries", "versions"):
+                     "banned-ips.json", "banned-players.json", "ops.json", "whitelist.json", "libraries", "versions",
+                     os.path.join("plugins", ".paper-remapped")):
             pth = os.path.join(DIST, s, junk)
             if os.path.isdir(pth):
                 shutil.rmtree(pth)
