@@ -11,7 +11,8 @@ ORDER = ["1.8.8", "ours-nomerge", "ours-fixredstone", "ours-no-laGCannons"]
 def load(path):
     d = {"D": collections.Counter(), "P": collections.Counter(), "T": collections.Counter(), "S": collections.Counter(),
          "X": collections.Counter(), "Xblocks": 0, "Xcancel": 0, "xs": [], "first": {}, "sand_last": {}, "integrity": None,
-         "tnt_first": [], "paths": collections.defaultdict(list)}
+         "tnt_first": [], "paths": collections.defaultdict(list), "disp": collections.defaultdict(list),
+         "pist": collections.defaultdict(list)}
     seen_tnt = set()
     with open(path) as fh:
         for line in fh:
@@ -25,8 +26,10 @@ def load(path):
             t = int(p[1])
             if k == "D":
                 d["D"][t] += 1
+                d["disp"][(int(p[2]), int(p[3]), int(p[4]))].append(t)
             elif k == "P":
                 d["P"][t] += 1
+                d["pist"][(int(p[2]), int(p[3]), int(p[4]))].append((t, p[5]))
             elif k == "E":
                 kind, eid = p[2], p[3]
                 d[kind][t] += 1
@@ -86,6 +89,7 @@ def main():
     if ref:
         for n in names:
             if n != "1.8.8":
+                redstone_diff(ref, runs[n], "1.8", n)
                 divergence(ref, runs[n], "1.8", n)
     print("\n=== PARITY: summary ===")
     for n in names:
@@ -131,6 +135,23 @@ def main():
             for line in open(log, errors="replace"):
                 if "[PARITY]" in line or "Exception" in line:
                     print("  log:", line.strip()[-170:])
+
+
+def redstone_diff(a, b, an, bn):
+    """Which dispensers / pistons fire differently (count or timing)."""
+    print(f"\n=== REDSTONE {an} vs {bn} ===")
+    for what, key in (("dispensers", "disp"), ("pistons", "pist")):
+        da, db = a[key], b[key]
+        diffs = []
+        for pos in set(da) | set(db):
+            ta = [x if isinstance(x, int) else x[0] for x in da.get(pos, [])]
+            tb = [x if isinstance(x, int) else x[0] for x in db.get(pos, [])]
+            if ta != tb:
+                first = next((i for i, (x, y) in enumerate(zip(ta, tb)) if x != y), min(len(ta), len(tb)))
+                diffs.append((ta[first] if first < len(ta) else (tb[first] if first < len(tb) else 0), pos, len(ta), len(tb), ta[:6], tb[:6]))
+        print(f"  {what}: {len(diffs)} of {len(set(da) | set(db))} positions differ")
+        for t, pos, na, nb, ta, tb in sorted(diffs)[:15]:
+            print(f"    {pos}: {an} {na}x {ta} | {bn} {nb}x {tb}")
 
 
 def divergence(a, b, an, bn):
