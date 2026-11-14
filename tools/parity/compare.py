@@ -1,4 +1,4 @@
-# laG cannon parity report
+# laG cannon parity report (1.8 vs 1.21)
 """Compare cannon traces: python compare.py <dir> ; each run is <dir>/<name>/trace.csv (+ server.log).
 
 Prints a side-by-side timeline (ticks after the button press) of dispenses, piston moves, live TNT,
