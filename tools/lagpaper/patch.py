@@ -60,6 +60,42 @@ edit("net/minecraft/world/level/ServerExplosion.java",
      "Math.sqrt(entity.distanceToSqr(this.center)) / f",
      f"Math.sqrt({MID} ? entity.position().add(0.0, entity.getBbHeight() / 2.0, 0.0).distanceToSqr(this.center) : entity.distanceToSqr(this.center)) / f /* laG */")
 
+# 2b) explosion exposure for TNT / falling blocks: 1.8's World.a(Vec3D, AABB) (float sample stepping, rays stop at
+#     block outlines - cobwebs, ladders, carpets shield like 1.8) instead of 1.21 collision-shape rays
+edit("net/minecraft/world/level/ServerExplosion.java",
+     "    private float getBlockDensity(Vec3 vec3d, Entity entity) {",
+     """    private float getBlockDensity(Vec3 vec3d, Entity entity) {
+        if (entity instanceof net.minecraft.world.entity.item.PrimedTnt || entity instanceof net.minecraft.world.entity.item.FallingBlockEntity) return this.lagLegacyDensity(vec3d, entity); // laG""")
+edit("net/minecraft/world/level/ServerExplosion.java",
+     "    // Paper start - Optimize explosions\n    private float getBlockDensity(",
+     """    // laG: 1.8 explosion exposure (World.a(Vec3D, AxisAlignedBB)) for cannon entities
+    private float lagLegacyDensity(Vec3 center, Entity entity) {
+        net.minecraft.world.phys.AABB bb = entity.getBoundingBox();
+        double d0 = 1.0D / ((bb.maxX - bb.minX) * 2.0D + 1.0D);
+        double d1 = 1.0D / ((bb.maxY - bb.minY) * 2.0D + 1.0D);
+        double d2 = 1.0D / ((bb.maxZ - bb.minZ) * 2.0D + 1.0D);
+        double d3 = (1.0D - Math.floor(1.0D / d0) * d0) / 2.0D;
+        double d4 = (1.0D - Math.floor(1.0D / d2) * d2) / 2.0D;
+        if (d0 < 0.0D || d1 < 0.0D || d2 < 0.0D) return 0.0F;
+        int seen = 0, total = 0;
+        for (float f = 0.0F; f <= 1.0F; f = (float) (f + d0)) {
+            for (float f1 = 0.0F; f1 <= 1.0F; f1 = (float) (f1 + d1)) {
+                for (float f2 = 0.0F; f2 <= 1.0F; f2 = (float) (f2 + d2)) {
+                    double x = bb.minX + (bb.maxX - bb.minX) * (double) f;
+                    double y = bb.minY + (bb.maxY - bb.minY) * (double) f1;
+                    double z = bb.minZ + (bb.maxZ - bb.minZ) * (double) f2;
+                    Vec3 from = new Vec3(x + d3, y, z + d4);
+                    if (this.level.clip(new net.minecraft.world.level.ClipContext(from, center, net.minecraft.world.level.ClipContext.Block.OUTLINE, net.minecraft.world.level.ClipContext.Fluid.NONE, entity)).getType() == net.minecraft.world.phys.HitResult.Type.MISS) seen++;
+                    total++;
+                }
+            }
+        }
+        return total == 0 ? 0.0F : (float) seen / (float) total;
+    }
+
+    // Paper start - Optimize explosions
+    private float getBlockDensity(""")
+
 # 3) east/west cannoning: legacy axis order for TNT and falling blocks
 cu = "ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java"
 edit(cu,
