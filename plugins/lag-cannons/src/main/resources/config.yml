@@ -34,3 +34,34 @@ checker-item: POTATO
 tntfill:
   radius-max: 25
   per-dispenser-max: 576
+
+# Flowing water/lava normally washes away redstone. Cannon servers turn that off so water-based cannons don't break themselves.
+water-proof:
+  enabled: true
+  blocks:
+    - REDSTONE_WIRE
+    - REPEATER
+    - COMPARATOR
+    - REDSTONE_TORCH
+    - REDSTONE_WALL_TORCH
+    - LEVER
+    - TRIPWIRE
+    - TRIPWIRE_HOOK
+    - "*_BUTTON"
+    - "*_PRESSURE_PLATE"
+    - RAIL
+    - POWERED_RAIL
+    - DETECTOR_RAIL
+    - ACTIVATOR_RAIL
+
+# Sandbots: bots that keep refilling sand at spots you mark (for sand-based cannons).
+sandbots:
+  # How often bots refill, in ticks (20 = 1 second).
+  interval-ticks: 20
+  # Max spots one bot can manage, and max bots per player.
+  max-spots: 64
+  max-bots-per-player: 5
+  # Spots must be within this many blocks of the bot.
+  range: 16
+  # What they place. SAND, RED_SAND, GRAVEL, or any *_CONCRETE_POWDER.
+  material: SAND

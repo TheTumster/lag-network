@@ -359,6 +359,14 @@ def main():
                 for nxt in lines[i + 1:i + 12]:
                     if re.search(r"Caused by|Exception|requires|version|depend", nxt, re.I):
                         problems.append(f"[{name}]     {nxt.strip()[:300]}")
+    # Make sure the important plugins actually ENABLED (not just loaded)
+    must = {"hub": ["laGCore"], "factions": ["laGCore", "laGCannons", "Factions"], "smp": ["laGCore"]}
+    for srv in SERVERS:
+        enabled = sorted({m.group(1) for l in logs.get(srv, []) for m in [re.search(r"Enabling (\S+) v", l)] if m})
+        log(f"  {srv:9} enabled: {', '.join(enabled)}")
+        for want in must.get(srv, []):
+            if not any(e.lower().startswith(want.lower()) for e in enabled):
+                problems.append(f"[{srv}] {want} did not enable")
     report = {"manifest": manifest, "problems": problems}
     json.dump(report, open(os.path.join(ROOT, "dist", "bake-report.json"), "w"), indent=2)
     for name, lines in logs.items():

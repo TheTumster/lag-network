@@ -41,11 +41,21 @@ public final class LagCannons extends JavaPlugin implements Listener {
 
 	private record Hit(String world, int hits, long last) { }
 
+	private Sandbots sandbots;
+
+	@Override
+	public void onDisable() {
+		if (sandbots != null) sandbots.shutdown();
+	}
+
 	@Override
 	public void onEnable() {
 		saveDefaultConfig();
 		loadDurable();
 		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
+		sandbots = new Sandbots(this);
+		getServer().getPluginManager().registerEvents(sandbots, this);
 		// sweep healed blocks once a minute
 		Bukkit.getScheduler().runTaskTimer(this, this::regen, 1200L, 1200L);
 		getLogger().info("laG Cannons enabled (random-kick=" + getConfig().getBoolean("tnt.random-kick") + ")");
@@ -155,9 +165,11 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("tntfill")) return tntfill(sender, args);
 		if (cmd.getName().equalsIgnoreCase("/upload")) return SchemUpload.run(this, sender, args);
+		if (cmd.getName().equalsIgnoreCase("sandbot")) return sandbots.command(sender, args);
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
 			loadDurable();
+			sandbots.restartTask();
 			send(sender, "<#38E0FF>laG Cannons reloaded.");
 		} else if (args.length > 0 && args[0].equalsIgnoreCase("clear")) {
 			damage.clear();
