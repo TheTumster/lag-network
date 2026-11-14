@@ -56,8 +56,10 @@ water-proof:
 
 # Sandbots: bots that keep refilling sand at spots you mark (for sand-based cannons).
 sandbots:
-  # How often bots refill, in ticks (20 = 1 second).
+  # Default refill rate in ticks (20 = 1 second). Players change it per bot with /sandbot speed <ticks>.
   interval-ticks: 20
+  # Fastest rate non-admins can set (admins can go down to 1 = every tick).
+  min-interval-ticks: 2
   # Max spots one bot can manage, and max bots per player.
   max-spots: 64
   max-bots-per-player: 5

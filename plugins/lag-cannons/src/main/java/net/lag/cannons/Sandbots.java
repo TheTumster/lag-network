@@ -64,6 +64,8 @@ final class Sandbots implements Listener {
 		boolean active = true;
 		final Set<String> spots = new LinkedHashSet<>(); // "x,y,z"
 		UUID entity;
+		int every = 0;    // ticks between refills; 0 = server default
+		int counter = 0;
 
 		Location loc() {
 			World w = Bukkit.getWorld(world);
@@ -97,8 +99,7 @@ final class Sandbots implements Listener {
 
 	void restartTask() {
 		if (task != null) task.cancel();
-		long every = Math.max(1, plugin.getConfig().getLong("sandbots.interval-ticks", 20));
-		task = Bukkit.getScheduler().runTaskTimer(plugin, this::refill, every, every);
+		task = Bukkit.getScheduler().runTaskTimer(plugin, this::refill, 1L, 1L);
 	}
 
 	void shutdown() {
@@ -117,8 +118,11 @@ final class Sandbots implements Listener {
 
 	private void refill() {
 		Material mat = material();
+		int def = Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 20));
 		for (Bot b : bots.values()) {
 			if (!b.active) continue;
+			if (++b.counter < (b.every > 0 ? b.every : def)) continue;
+			b.counter = 0;
 			World w = Bukkit.getWorld(b.world);
 			if (w == null || !w.isChunkLoaded((int) Math.floor(b.x) >> 4, (int) Math.floor(b.z) >> 4)) continue;
 			for (String s : b.spots) {
@@ -158,12 +162,17 @@ final class Sandbots implements Listener {
 			a.setArms(true);
 			a.getEquipment().setHelmet(new ItemStack(Material.SAND));
 			a.getEquipment().setItemInMainHand(new ItemStack(Material.SAND));
-			a.customName(MM.deserialize(b.active ? "<gradient:#38E0FF:#B040FF><bold>Sandbot</bold></gradient> <gray>" + b.spots.size() + " spots"
+			a.customName(MM.deserialize(b.active ? "<gradient:#38E0FF:#B040FF><bold>Sandbot</bold></gradient> <gray>" + b.spots.size() + " spots • " + speedLabel(b)
 					: "<dark_gray>Sandbot <gray>(paused)"));
 			a.setCustomNameVisible(true);
 			a.getPersistentDataContainer().set(botKey, PersistentDataType.STRING, b.id.toString());
 		});
 		b.entity = as.getUniqueId();
+	}
+
+	private String speedLabel(Bot b) {
+		int t = b.every > 0 ? b.every : Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 20));
+		return t + "t";
 	}
 
 	private void removeEntity(Bot b) {
@@ -365,6 +374,34 @@ final class Sandbots implements Listener {
 					say(p, b.active ? "<#38E0FF>Sandbot running." : "<gray>Sandbot paused.");
 				}
 			}
+			case "speed", "rate", "delay" -> {
+				Bot b = nearest(p);
+				if (b == null) {
+					say(p, "<red>No sandbot of yours within 8 blocks.");
+					return true;
+				}
+				int min = p.hasPermission("lag.cannons.admin") ? 1 : Math.max(1, plugin.getConfig().getInt("sandbots.min-interval-ticks", 2));
+				if (args.length < 2) {
+					say(p, "<gray>This bot refills every <white>" + speedLabel(b) + "<gray> (20t = 1 second). <white>/sandbot speed <ticks>");
+					return true;
+				}
+				int t;
+				try {
+					t = Integer.parseInt(args[1]);
+				} catch (NumberFormatException ex) {
+					say(p, "<red>Use a number of ticks, e.g. /sandbot speed 4 (20 = 1 second).");
+					return true;
+				}
+				if (t < min) {
+					say(p, "<red>Fastest allowed is " + min + " ticks.");
+					return true;
+				}
+				b.every = Math.min(t, 1200);
+				b.counter = 0;
+				spawnEntity(b);
+				save();
+				say(p, "<#38E0FF>Sandbot now refills every <white>" + b.every + "t <gray>(" + String.format(java.util.Locale.ROOT, "%.2f", b.every / 20.0) + "s)");
+			}
 			case "list" -> {
 				List<String> lines = new ArrayList<>();
 				for (Bot b : bots.values()) {
@@ -379,6 +416,7 @@ final class Sandbots implements Listener {
 				say(p, "<gradient:#38E0FF:#B040FF><bold>Sandbots</bold></gradient>");
 				say(p, "<white>/sandbot create <gray>- place a bot here (gives you its wand)");
 				say(p, "<white>/sandbot wand <gray>- wand for your nearest bot");
+				say(p, "<white>/sandbot speed <ticks> <gray>- refill rate for your nearest bot (20 = 1s, 1 = every tick)");
 				say(p, "<white>/sandbot toggle | clear | remove | list");
 				say(p, "<gray>Wand: left-click block faces to add/remove sand spots.");
 				say(p, "<gray>Right-click a bot to pause it, sneak + right-click to remove it.");
@@ -402,6 +440,7 @@ final class Sandbots implements Listener {
 				b.y = y.getDouble(k + ".y");
 				b.z = y.getDouble(k + ".z");
 				b.active = y.getBoolean(k + ".active", true);
+				b.every = y.getInt(k + ".every", 0);
 				b.spots.addAll(y.getStringList(k + ".spots"));
 				bots.put(b.id, b);
 			} catch (Exception ex) {
@@ -421,6 +460,7 @@ final class Sandbots implements Listener {
 			y.set(k + ".y", b.y);
 			y.set(k + ".z", b.z);
 			y.set(k + ".active", b.active);
+			y.set(k + ".every", b.every);
 			y.set(k + ".spots", new ArrayList<>(b.spots));
 		}
 		try {
