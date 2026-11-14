@@ -107,6 +107,15 @@ def main():
             ox, oy, oz, sw, sh, sl = b
             inside = sum(1 for x in xs if ox <= x[1] < ox + sw and oz <= x[3] < oz + sl and oy <= x[2] < oy + sh)
             print(f"  explosions inside the cannon footprint: {inside}/{len(xs)}")
+            spots = collections.Counter((int(x[1] // 1), int(x[2] // 1), int(x[3] // 1)) for x in xs
+                                        if ox <= x[1] < ox + sw and oz <= x[3] < oz + sl and oy <= x[2] < oy + sh)
+            first = {}
+            for x in xs:
+                first.setdefault((int(x[1] // 1), int(x[2] // 1), int(x[3] // 1)), x[0])
+            print("  where inside (block x,y,z: count, first tick): " + ", ".join(
+                f"{k[0]},{k[1]},{k[2]}: {v} @t{first[k]}" for k, v in spots.most_common(15)))
+            earliest = sorted(xs)[:5]
+            print("  first 5 explosions: " + ", ".join(f"t{x[0]} ({x[1]:.1f},{x[2]:.1f},{x[3]:.1f})" for x in earliest))
         if n == "1.8.8":
             ok = d["integrity"] and d["integrity"][0] - d["integrity"][1] == 0 and len(xs) > 0
             print("  1.8 SANITY: " + ("PASS - fired and the cannon is intact, so the setup matches how it's used" if ok else
