@@ -126,7 +126,7 @@ public class H121 extends Harness {
 					if (m.getName().equals("getItems") && m.getParameterCount() == 0) getItems = m;
 			getItems.setAccessible(true);
 			@SuppressWarnings("unchecked") java.util.List<Object> items = (java.util.List<Object>) getItems.invoke(be);
-			Object tnt = Class.forName("org.bukkit.craftbukkit.inventory.CraftItemStack").getMethod("asNMSCopy", ItemStack.class).invoke(null, new ItemStack(Material.TNT, 64));
+			Object tnt = Class.forName("org.bukkit.craftbukkit.inventory.CraftItemStack").getMethod("asNMSCopy", org.bukkit.inventory.ItemStack.class).invoke(null, new org.bukkit.inventory.ItemStack(Material.TNT, 64));
 			java.lang.reflect.Method copy = tnt.getClass().getMethod("copy");
 			for (int i = 0; i < items.size(); i++) items.set(i, copy.invoke(tnt));
 			return true;
