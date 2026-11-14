@@ -1,0 +1,70 @@
+name: cannon-jar
+# Builds SulphurSpigot (open-source 1.8.8 TacoSpigot fork focused on TNT cannons) from source
+# for the 1.8 cannon lab, and publishes it as release "cannon-jar".
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/cannon-jar.yml', 'tools/cannonjar/**']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: temurin
+      - name: Get source
+        run: |
+          git config --global user.email "ci@lag.local"
+          git config --global user.name "laG CI"
+          git clone -q https://github.com/AmbrosL/SulphurSpigot src
+          cd src
+          echo "SulphurSpigot commit: $(git rev-parse HEAD)"
+          git submodule update --init 2>&1 | tail -5
+          git submodule status
+      - name: Fix 2018-era links
+        working-directory: src
+        run: |
+          # Mojang's old S3 link is gone; same 1.8.8 server jar from the current launcher host (md5 is still checked)
+          sed -i 's#https://s3.amazonaws.com/Minecraft.Download/versions/$minecraftversion/minecraft_server.$minecraftversion.jar#https://launcher.mojang.com/v1/objects/5fafba3f58c40dc51b5c3ca72a98f62dfdae1db7/server.jar#' remap.sh
+          grep -n "server.jar\|curl" remap.sh
+          # dead maven repos -> PaperMC's archive + Spigot's nexus
+          for f in $(grep -rl "repo.md-5.net\|repo.destroystokyo.com\|ci.destroystokyo.com" --include=pom.xml --include=*.patch . ); do
+            sed -i 's#http://repo.md-5.net/content/repositories/releases/#https://repo.papermc.io/repository/maven-public/#g;
+                    s#https://repo.destroystokyo.com/content/repositories/releases/#https://repo.papermc.io/repository/maven-public/#g;
+                    s#https://repo.destroystokyo.com/content/repositories/snapshots/#https://repo.papermc.io/repository/maven-public/#g;
+                    s#https://ci.destroystokyo.com/plugin/repository/everything/#https://repo.papermc.io/repository/maven-public/#g' "$f"
+            echo "fixed repos in $f"
+          done
+      - name: Remap + decompile + patch
+        working-directory: src
+        run: |
+          ./remap.sh
+          ./decompile.sh
+          ./init.sh
+          ./applyPatches.sh 2>&1 | tail -40
+          ls
+      - name: Compile
+        working-directory: src
+        run: |
+          mvn -B -q -DskipTests -Dmaven.javadoc.skip=true clean install 2>&1 | tail -60
+          find . -path '*Server/target/*.jar' -not -name '*original*' | head
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          JAR=$(find src -path '*Server/target/*.jar' -not -name '*original*' -not -name '*sources*' | head -1)
+          [ -n "$JAR" ] || { echo "no server jar built"; exit 1; }
+          cp "$JAR" sulphurspigot-1.8.8.jar
+          ls -la sulphurspigot-1.8.8.jar
+          sha256sum sulphurspigot-1.8.8.jar
+          gh release delete cannon-jar -y --cleanup-tag 2>/dev/null || true
+          gh release create cannon-jar sulphurspigot-1.8.8.jar --title "1.8.8 cannon jar (SulphurSpigot, built from source)" \
+            --notes "Built from https://github.com/AmbrosL/SulphurSpigot by the cannon-jar workflow. For the private 1.8 cannon lab only."
