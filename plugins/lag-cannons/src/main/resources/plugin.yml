@@ -38,3 +38,5 @@ permissions:
     default: true
   lag.cannons.fixredstone:
     default: true
+  lagcannons.banneditems.bypass:
+    default: false

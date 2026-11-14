@@ -89,3 +89,10 @@ cannon-protect:
 # Falling sand/gravel that breaks (lands on a slab, piston head, carpet...) drops nothing. true = vanilla item drops.
 falling-blocks:
   drop-items: false
+
+# Classic factions PvP: these items can't be crafted, used, picked up or kept. "*_SPEAR" = every spear.
+# Empty list ([]) = allow everything. Permission lagcannons.banneditems.bypass ignores this (not given by default).
+banned-items:
+  - SHIELD
+  - MACE
+  - "*_SPEAR"
