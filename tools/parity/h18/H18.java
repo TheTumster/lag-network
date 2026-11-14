@@ -37,23 +37,55 @@ public class H18 extends Harness {
 		if (e.getWorld() == world) e.setCancelled(true);
 	}
 
+	// blocks that hang on / sit on another block; placed after everything else, like WorldEdit does
+	private static final java.util.Set<Integer> FRAGILE = new java.util.HashSet<Integer>(java.util.Arrays.asList(
+			6, 26, 27, 28, 31, 32, 37, 38, 39, 40, 50, 51, 55, 59, 63, 64, 65, 66, 68, 69, 70, 71, 72, 75, 76, 77, 78, 83, 93, 94,
+			96, 106, 111, 115, 127, 131, 132, 140, 141, 142, 143, 144, 147, 148, 149, 150, 157, 167, 171, 175, 193, 194, 195, 196, 197));
+
 	@Override
 	protected void paste() throws Exception {
+		java.util.List<String[]> later = new java.util.ArrayList<String[]>();
 		int n = 0;
 		try (BufferedReader r = new BufferedReader(new FileReader(new File(getDataFolder(), "blocks.txt")))) {
 			String s;
 			while ((s = r.readLine()) != null) {
 				String[] p = s.split(" ");
-				Block b = world.getBlockAt(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
-				b.setTypeIdAndData(Integer.parseInt(p[3]), (byte) Integer.parseInt(p[4]), false);
+				if (FRAGILE.contains(Integer.parseInt(p[3]))) later.add(p);
+				else place(p);
 				n++;
 			}
 		}
-		say("placed " + n + " blocks");
+		for (String[] p : later) place(p);
+		say("placed " + n + " blocks (" + later.size() + " attached ones last)");
+	}
+
+	private void place(String[] p) {
+		Block b = world.getBlockAt(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
+		b.setTypeIdAndData(Integer.parseInt(p[3]), (byte) Integer.parseInt(p[4]), false);
 	}
 
 	@Override
-	protected void afterPaste() { }
+	protected void afterPaste() {
+		// report anything that didn't survive the paste (popped off / changed)
+		int bad = 0;
+		StringBuilder sb = new StringBuilder();
+		try (BufferedReader r = new BufferedReader(new FileReader(new File(getDataFolder(), "blocks.txt")))) {
+			String s;
+			while ((s = r.readLine()) != null) {
+				String[] p = s.split(" ");
+				Block b = world.getBlockAt(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
+				int id = Integer.parseInt(p[3]);
+				boolean same = b.getTypeId() == id || (id == 93 && b.getTypeId() == 94) || (id == 94 && b.getTypeId() == 93)
+						|| (id == 75 && b.getTypeId() == 76) || (id == 76 && b.getTypeId() == 75) || (id == 149 && b.getTypeId() == 150) || (id == 150 && b.getTypeId() == 149);
+				if (!same) {
+					if (bad++ < 25) sb.append(" ").append(p[0]).append(",").append(p[1]).append(",").append(p[2]).append(":").append(id).append("->").append(b.getTypeId());
+				}
+			}
+		} catch (Exception e) {
+			say("diff failed " + e);
+		}
+		say("blocks not as in schematic after paste: " + bad + sb);
+	}
 
 	@Override
 	protected void makeWater(Block b) {
