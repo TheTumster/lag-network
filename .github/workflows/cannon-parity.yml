@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
-          - { name: "lag-paper-stale", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper", stale: "true" }
+          - { name: "plain-paper", kind: "121", fix: "true", cannons: "true", merge: "false" }
           - { name: "lag-paper", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
     steps:

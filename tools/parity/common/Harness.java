@@ -57,6 +57,8 @@ public abstract class Harness extends JavaPlugin implements Listener {
 	protected abstract String rsState(Block b);
 	/** Fill a dispenser without notifying comparators (experiment); false = use the normal API fill. */
 	protected boolean fillQuietly(Block b) { return false; }
+	/** Called right after the TNT fill (1.8: make comparators notice the full dispensers, like in the real lab). */
+	protected void afterFill() { }
 
 	protected int[] xyz(String s) {
 		String[] p = s.split(",");
@@ -122,6 +124,7 @@ public abstract class Harness extends JavaPlugin implements Listener {
 							}
 						}
 				say("filled dispensers: " + d);
+				afterFill();
 				String ice = cfg.getProperty("ice", "");
 				if (!ice.isEmpty()) for (String p : ice.split(";")) {
 					int[] c = xyz(p);

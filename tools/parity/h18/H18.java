@@ -94,6 +94,40 @@ public class H18 extends Harness {
 	}
 
 	@Override
+	protected void afterFill() {
+		// The 1.8 lab pastes with WorldEdit 6 (block updates on) and dispensers that already hold TNT, so comparators
+		// reading them are on. Our harness places blocks without updates, so update the comparators now.
+		int n = 0;
+		try {
+			String v = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+			String nms = "net.minecraft.server." + v + ".";
+			Object nw = world.getClass().getMethod("getHandle").invoke(world);
+			Class<?> bpC = Class.forName(nms + "BlockPosition");
+			Class<?> wC = Class.forName(nms + "World");
+			Class<?> ibdC = Class.forName(nms + "IBlockData");
+			Class<?> blockC = Class.forName(nms + "Block");
+			java.lang.reflect.Method getType = wC.getMethod("getType", bpC);
+			java.lang.reflect.Method getBlock = ibdC.getMethod("getBlock");
+			java.lang.reflect.Method doPhysics = blockC.getMethod("doPhysics", wC, bpC, ibdC, blockC);
+			for (int x = 0; x < sw; x++)
+				for (int y = 0; y < sh; y++)
+					for (int z = 0; z < sl; z++) {
+						Block b = world.getBlockAt(ox + x, oy + y, oz + z);
+						int id = b.getTypeId();
+						if (id != 149 && id != 150) continue;
+						Object pos = bpC.getConstructor(int.class, int.class, int.class).newInstance(b.getX(), b.getY(), b.getZ());
+						Object st = getType.invoke(nw, pos);
+						Object blk = getBlock.invoke(st);
+						doPhysics.invoke(blk, nw, pos, st, blk);
+						n++;
+					}
+		} catch (Exception e) {
+			say("comparator update failed: " + e);
+		}
+		say("updated " + n + " comparators after the fill");
+	}
+
+	@Override
 	protected String rsState(Block b) {
 		int id = b.getTypeId(), d = b.getData();
 		switch (id) {
