@@ -118,7 +118,7 @@ final class Sandbots implements Listener {
 
 	private void refill() {
 		Material mat = material();
-		int def = Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 20));
+		int def = Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 2));
 		for (Bot b : bots.values()) {
 			if (!b.active) continue;
 			if (++b.counter < (b.every > 0 ? b.every : def)) continue;
@@ -171,7 +171,7 @@ final class Sandbots implements Listener {
 	}
 
 	private String speedLabel(Bot b) {
-		int t = b.every > 0 ? b.every : Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 20));
+		int t = b.every > 0 ? b.every : Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 2));
 		return t + "t";
 	}
 
