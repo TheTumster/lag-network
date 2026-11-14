@@ -18,6 +18,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -42,7 +43,10 @@ final class PistonFix implements Listener {
 	/** pistons that are being pushed/pulled: where they'll land -> ticks left to wait */
 	private final Map<Block, Integer> landing = new HashMap<Block, Integer>();
 
+	private final Plugin plugin;
+
 	PistonFix(Plugin plugin) {
+		this.plugin = plugin;
 		// fallback: if a landing wasn't caught by the physics hook, check it once it's there (expires after 8 ticks)
 		Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
 			public void run() {
@@ -79,6 +83,50 @@ final class PistonFix implements Listener {
 		if (behind.isBlockIndirectlyPowered() || behind.getRelative(BlockFace.UP).isBlockIndirectlyPowered()) {
 			e.setCancelled(true);
 			landing.put(front.getRelative(e.getDirection()), 8);
+		}
+	}
+
+	/** front piston -> the sticky waiting to pull it back */
+	private final Map<Block, Block> waiting = new HashMap<Block, Block>();
+	private final java.util.Set<Block> bypass = new java.util.HashSet<Block>();
+
+	/**
+	 * Same race when power turns off: the sticky must pull the front piston back, but it can only pull it once the
+	 * front piston has pulled its own head in. If the sticky goes first it retracts empty and the front piston is
+	 * left stranded. So the sticky waits, the front piston retracts first, then the sticky pulls (same tick).
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onRetractOrder(BlockPistonRetractEvent e) {
+		if (!enabled || !e.isSticky()) return;
+		Block sticky = e.getBlock();
+		if (bypass.remove(sticky)) return;
+		BlockFace dir = e.getDirection();
+		Block front = sticky.getRelative(dir).getRelative(dir);
+		if (!isPiston(front.getType())) return;
+		int fd = front.getData();
+		if ((fd & 8) == 0 || (fd & 7) != (sticky.getData() & 7)) return; // front not extended / not facing the same way
+		e.setCancelled(true);
+		waiting.put(front, sticky);
+		update(front); // make the front piston notice it lost power and retract now
+		final Block f = front;
+		Bukkit.getScheduler().runTask(plugin, new Runnable() {
+			public void run() {
+				// front piston stayed out (still powered): let the sticky retract on its own like vanilla would
+				Block st = waiting.remove(f);
+				if (st != null) {
+					bypass.add(st);
+					update(st);
+				}
+			}
+		});
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onRetracted(BlockPistonRetractEvent e) {
+		Block sticky = waiting.remove(e.getBlock());
+		if (sticky != null) {
+			bypass.add(sticky);
+			update(sticky); // front head is in: now the sticky retracts and pulls it
 		}
 	}
 
