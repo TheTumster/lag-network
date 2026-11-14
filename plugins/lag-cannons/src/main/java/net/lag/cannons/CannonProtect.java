@@ -43,6 +43,12 @@ final class CannonProtect implements Listener {
 		});
 	}
 
+	/** True if explosions can't break this block (protected test world + diamond somewhere below). */
+	boolean isProtected(Block b) {
+		World w = b.getWorld();
+		return active(w) && (b.getType() == Material.DIAMOND_BLOCK || lowestProtector(w, b.getX(), b.getZ()) < b.getY());
+	}
+
 	private void filter(World w, List<Block> blocks) {
 		if (!active(w)) return;
 		blocks.removeIf(b -> b.getType() == Material.DIAMOND_BLOCK || lowestProtector(w, b.getX(), b.getZ()) < b.getY());

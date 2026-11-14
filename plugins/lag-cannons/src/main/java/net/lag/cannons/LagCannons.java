@@ -58,7 +58,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
 		getServer().getPluginManager().registerEvents(new ClassicFactions(), this); // only rewrites /f commands
 		getServer().getPluginManager().registerEvents(new TntMerge(this), this);
-		getServer().getPluginManager().registerEvents(new CannonProtect(this), this);
+		protect = new CannonProtect(this);
+		getServer().getPluginManager().registerEvents(protect, this);
 		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		redstoneFix = new RedstoneFix(this);
 		getServer().getPluginManager().registerEvents(redstoneFix, this);
@@ -104,6 +105,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		}
 	}
 
+	private CannonProtect protect;
+
 	// ---------------------------------------------------------------- obsidian durability
 
 	private static long key(Block b) {
@@ -129,6 +132,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 					Block b = center.getRelative(dx, dy, dz);
 					Integer max = durable.get(b.getType());
 					if (max == null) continue;
+					if (protect != null && protect.isProtected(b)) continue; // diamond-protected test cannon
 					long k = key(b);
 					Hit h = damage.get(k);
 					int hits = (h != null && h.world().equals(w.getName()) ? h.hits() : 0) + 1;
