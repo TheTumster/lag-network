@@ -29,7 +29,7 @@ jobs:
       - name: Build FactionsUUID 4.4.3 from source (GPLv3; buy it on SpigotMC once the server goes public)
         run: |
           git clone -q --depth 1 -b 4.4.3 https://github.com/FactionsU/UID fuuid
-          cd fuuid && chmod +x gradlew && ./gradlew build -x test -q
+          cd fuuid && bash ../tools/patches/fuuid-no-graves.sh && chmod +x gradlew && ./gradlew build -x test -q
           ls -la */build/libs build/libs 2>/dev/null || true
           JAR=$(ls -S */build/libs/*.jar build/libs/*.jar 2>/dev/null | grep -viE "sources|javadoc|api|example" | head -1)
           echo "Using $JAR"
