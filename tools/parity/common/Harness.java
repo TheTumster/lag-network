@@ -103,6 +103,8 @@ public abstract class Harness extends JavaPlugin implements Listener {
 				pastedBlocks = countBlocks();
 				say("pasted blocks: " + pastedBlocks);
 				afterPaste();
+			} else if (tick == 159) {
+				snapshot("prefill");
 			} else if (tick == 160) {
 				int d = 0;
 				for (int x = 0; x < sw; x++)
@@ -179,6 +181,8 @@ public abstract class Harness extends JavaPlugin implements Listener {
 					+ f(v.getX()) + "," + f(v.getY()) + "," + f(v.getZ()) + "," + fuse);
 		}
 	}
+
+	private void snapshotX(String phase) { snapshot(phase); }
 
 	private void snapshot(String phase) {
 		for (int x = 0; x < sw; x++)

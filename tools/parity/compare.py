@@ -19,7 +19,10 @@ def load(path):
             p = line.rstrip("\n").split(",")
             k = p[0]
             if k == "S":
-                d["snap"][(int(p[2]), int(p[3]), int(p[4]))] = p[5]
+                if p[1] == "pre":
+                    d["snap"][(int(p[2]), int(p[3]), int(p[4]))] = p[5]
+                else:
+                    d.setdefault("snap_" + p[1], {})[(int(p[2]), int(p[3]), int(p[4]))] = p[5]
                 continue
             if k == "R":
                 d["rs"][int(p[1])][(int(p[2]), int(p[3]), int(p[4]))] = int(p[6])
@@ -157,6 +160,9 @@ def redstone_diff(a, b, an, bn):
     print(f"\n=== REDSTONE {an} vs {bn} ===")
     sa, sb = a["snap"], b["snap"]
     diff = [(p, sa.get(p), sb.get(p)) for p in sorted(set(sa) | set(sb)) if sa.get(p) != sb.get(p)]
+    pa, pb = a.get("snap_prefill", {}), b.get("snap_prefill", {})
+    pdiff = [(p, pa.get(p), pb.get(p)) for p in sorted(set(pa) | set(pb)) if pa.get(p) != pb.get(p)]
+    print(f"  state after paste (before TNT fill): {len(pdiff)} redstone parts differ: " + ", ".join(f"{p}:{x}|{y}" for p, x, y in pdiff[:12]))
     print(f"  state before the button: {len(diff)} of {len(set(sa) | set(sb))} redstone parts differ")
     for p, x, y in diff[:70]:
         print(f"    {p}: {an} {x} | {bn} {y}")
