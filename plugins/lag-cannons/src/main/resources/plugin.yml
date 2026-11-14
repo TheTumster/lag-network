@@ -11,8 +11,15 @@ commands:
   tntfill:
     description: Fill nearby dispensers with TNT
     permission: lag.cannons.tntfill
+  /upload:
+    description: Download a schematic from a link into the FAWE/WorldEdit schematics folder
+    usage: //upload <link> [name]
+    aliases: [schemupload]
+    permission: lag.cannons.upload
 permissions:
   lag.cannons.admin:
     default: op
   lag.cannons.tntfill:
     default: true
+  lag.cannons.upload:
+    default: op

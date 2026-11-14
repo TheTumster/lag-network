@@ -57,6 +57,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest laG-Network.zip dist/bake-report.json \
+          gh release create latest laG-Network.zip dist/bake-report.json localjars/laGCannons.jar localjars/laGCore.jar \
             --title "laG Network (build ${{ github.run_number }})" \
             --notes "Download laG-Network.zip, extract it anywhere, double-click START.bat." --latest

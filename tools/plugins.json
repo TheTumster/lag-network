@@ -40,7 +40,7 @@
       "hangar": "HelpChat/PlaceholderAPI"
     },
     {
-      "modrinth": "worldedit",
+      "modrinth": "fastasyncworldedit",
       "loader": "paper"
     },
     {
@@ -84,7 +84,7 @@
       "loader": "paper"
     },
     {
-      "modrinth": "worldedit",
+      "modrinth": "fastasyncworldedit",
       "loader": "paper"
     },
     {

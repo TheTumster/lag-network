@@ -154,6 +154,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("tntfill")) return tntfill(sender, args);
+		if (cmd.getName().equalsIgnoreCase("/upload")) return SchemUpload.run(this, sender, args);
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
 			loadDurable();
