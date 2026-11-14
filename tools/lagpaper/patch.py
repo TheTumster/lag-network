@@ -169,6 +169,12 @@ edit(pb, """        // Paper end - Protect Bedrock and End Portal/Frames from be
         if (!level.isClientSide() && this.isSticky && id == TRIGGER_CONTRACT && !this.getNeighborSignal(level, pos, direction)) { // laG: double piston retract
             BlockPos lagFront = pos.relative(direction, 2);
             BlockState lagFs = level.getBlockState(lagFront);
+            // front piston already mid-retract (its block event ran first this tick): finish it so it can be pulled
+            if (lagFs.is(Blocks.MOVING_PISTON) && level.getBlockEntity(lagFront) instanceof PistonMovingBlockEntity lagPm
+                && lagPm.isSourcePiston() && !lagPm.isExtending() && lagPm.getDirection() == direction) {
+                lagPm.finalTick();
+                lagFs = level.getBlockState(lagFront);
+            }
             if ((lagFs.is(Blocks.PISTON) || lagFs.is(Blocks.STICKY_PISTON)) && lagFs.getValue(EXTENDED) && lagFs.getValue(FACING) == direction
                 && !((PistonBaseBlock) lagFs.getBlock()).getNeighborSignal(level, lagFront, direction)) {
                 level.setBlock(lagFront, lagFs.setValue(EXTENDED, false), Block.UPDATE_ALL);
