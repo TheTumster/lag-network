@@ -93,12 +93,15 @@ final class RedstoneFix implements Listener {
 		int minY = fullHeight ? w.getMinHeight() : Math.max(w.getMinHeight(), cy - r);
 		int maxY = fullHeight ? w.getMaxHeight() - 1 : Math.min(w.getMaxHeight() - 1, cy + r);
 		List<Block> wires = new ArrayList<>();
+		List<Block> dispensers = new ArrayList<>();
 		for (int x = cx - r; x <= cx + r; x++) {
 			for (int z = cz - r; z <= cz + r; z++) {
 				if (!w.isChunkLoaded(x >> 4, z >> 4)) continue;
 				for (int y = minY; y <= maxY; y++) {
 					Block b = w.getBlockAt(x, y, z);
-					if (b.getType() == Material.REDSTONE_WIRE) wires.add(b);
+					Material m = b.getType();
+					if (m == Material.REDSTONE_WIRE) wires.add(b);
+					else if (m == Material.DISPENSER || m == Material.DROPPER) dispensers.add(b);
 				}
 			}
 		}
@@ -126,6 +129,15 @@ final class RedstoneFix implements Listener {
 		}
 		// 2) poke each one so power recalculates through the circuit
 		for (Block b : wires) b.setBlockData(b.getBlockData(), true);
+		// 3) dispensers saved mid-shot keep "triggered" from the schematic; unpowered ones would ignore their first
+		//    pulse. 1.8's paste updates reset them, so do the same (only the ones that aren't actually powered).
+		for (Block b : dispensers) {
+			if (b.getBlockData() instanceof org.bukkit.block.data.type.Dispenser d && d.isTriggered()
+					&& !b.isBlockIndirectlyPowered() && !b.getRelative(BlockFace.UP).isBlockIndirectlyPowered()) {
+				d.setTriggered(false);
+				b.setBlockData(d, false);
+			}
+		}
 		return wires.size();
 	}
 
