@@ -118,6 +118,23 @@ if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {
     Say "Network secured (first run)." Green
 }
 
+# ---- Already running? (a second copy can't use the same ports)
+function Get-LagJava {
+    Get-CimInstance Win32_Process -Filter "Name='java.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith("$Root\runtime", [StringComparison]::OrdinalIgnoreCase) }
+}
+$old = @(Get-LagJava)
+if ($old.Count -gt 0) {
+    Write-Host ""
+    Say "The network is already running ($($old.Count) servers from an earlier start)." Yellow
+    Say "Best: close it properly by typing 'stop' in each server tab, then run START again." White
+    $ans = Read-Host "  Or force-stop the old ones now and restart? (y/N)"
+    if ($ans -notmatch '^[yY]') { exit 0 }
+    $old | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Seconds 3
+    Say "Old servers stopped." Green
+}
+
 # ---- Start everything: one Windows Terminal window with a tab per server (separate windows if Terminal isn't installed)
 $flags = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20"
 $runs = [ordered]@{}
@@ -130,13 +147,16 @@ foreach ($s in $runs.Keys) {
     # tiny per-server launcher so the tab/window command stays simple (no quoting headaches)
     Set-Content "$Root\$s\run-laG.cmd" "@echo off`r`ntitle laG $s`r`n$($runs[$s])" -Encoding ASCII
 }
-$wt = Get-Command wt.exe -ErrorAction SilentlyContinue
-if ($wt) {
-    $tabs = @()
-    foreach ($s in $runs.Keys) { $tabs += "new-tab --title `"laG $s`" --suppressApplicationTitle -d `"$Root\$s`" cmd /k run-laG.cmd" }
-    Say "Starting hub, factions, smp and proxy in one window (tabs)..."
-    Start-Process wt.exe -ArgumentList ("-w laG " + ($tabs -join " ; "))
-} else {
+$tabs = @()
+foreach ($s in $runs.Keys) { $tabs += "new-tab --title `"laG $s`" --suppressApplicationTitle -d `"$Root\$s`" cmd /k run-laG.cmd" }
+$tabbed = $false
+try {
+    # Start-Process finds Windows Terminal through its app alias even when it isn't on PATH
+    Start-Process wt.exe -ArgumentList ("-w laG " + ($tabs -join " ; ")) -ErrorAction Stop
+    $tabbed = $true
+    Say "Started hub, factions, smp and proxy in one window (tabs)." Green
+} catch { }
+if (-not $tabbed) {
     foreach ($s in $runs.Keys) {
         Say "Starting $s..."
         Start-Process cmd -WorkingDirectory "$Root\$s" -ArgumentList "/k run-laG.cmd"
