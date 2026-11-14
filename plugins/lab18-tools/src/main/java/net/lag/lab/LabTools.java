@@ -21,6 +21,7 @@ public class LabTools extends JavaPlugin {
 		sandbots = new Sandbots(this);
 		getServer().getPluginManager().registerEvents(sandbots, this);
 		getServer().getPluginManager().registerEvents(new WaterProof(), this);
+		getServer().getPluginManager().registerEvents(new CannonProtect(this), this);
 	}
 
 	@Override
