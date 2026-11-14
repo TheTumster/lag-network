@@ -28,9 +28,9 @@ final class PistonOrder implements Listener {
 	private final JavaPlugin plugin;
 	private final Map<Block, Block> waiting = new HashMap<>();
 	private final Set<Block> bypass = new HashSet<>();
-	private boolean broken;
-	private Method getHandle, neighborChanged, getBlockState, getBlock;
-	private Constructor<?> posCtor;
+	private static boolean broken;
+	private static Method getHandle, neighborChanged, getBlockState, getBlock;
+	private static Constructor<?> posCtor;
 
 	PistonOrder(JavaPlugin plugin) {
 		this.plugin = plugin;
@@ -89,7 +89,7 @@ final class PistonOrder implements Listener {
 	}
 
 	/** Same as a neighbor update hitting this piston: it re-checks its power right now. */
-	private void update(Block b) {
+	static void update(Block b) {
 		if (broken) return;
 		try {
 			World w = b.getWorld();
@@ -110,7 +110,7 @@ final class PistonOrder implements Listener {
 			neighborChanged.invoke(lvl, pos, block, null);
 		} catch (Throwable ex) {
 			broken = true;
-			plugin.getLogger().warning("piston order fix: couldn't update pistons (" + ex + ")");
+			Bukkit.getLogger().warning("[laGCannons] piston update unavailable (" + ex + ")");
 		}
 	}
 }

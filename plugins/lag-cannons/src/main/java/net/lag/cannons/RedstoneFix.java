@@ -94,6 +94,7 @@ final class RedstoneFix implements Listener {
 		int maxY = fullHeight ? w.getMaxHeight() - 1 : Math.min(w.getMaxHeight() - 1, cy + r);
 		List<Block> wires = new ArrayList<>();
 		List<Block> dispensers = new ArrayList<>();
+		List<Block> pistons = new ArrayList<>();
 		for (int x = cx - r; x <= cx + r; x++) {
 			for (int z = cz - r; z <= cz + r; z++) {
 				if (!w.isChunkLoaded(x >> 4, z >> 4)) continue;
@@ -102,6 +103,7 @@ final class RedstoneFix implements Listener {
 					Material m = b.getType();
 					if (m == Material.REDSTONE_WIRE) wires.add(b);
 					else if (m == Material.DISPENSER || m == Material.DROPPER) dispensers.add(b);
+					else if (m == Material.PISTON || m == Material.STICKY_PISTON) pistons.add(b);
 				}
 			}
 		}
@@ -137,6 +139,12 @@ final class RedstoneFix implements Listener {
 				d.setTriggered(false);
 				b.setBlockData(d, false);
 			}
+		}
+		// 4) pistons saved extended with nothing powering them: let them notice and retract (1.8's paste does this)
+		for (Block b : pistons) {
+			if (b.getBlockData() instanceof org.bukkit.block.data.type.Piston pd && pd.isExtended()
+					&& !b.isBlockIndirectlyPowered() && !b.getRelative(BlockFace.UP).isBlockIndirectlyPowered())
+				PistonOrder.update(b);
 		}
 		return wires.size();
 	}
