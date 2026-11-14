@@ -243,8 +243,11 @@ def patch_backend(name):
         # Cannon server settings: let big cannons tick every TNT, and use Paper's explosion cache
         yaml_set(os.path.join(d, "spigot.yml"), "world-settings.default.max-tnt-per-tick", 20000)
         yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "environment.optimize-explosions", True)
-        fc = os.path.join(d, "plugins", "Factions", "config", "main.conf")
-        if os.path.exists(fc):
+        fc = next((c for c in (os.path.join(d, "plugins", n, "config", "main.conf") for n in ("FactionsUUID", "Factions"))
+                   if os.path.exists(c)), None)
+        if not fc:
+            log("  ! FactionsUUID main.conf not found; TNT bank not enabled")
+        else:
             t = open(fc).read()
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false", r"\1enable=true", t)
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b", r"\1maxRadius=48", t)

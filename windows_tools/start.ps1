@@ -96,8 +96,8 @@ if (Test-Path $pw) {
 }
 
 # ---- FactionsUUID: turn on faction TNT banks (/f tnt, /f tntfill) and allow a bigger fill radius
-$fc = "$Root\factions\plugins\Factions\config\main.conf"
-if (Test-Path $fc) {
+$fc = @("$Root\factions\plugins\FactionsUUID\config\main.conf", "$Root\factions\plugins\Factions\config\main.conf") | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($fc) {
     $t = Get-Content $fc -Raw
     $n = [regex]::Replace($t, '(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false', '${1}enable=true')
     $n = [regex]::Replace($n, '(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b', '${1}maxRadius=48')
