@@ -9,22 +9,22 @@ Write-Host ""
 Write-Host "  laG Network" -ForegroundColor Magenta
 Write-Host ""
 
-# ---- Java 21+ (uses a private copy in .\runtime if your PC doesn't have one)
+# ---- Java 25+ (uses a private copy in .\runtime if your PC doesn't have one)
 $java = "$Root\runtime\bin\java.exe"
 if (-not (Test-Path $java)) {
     $sys = Get-Command java -ErrorAction SilentlyContinue
     $ok = $false
     if ($sys) {
         $v = (& java -version 2>&1 | Select-Object -First 1) -as [string]
-        if ($v -match '"(\d+)') { $ok = [int]$Matches[1] -ge 21 }
+        if ($v -match '"(\d+)') { $ok = [int]$Matches[1] -ge 25 }
     }
     if ($ok) {
         $java = $sys.Source
     } else {
-        Say "Downloading Java 21 (one time, ~45 MB)..."
-        $zip = "$env:TEMP\lag-jre21.zip"
-        Invoke-WebRequest "https://api.adoptium.net/v3/binary/latest/21/ga/windows/x64/jre/hotspot/normal/eclipse" -OutFile $zip -UseBasicParsing
-        $tmp = "$env:TEMP\lag-jre21"
+        Say "Downloading Java 25 (one time, ~50 MB)..."
+        $zip = "$env:TEMP\lag-jre25.zip"
+        Invoke-WebRequest "https://api.adoptium.net/v3/binary/latest/25/ga/windows/x64/jre/hotspot/normal/eclipse" -OutFile $zip -UseBasicParsing
+        $tmp = "$env:TEMP\lag-jre25"
         if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
         Expand-Archive $zip $tmp
         Move-Item (Get-ChildItem $tmp | Select-Object -First 1).FullName "$Root\runtime"
