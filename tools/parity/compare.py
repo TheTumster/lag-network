@@ -11,7 +11,7 @@ ORDER = ["1.8.8", "ours-as-pasted", "ours-fixredstone", "ours-no-laGCannons"]
 def load(path):
     d = {"D": collections.Counter(), "P": collections.Counter(), "T": collections.Counter(), "S": collections.Counter(),
          "X": collections.Counter(), "Xblocks": 0, "Xcancel": 0, "xs": [], "first": {}, "sand_last": {}, "integrity": None,
-         "tnt_first": []}
+         "tnt_first": [], "paths": collections.defaultdict(list)}
     seen_tnt = set()
     with open(path) as fh:
         for line in fh:
@@ -30,6 +30,7 @@ def load(path):
             elif k == "E":
                 kind, eid = p[2], p[3]
                 d[kind][t] += 1
+                d["paths"][kind + eid].append((t, *(float(v) for v in p[4:10])))
                 if kind == "T" and eid not in seen_tnt:
                     seen_tnt.add(eid)
                     d["tnt_first"].append(tuple(float(v) for v in p[4:10]))
@@ -81,6 +82,11 @@ def main():
             d = runs[n]
             cells.append(f"{d['D'][t]}/{d['P'][t]}/{d['T'][t]}/{d['S'][t]}/{d['X'][t]}".rjust(w))
         print(str(t).rjust(5) + "".join(cells))
+    ref = runs.get("1.8.8")
+    if ref:
+        for n in names:
+            if n != "1.8.8":
+                divergence(ref, runs[n], "1.8", n)
     print("\n=== PARITY: summary ===")
     for n in names:
         d = runs[n]
@@ -125,6 +131,50 @@ def main():
             for line in open(log, errors="replace"):
                 if "[PARITY]" in line or "Exception" in line:
                     print("  log:", line.strip()[-170:])
+
+
+def divergence(a, b, an, bn):
+    """Match TNT/sand by kind + spawn tick + spawn spot and report where they first split apart."""
+    def keyed(d):
+        out = collections.defaultdict(list)
+        for k, path in d["paths"].items():
+            t0, x, y, z = path[0][:4]
+            out[(k[0], t0, round(x, 1), round(y, 1), round(z, 1))].append(path)
+        return out
+    ka, kb = keyed(a), keyed(b)
+    rows = []
+    matched = 0
+    for key in ka:
+        if key not in kb:
+            continue
+        for pa, pb in zip(ka[key], kb[key]):
+            matched += 1
+            byt = {r[0]: r for r in pb}
+            prev = None
+            for ra in pa:
+                rb = byt.get(ra[0])
+                if rb is None:
+                    rows.append((ra[0], key, "gone in " + bn, ra, prev))
+                    break
+                if max(abs(ra[i] - rb[i]) for i in (1, 2, 3)) > 0.01:
+                    rows.append((ra[0], key, "moved differently", ra, rb, prev))
+                    break
+                prev = (ra, rb)
+            else:
+                if len(pb) > len(pa):
+                    rows.append((pa[-1][0], key, "gone in " + an, pa[-1], prev))
+    print(f"\n=== DIVERGENCE {an} vs {bn}: {matched} entities matched by spawn; {len(rows)} split apart ===")
+    hist = collections.Counter(r[2] for r in rows)
+    print("  kinds:", dict(hist))
+    for r in sorted(rows, key=lambda r: r[0])[:25]:
+        t, key, why = r[0], r[1], r[2]
+        f = lambda v: "(" + ",".join(f"{x:.3f}" for x in v[1:4]) + " v " + ",".join(f"{x:.3f}" for x in v[4:7]) + ")"
+        line = f"  t{t} {key[0]} spawned t{key[1]} at {key[2:]}: {why}"
+        if why == "moved differently":
+            line += f" | {an} {f(r[3])} | {bn} {f(r[4])}"
+            if r[5]:
+                line += f" | tick before: {an} {f(r[5][0])} {bn} {f(r[5][1])}"
+        print(line)
 
 
 if __name__ == "__main__":
