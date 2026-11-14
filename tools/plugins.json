@@ -1,35 +1,101 @@
 {
   "_readme": "Plugins for each server. Sources: modrinth slug, hangar owner/slug, or 'local' (built in this repo / from source). optional=true means a missing build won't fail the pipeline.",
   "proxy": [
-    {"modrinth": "luckperms", "loader": "velocity"},
-    {"modrinth": "viaversion", "loader": "velocity"},
-    {"modrinth": "viabackwards", "loader": "velocity"}
+    {
+      "modrinth": "luckperms",
+      "loader": "velocity"
+    },
+    {
+      "modrinth": "viaversion",
+      "loader": "velocity"
+    },
+    {
+      "modrinth": "viabackwards",
+      "loader": "velocity"
+    }
   ],
   "hub": [
-    {"modrinth": "luckperms", "loader": "paper"},
-    {"local": "laGCore"}
+    {
+      "modrinth": "luckperms",
+      "loader": "paper"
+    },
+    {
+      "local": "laGCore"
+    }
   ],
   "factions": [
-    {"modrinth": "luckperms", "loader": "paper"},
-    {"modrinth": "essentialsx", "loader": "paper"},
-    {"modrinth": "vaultunlocked", "loader": "paper"},
-    {"hangar": "HelpChat/PlaceholderAPI"},
-    {"modrinth": "worldedit", "loader": "paper"},
-    {"modrinth": "worldguard", "loader": "paper", "optional": true},
-    {"modrinth": "coreprotect", "loader": "paper"},
-    {"modrinth": "oldcombatmechanics", "loader": "paper", "optional": true},
-    {"modrinth": "grimac", "loader": "paper", "optional": true},
-    {"local": "FactionsUUID"},
-    {"local": "laGCore"},
-    {"local": "laGCannons"}
+    {
+      "modrinth": "luckperms",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "essentialsx",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "vaultunlocked",
+      "loader": "paper"
+    },
+    {
+      "hangar": "HelpChat/PlaceholderAPI"
+    },
+    {
+      "modrinth": "worldedit",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "worldguard",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "modrinth": "coreprotect",
+      "loader": "paper"
+    },
+    {
+      "hangar": "kernitus/OldCombatMechanics"
+    },
+    {
+      "modrinth": "grimac",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "local": "FactionsUUID"
+    },
+    {
+      "local": "laGCore"
+    },
+    {
+      "local": "laGCannons"
+    }
   ],
   "smp": [
-    {"modrinth": "luckperms", "loader": "paper"},
-    {"modrinth": "essentialsx", "loader": "paper"},
-    {"modrinth": "vaultunlocked", "loader": "paper"},
-    {"modrinth": "worldedit", "loader": "paper"},
-    {"modrinth": "coreprotect", "loader": "paper"},
-    {"modrinth": "huskclaims", "loader": "paper", "optional": true},
-    {"local": "laGCore"}
+    {
+      "modrinth": "luckperms",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "essentialsx",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "vaultunlocked",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "worldedit",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "coreprotect",
+      "loader": "paper"
+    },
+    {
+      "github": "GriefPrevention/GriefPrevention"
+    },
+    {
+      "local": "laGCore"
+    }
   ]
 }

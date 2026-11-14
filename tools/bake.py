@@ -64,13 +64,17 @@ def download(url, dest, sha1=None):
 # ------------------------------------------------------------------ sources
 
 def papermc(project, version=None):
-    if version is None:
-        versions = get_json(f"https://fill.papermc.io/v3/projects/{project}")["versions"]
-        # newest version group first, newest version first
-        version = next(iter(versions.values()))[0]
-    builds = get_json(f"https://fill.papermc.io/v3/projects/{project}/versions/{version}/builds")
-    stable = [b for b in builds if b.get("channel") == "STABLE"] or builds
-    b = stable[0]
+    candidates = [version] if version else [v for group in get_json(f"https://fill.papermc.io/v3/projects/{project}")["versions"].values() for v in group]
+    b = None
+    for ver in candidates:
+        builds = get_json(f"https://fill.papermc.io/v3/projects/{project}/versions/{ver}/builds")
+        stable = [x for x in builds if x.get("channel") == "STABLE"]
+        if stable:
+            b, version = stable[0], ver
+            break
+    if b is None:  # nothing stable anywhere: newest build of the first candidate
+        version = candidates[0]
+        b = get_json(f"https://fill.papermc.io/v3/projects/{project}/versions/{version}/builds")[0]
     dl = b["downloads"]["server:default"]
     return dl["url"], f"{project}-{version}-{b['id']}.jar"
 
@@ -94,14 +98,22 @@ def modrinth(slug, loader, mc=MC):
 def hangar(owner_slug):
     owner, slug = owner_slug.split("/")
     data = get_json(f"https://hangar.papermc.io/api/v1/projects/{owner}/{slug}/versions?limit=25&offset=0&platform=PAPER")
-    for v in data.get("result", []):
-        if v.get("channel", {}).get("name", "").lower() not in ("release", "stable"):
-            continue
+    results = data.get("result", [])
+    rel = [v for v in results if v.get("channel", {}).get("name", "").lower() in ("release", "stable")]
+    for v in rel or results:
         dl = v.get("downloads", {}).get("PAPER", {})
         url = dl.get("downloadUrl") or dl.get("externalUrl")
         if url:
             name = dl.get("fileInfo", {}).get("name") or f"{slug}-{v['name']}.jar"
             return url, name, None
+    return None
+
+
+def github(repo, match=r"\.jar$"):
+    rel = get_json(f"https://api.github.com/repos/{repo}/releases/latest")
+    for a in rel.get("assets", []):
+        if re.search(match, a["name"]) and not re.search(r"sources|javadoc", a["name"]):
+            return a["browser_download_url"], a["name"], None
     return None
 
 
@@ -266,7 +278,12 @@ def main():
                 manifest["plugins"].setdefault(server, []).append(it["local"] + " (built)")
                 continue
             try:
-                res = modrinth(it["modrinth"], it["loader"]) if "modrinth" in it else hangar(it["hangar"])
+                if "modrinth" in it:
+                    res = modrinth(it["modrinth"], it["loader"])
+                elif "hangar" in it:
+                    res = hangar(it["hangar"])
+                else:
+                    res = github(it["github"], it.get("match", r"\.jar$"))
             except Exception as e:
                 res = None
                 log(f"  ! {it}: {e}")
