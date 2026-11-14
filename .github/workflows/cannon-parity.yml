@@ -42,16 +42,17 @@ jobs:
         run: |
           pip install -q nbtlib
           if [ -n "$CANNON_KEY" ]; then
-            openssl enc -d -aes-256-cbc -pbkdf2 -in tools/parity/cannons/255osrb.schematic.enc -out /tmp/cannon.schematic -pass env:CANNON_KEY
+            openssl enc -d -aes-256-cbc -pbkdf2 -in tools/parity/cannons/working1.schematic.enc -out /tmp/cannon.schematic -pass env:CANNON_KEY
             python3 tools/parity/prep.py /tmp/cannon.schematic /tmp/prep
-            echo "::notice::Using the real cannon (255OSRB)"
+            echo "use-lever=false" >> /tmp/prep/harness.properties
+            echo "::notice::Using Jacob's working setup (working1: diamond-protected, button-fired)"
           else
             python3 tools/parity/prep.py --test /tmp/prep
             echo "::warning::CANNON_KEY secret not set; using the small built-in test contraption"
           fi
           {
             echo "fix-redstone=${{ matrix.fix }}"
-            echo "record-ticks=400"
+            echo "record-ticks=600"
             echo "settle-ticks=100"
           } >> /tmp/prep/harness.properties
           cat /tmp/prep/harness.properties
@@ -60,11 +61,10 @@ jobs:
         if: matrix.kind == '18'
         run: |
           mkdir -p srv && cd srv
-          URL=$(curl -fsSL -A "laG-parity (github.com/TheTumster/lag-network)" https://fill.papermc.io/v3/projects/paper/versions/1.8.8/builds/latest \
-            | python3 -c "import sys,json; print(json.load(sys.stdin)['downloads']['server:default']['url'])" || true)
-          [ -n "$URL" ] || URL=https://api.papermc.io/v2/projects/paper/versions/1.8.8/builds/445/downloads/paper-1.8.8-445.jar
-          echo "Paper 1.8.8: $URL"
-          curl -fsSL -A "laG-parity" -o paper.jar "$URL"
+          # the same 1.8 setup the cannon works on in the lab: SulphurSpigot (cannon fork) + laGLab (piston fix, diamond protection)
+          curl -fsSL -o paper.jar https://github.com/${{ github.repository }}/releases/download/cannon-jar/sulphurspigot-1.8.8.jar
+          mkdir -p plugins && curl -fsSL -o plugins/laGLab.jar https://github.com/${{ github.repository }}/releases/latest/download/laGLab.jar
+          printf 'world-settings:\n  default:\n    fix-east-west-cannoning: true\n    tnt:\n      optimize-movement: true\n      optimize-liquid-explosions: true\n    redstone-fire-BlockPhysicsEvent: true\n' > taco.yml
           echo eula=true > eula.txt
           printf 'online-mode=false\nlevel-type=FLAT\nspawn-monsters=false\nspawn-animals=false\n' > server.properties
           (sleep 150; echo stop) | timeout 400 java -Xmx2G -jar paper.jar > firstboot.log 2>&1 || true
@@ -84,7 +84,8 @@ jobs:
           open("paper.yml", "w").write(s)
           PY
           grep -n "fix-cannons\|tnt-entities\|falling-blocks" paper.yml
-          CP=$(ls cache/patched*.jar 2>/dev/null | head -1); [ -n "$CP" ] || CP=paper.jar
+          CP=paper.jar
+          grep -a -i "tacospigot\|Fix TNT cannons\|laGLab" firstboot.log | head -5
           echo "compile against $CP"
           mkdir -p ../hbuild && javac -nowarn -source 8 -target 8 -cp "$CP" -d ../hbuild ../tools/parity/common/Harness.java ../tools/parity/h18/H18.java
           printf 'name: ParityHarness\nversion: 1\nmain: lag.parity.H18\n' > ../hbuild/plugin.yml
@@ -101,6 +102,17 @@ jobs:
           sed -i 's/^pause-when-empty-seconds=.*//' server.properties && echo "pause-when-empty-seconds=-1" >> server.properties
           grep -n "max-tnt-per-tick" spigot.yml || true
           if [ "${{ matrix.cannons }}" = "false" ]; then rm -f plugins/laGCannons.jar; echo "laGCannons removed"; fi
+          # diamond protection on in the test world, like the lab
+          python3 - <<'PY'
+          import os, yaml
+          p = "plugins/laGCannons/config.yml"
+          c = yaml.safe_load(open(p)) if os.path.exists(p) else {}
+          c = c or {}
+          c.setdefault("cannon-protect", {})["worlds"] = ["parity"]
+          os.makedirs(os.path.dirname(p), exist_ok=True)
+          yaml.safe_dump(c, open(p, "w"), sort_keys=False)
+          print("cannon-protect:", c["cannon-protect"])
+          PY
           ls plugins
           CP=$(find libraries versions -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | grep -i fastasync | head -1)
           mkdir -p ../hbuild && javac -nowarn --release 21 -cp "$CP" -d ../hbuild ../tools/parity/common/Harness.java ../tools/parity/h121/H121.java

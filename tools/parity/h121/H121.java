@@ -43,7 +43,9 @@ public class H121 extends Harness {
 			cb = r.read();
 		}
 		try (EditSession es = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(world))) {
-			Operations.complete(new ClipboardHolder(cb).createPaste(es).to(BlockVector3.at(ox, oy, oz)).ignoreAirBlocks(false).build());
+			// place the schematic's corner at the origin (same spot the 1.8 side uses), whatever its copy offset
+			BlockVector3 off = cb.getRegion().getMinimumPoint().subtract(cb.getOrigin());
+			Operations.complete(new ClipboardHolder(cb).createPaste(es).to(BlockVector3.at(ox, oy, oz).subtract(off)).ignoreAirBlocks(false).build());
 		}
 		say("FAWE pasted with format " + fmt.getName());
 	}
