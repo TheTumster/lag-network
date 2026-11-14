@@ -165,10 +165,11 @@ def redstone_diff(a, b, an, bn):
     print(f"  state after paste (before TNT fill): {len(pdiff)} redstone parts differ: " + ", ".join(f"{p}:{x}|{y}" for p, x, y in pdiff[:12]))
     print(f"  state before the button: {len(diff)} of {len(set(sa) | set(sb))} redstone parts differ")
     # neighbourhood of the first differing dust: every redstone part within 2 blocks, both versions
-    first = next((p for p, x, y in diff if (x or y or "").startswith("wire")), None)
+    wires = [(int((y or "wire:0").split(":")[1]) if (y or "").startswith("wire") else 0, p) for p, x, y in diff]
+    first = max(wires)[1] if wires else None
     if first:
         fx, fy, fz = first
-        near = sorted(p for p in set(sa) | set(sb) if abs(p[0] - fx) <= 2 and abs(p[1] - fy) <= 2 and abs(p[2] - fz) <= 2)
+        near = sorted(p for p in set(sa) | set(sb) if abs(p[0] - fx) <= 1 and abs(p[1] - fy) <= 2 and abs(p[2] - fz) <= 1)
         print(f"  around {first}: " + ", ".join(f"{p}:{sa.get(p)}|{sb.get(p)}" for p in near))
     for p, x, y in diff[:70]:
         print(f"    {p}: {an} {x} | {bn} {y}")
