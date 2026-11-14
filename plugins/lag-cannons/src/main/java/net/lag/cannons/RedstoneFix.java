@@ -56,7 +56,22 @@ final class RedstoneFix implements Listener {
 	}
 
 	boolean command(CommandSender sender, String[] args) {
-		if (!(sender instanceof Player p)) return true;
+		if (!(sender instanceof Player p)) {
+			// console: fixredstone <radius> <world> <x> <y> <z>
+			if (args.length < 5) {
+				sender.sendMessage("Usage: fixredstone <radius> <world> <x> <y> <z>");
+				return true;
+			}
+			try {
+				World w = Bukkit.getWorld(args[1]);
+				int r = Math.min(96, Math.max(1, Integer.parseInt(args[0])));
+				int n = fix(new Location(w, Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4])), r);
+				sender.sendMessage("Redstone fixed: " + n + " dust");
+			} catch (RuntimeException ex) {
+				sender.sendMessage("Bad arguments: " + ex.getMessage());
+			}
+			return true;
+		}
 		int r = 32;
 		try {
 			if (args.length > 0) r = Math.min(96, Math.max(1, Integer.parseInt(args[0])));

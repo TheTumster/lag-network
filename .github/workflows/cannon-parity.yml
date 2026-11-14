@@ -1,0 +1,124 @@
+name: cannon-parity
+# Fires the same cannon on real Paper 1.8.8 and on our 1.21.11 factions server and compares them tick by tick.
+# Runs after every successful network build (so it tests what was just released), or by hand.
+on:
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fire:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
+          - { name: "ours-as-pasted", kind: "121", fix: "false", cannons: "true" }
+          - { name: "ours-fixredstone", kind: "121", fix: "true", cannons: "true" }
+          - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.kind == '18' && '8' || '25' }}
+          distribution: temurin
+
+      - name: Prepare cannon (decrypted only inside this job; never uploaded)
+        env:
+          CANNON_KEY: ${{ secrets.CANNON_KEY }}
+        run: |
+          pip install -q nbtlib
+          if [ -n "$CANNON_KEY" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -in tools/parity/cannons/255osrb.schematic.enc -out /tmp/cannon.schematic -pass env:CANNON_KEY
+            python3 tools/parity/prep.py /tmp/cannon.schematic /tmp/prep
+            echo "::notice::Using the real cannon (255OSRB)"
+          else
+            python3 tools/parity/prep.py --test /tmp/prep
+            echo "::warning::CANNON_KEY secret not set; using the small built-in test contraption"
+          fi
+          {
+            echo "fix-redstone=${{ matrix.fix }}"
+            echo "record-ticks=400"
+            echo "settle-ticks=100"
+          } >> /tmp/prep/harness.properties
+          cat /tmp/prep/harness.properties
+
+      - name: Set up Paper 1.8.8
+        if: matrix.kind == '18'
+        run: |
+          mkdir -p srv && cd srv
+          URL=$(curl -fsSL -A "laG-parity (github.com/TheTumster/lag-network)" https://fill.papermc.io/v3/projects/paper/versions/1.8.8/builds/latest \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['downloads']['server:default']['url'])" || true)
+          [ -n "$URL" ] || URL=https://api.papermc.io/v2/projects/paper/versions/1.8.8/builds/445/downloads/paper-1.8.8-445.jar
+          echo "Paper 1.8.8: $URL"
+          curl -fsSL -A "laG-parity" -o paper.jar "$URL"
+          echo eula=true > eula.txt
+          printf 'online-mode=false\nlevel-type=FLAT\nspawn-monsters=false\nspawn-animals=false\n' > server.properties
+          (sleep 150; echo stop) | timeout 400 java -Xmx2G -jar paper.jar > firstboot.log 2>&1 || true
+          tail -5 firstboot.log
+          sed -i 's/max-tnt-per-tick: .*/max-tnt-per-tick: 20000/; s/timeout-time: .*/timeout-time: 600/' spigot.yml
+          grep -n "max-tnt-per-tick\|timeout-time" spigot.yml
+          CP=$(ls cache/patched*.jar 2>/dev/null | head -1); [ -n "$CP" ] || CP=paper.jar
+          echo "compile against $CP"
+          mkdir -p ../hbuild && javac -nowarn -source 8 -target 8 -cp "$CP" -d ../hbuild ../tools/parity/common/Harness.java ../tools/parity/h18/H18.java
+          printf 'name: ParityHarness\nversion: 1\nmain: lag.parity.H18\n' > ../hbuild/plugin.yml
+
+      - name: Set up our factions server (latest release)
+        if: matrix.kind == '121'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download latest -R ${{ github.repository }} -p laG-Network.zip
+          unzip -q laG-Network.zip && mv laG-Network/factions srv && cd srv
+          cat ../laG-Network/BUILD.txt 2>/dev/null || true
+          java -Dpaperclip.patchonly=true -jar paper.jar > patch.log 2>&1 || tail -20 patch.log
+          sed -i 's/^pause-when-empty-seconds=.*//' server.properties && echo "pause-when-empty-seconds=-1" >> server.properties
+          grep -n "max-tnt-per-tick" spigot.yml || true
+          if [ "${{ matrix.cannons }}" = "false" ]; then rm -f plugins/laGCannons.jar; echo "laGCannons removed"; fi
+          ls plugins
+          CP=$(find libraries versions -name '*.jar' | tr '\n' ':')$(ls plugins/*.jar | grep -i fastasync | head -1)
+          mkdir -p ../hbuild && javac -nowarn --release 21 -cp "$CP" -d ../hbuild ../tools/parity/common/Harness.java ../tools/parity/h121/H121.java
+          printf 'name: ParityHarness\nversion: 1\nmain: lag.parity.H121\napi-version: "1.21"\ndepend: [FastAsyncWorldEdit]\n' > ../hbuild/plugin.yml
+
+      - name: Fire
+        run: |
+          (cd hbuild && jar cf ../srv/plugins/ParityHarness.jar .)
+          mkdir -p srv/plugins/ParityHarness && cp /tmp/prep/* srv/plugins/ParityHarness/
+          cd srv
+          timeout 1500 java -Xms3G -Xmx3G -jar paper.jar --nogui < /dev/null > server.log 2>&1 || echo "server exited with $?"
+          grep -a "\[PARITY\]" server.log || (echo "--- no harness output; tail:"; tail -60 server.log)
+          mkdir -p ../out/${{ matrix.name }}
+          cp plugins/ParityHarness/trace.csv ../out/${{ matrix.name }}/ 2>/dev/null || touch ../out/${{ matrix.name }}/trace.csv
+          grep -a "\[PARITY\]\|Exception\|ERROR" server.log | head -80 > ../out/${{ matrix.name }}/server.log || true
+          wc -l ../out/${{ matrix.name }}/trace.csv
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trace-${{ matrix.name }}
+          path: out/
+          retention-days: 3
+
+  compare:
+    needs: fire
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: trace-*
+          path: traces
+          merge-multiple: true
+      - name: Compare 1.8 vs ours
+        run: python3 tools/parity/compare.py traces | tee report.txt
