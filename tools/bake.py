@@ -299,9 +299,16 @@ def main():
     download(purl, os.path.join(DIST, "_paper.jar"))
     for s in SERVERS:
         os.makedirs(os.path.join(DIST, s, "plugins"), exist_ok=True)
+        open(os.path.join(DIST, s, "eula.txt"), "w").write("eula=true\n")
+        if s == "factions":
+            # laG Paper: Paper 1.21.11 + 1.8 cannon patches (built by the lag-paper workflow)
+            lurl = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/releases/download/lag-paper/lag-paper-1.21.11.jar"
+            download(lurl, os.path.join(DIST, s, "paper.jar"))
+            manage(s, "paper.jar", lurl)
+            log("  factions  + laG Paper (cannon patches)")
+            continue
         shutil.copy(os.path.join(DIST, "_paper.jar"), os.path.join(DIST, s, "paper.jar"))
         manage(s, "paper.jar", purl)
-        open(os.path.join(DIST, s, "eula.txt"), "w").write("eula=true\n")
     os.remove(os.path.join(DIST, "_paper.jar"))
 
     log("== Plugins")
