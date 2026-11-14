@@ -231,7 +231,9 @@ def divergence(a, b, an, bn):
     print(f"\n=== DIVERGENCE {an} vs {bn}: {matched} entities matched by spawn; {len(rows)} split apart ===")
     hist = collections.Counter(r[2] for r in rows)
     print("  kinds:", dict(hist))
-    for r in sorted(rows, key=lambda r: r[0])[:25]:
+    sand_rows = [r for r in rows if r[1][0] == "S"]
+    print(f"  sand split apart: {len(sand_rows)}")
+    for r in sorted(sand_rows, key=lambda r: r[0])[:12] + sorted(rows, key=lambda r: r[0])[:12]:
         t, key, why = r[0], r[1], r[2]
         f = lambda v: "(" + ",".join(f"{x:.3f}" for x in v[1:4]) + " v " + ",".join(f"{x:.3f}" for x in v[4:7]) + ")"
         line = f"  t{t} {key[0]} spawned t{key[1]} at {key[2:]}: {why}"
