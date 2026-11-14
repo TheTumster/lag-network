@@ -7,6 +7,9 @@ commands:
     description: Fill dispensers around you with TNT
     usage: /tntfill [radius] [amount per dispenser]
     aliases: [tf]
+  sandbot:
+    description: Sand bots that refill sand at marked spots
+    aliases: [sandbots, sb]
   /upload:
     description: Download a schematic from a link into WorldEdit's schematics folder
     usage: //upload <link> [name]

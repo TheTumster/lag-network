@@ -14,6 +14,19 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /** 1.8 cannon lab: /tntfill [radius] [amount] fills every dispenser near you (creative test server, no cost). */
 public class LabTools extends JavaPlugin {
+	private Sandbots sandbots;
+
+	@Override
+	public void onEnable() {
+		sandbots = new Sandbots(this);
+		getServer().getPluginManager().registerEvents(sandbots, this);
+	}
+
+	@Override
+	public void onDisable() {
+		if (sandbots != null) sandbots.shutdown();
+	}
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("/upload")) {
@@ -22,6 +35,7 @@ public class LabTools extends JavaPlugin {
 		}
 		if (!(sender instanceof Player)) return true;
 		Player p = (Player) sender;
+		if (cmd.getName().equalsIgnoreCase("sandbot")) return sandbots.command(p, args);
 		int r = 32, amount = 576;
 		try {
 			if (args.length > 0) r = Math.max(1, Math.min(128, Integer.parseInt(args[0])));
