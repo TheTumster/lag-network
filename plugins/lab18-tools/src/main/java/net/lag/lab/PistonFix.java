@@ -18,7 +18,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -89,13 +88,6 @@ final class PistonFix implements Listener {
 		for (Block b : e.getBlocks()) if (isPiston(b.getType())) landing.put(b.getRelative(e.getDirection()), 8);
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onRetract(BlockPistonRetractEvent e) {
-		if (!enabled || !e.isSticky()) return;
-		BlockFace back = e.getDirection().getOppositeFace();
-		for (Block b : e.getBlocks()) if (isPiston(b.getType())) landing.put(b.getRelative(back), 8);
-	}
-
 	/** A pushed piston lands and updates its neighbors (changed type = piston): make the landed pistons check power now. */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onLand(BlockPhysicsEvent e) {
@@ -126,14 +118,6 @@ final class PistonFix implements Listener {
 		doPhysics = blockC.getMethod("doPhysics", worldC, bp, Class.forName(nms + "IBlockData"), blockC);
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPhysics(BlockPhysicsEvent e) {
-		if (!enabled || busy || broken || !SOURCES.contains(e.getChangedType())) return;
-		Block below = e.getBlock().getRelative(BlockFace.DOWN);
-		Material t = below.getType();
-		if (t != Material.PISTON_BASE && t != Material.PISTON_STICKY_BASE) return;
-		update(below);
-	}
 
 	private void update(Block b) {
 		if (busy || broken) return;
