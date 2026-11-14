@@ -37,10 +37,12 @@ if (-not (Test-Path "$Lab\server.properties")) {
 }
 if (-not (Test-Path "$Lab\spigot.yml")) {
     # Spigot fills in everything else on first start
-    @("settings:", "  timeout-time: 600", "world-settings:", "  default:", "    max-tnt-per-tick: 20000") | Set-Content "$Lab\spigot.yml"
+    @("settings:", "  timeout-time: 600", "world-settings:", "  default:", "    max-tnt-per-tick: 20000", "    anti-xray:", "      enabled: false") | Set-Content "$Lab\spigot.yml"
 } else {
     $t = Get-Content "$Lab\spigot.yml" -Raw
     $n = $t -replace 'max-tnt-per-tick:\s*\d+', 'max-tnt-per-tick: 20000'
+    # anti-xray re-hides obsidian on every explosion: huge lag when cannons fire, and a test lab doesn't need it
+    $n = [regex]::Replace($n, '(anti-xray:\s*\r?\n\s+enabled:)\s*true', '$1 false')
     if ($n -ne $t) { Set-Content "$Lab\spigot.yml" $n -NoNewline }
 }
 # PaperSpigot cannon settings (what 1.8 cannon servers run): fix-cannons, no explosion knockback,

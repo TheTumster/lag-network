@@ -70,6 +70,7 @@ jobs:
           (sleep 150; echo stop) | timeout 400 java -Xmx2G -jar paper.jar > firstboot.log 2>&1 || true
           tail -5 firstboot.log
           sed -i 's/max-tnt-per-tick: .*/max-tnt-per-tick: 20000/; s/timeout-time: .*/timeout-time: 600/' spigot.yml
+          python3 -c "import re;p='spigot.yml';s=open(p).read();open(p,'w').write(re.sub(r'(anti-xray:\\n\\s+enabled:) true', r'\\1 false', s))"
           grep -n "max-tnt-per-tick\|timeout-time" spigot.yml
           # what 1.8 cannon servers (Minecadia etc.) build on: PaperSpigot fix-cannons + TNT/sand load chunks
           sed -i 's/fix-cannons: false/fix-cannons: true/; s/disable-explosion-knockback: false/disable-explosion-knockback: true/; s/optimize-explosions: false/optimize-explosions: true/' paper.yml
