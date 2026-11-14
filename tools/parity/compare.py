@@ -117,7 +117,10 @@ def main():
             firsts = collections.Counter((p[0][0] // 10) * 10 for p in sand_paths)
             print("  sand starts falling (tick bucket: count): " + ", ".join(f"t{k}:{v}" for k, v in sorted(firsts.items())))
             spots = collections.Counter((int(p[0][1] // 1), int(p[0][2] // 1), int(p[0][3] // 1)) for p in sand_paths)
-            print("  sand starts at (top spots): " + ", ".join(f"{k}:{v}" for k, v in spots.most_common(10)))
+            cols = collections.Counter((int(p[0][1] // 1), int(p[0][3] // 1)) for p in sand_paths)
+            print("  sand starts by column x,z (count): " + ", ".join(f"{k}:{v}" for k, v in cols.most_common(12)))
+            ys = collections.Counter(int(p[0][2] // 1) for p in sand_paths)
+            print("  sand starts by height y (count): " + ", ".join(f"{k}:{v}" for k, v in ys.most_common(10)))
         sl = list(d["sand_last"].values())
         if sl:
             print(f"  sand entities {len(sl)}; last seen x {stats([s[1] for s in sl])} y {stats([s[2] for s in sl])} z {stats([s[3] for s in sl])}")
