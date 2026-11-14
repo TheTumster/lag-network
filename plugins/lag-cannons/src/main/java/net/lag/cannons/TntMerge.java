@@ -40,7 +40,7 @@ final class TntMerge implements Listener {
 	}
 
 	private boolean enabled() {
-		return plugin.getConfig().getBoolean("tnt.merge", true);
+		return plugin.getConfig().getBoolean("tnt.merge", false);
 	}
 
 	int count(TNTPrimed t) {
