@@ -15,6 +15,10 @@ public class Graves {
     public static boolean init(Plugin graves) {
         return false;
     }
+
+    public static boolean allowAnyway(org.bukkit.block.Block block) {
+        return false;
+    }
 }
 JAVA
 echo "patched: graves integration removed"
