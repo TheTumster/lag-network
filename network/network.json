@@ -1,0 +1,12 @@
+{
+  "_readme": "One place for the network's settings. Re-run setup after changing.",
+  "name": "laG Network",
+  "minecraft": "1.21.11",
+  "public_port": 25565,
+  "servers": {
+    "hub":      { "port": 25566, "memory": "1G" },
+    "factions": { "port": 25567, "memory": "3G" },
+    "smp":      { "port": 25568, "memory": "2G" }
+  },
+  "proxy_memory": "512M"
+}

@@ -1,0 +1,36 @@
+# laG Cannons - every value can be changed live with /lc reload.
+
+tnt:
+  # Vanilla gives freshly lit TNT a small random sideways kick. 1.8 cannon servers remove it so
+  # every shot is identical. false = no kick (recommended).
+  random-kick: false
+  # Keep vanilla's little upward pop when TNT is lit (0.2). Set 0 for a pure drop.
+  prime-y-velocity: 0.2
+
+# Blocks that take several hits instead of being immune (classic "obby breaking").
+durability:
+  enabled: true
+  # How far from an explosion (in blocks) these blocks get damaged.
+  radius: 1.5
+  # TNT that explodes in water does NOT damage these blocks (vanilla-style water protection).
+  water-protects: true
+  # Damage heals after this many seconds without being hit. 0 = never heals.
+  regen-seconds: 300
+  # Drop the block as an item when it breaks.
+  drop: false
+  blocks:
+    OBSIDIAN: 4
+    CRYING_OBSIDIAN: 5
+    ENCHANTING_TABLE: 4
+    ENDER_CHEST: 3
+    ANVIL: 3
+    CHIPPED_ANVIL: 2
+    DAMAGED_ANVIL: 1
+    RESPAWN_ANCHOR: 5
+
+# Right-click a block with this item to see how many hits it has left.
+checker-item: POTATO
+
+tntfill:
+  radius-max: 25
+  per-dispenser-max: 576

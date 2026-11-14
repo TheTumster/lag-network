@@ -1,0 +1,38 @@
+# laG Core. The SAME network name goes in every server's copy of this file.
+network-name: "laG Network"
+
+# What this server is: hub, factions or smp. Hub features (selector item, no damage, etc.) only run on the hub.
+role: hub
+
+# Realms shown in the server selector. "server" must match the name in the proxy's velocity.toml.
+realms:
+  factions:
+    server: factions
+    name: "<gradient:#38E0FF:#B040FF><bold>FACTIONS</bold></gradient>"
+    icon: TNT
+    slot: 11
+    lore:
+      - "<gray>Raid, cannon, claim, conquer."
+      - "<gray>1.8 PvP  •  laG cannon physics"
+      - ""
+      - "<#38E0FF>▶ Click to play"
+  smp:
+    server: smp
+    name: "<gradient:#38E0FF:#B040FF><bold>SMP</bold></gradient>"
+    icon: GRASS_BLOCK
+    slot: 15
+    lore:
+      - "<gray>Chill survival with land claims."
+      - ""
+      - "<#38E0FF>▶ Click to play"
+
+hub:
+  # Spawn is set with /setspawn; until then players spawn at the world spawn.
+  spawn: ""
+  double-jump: true
+  void-y: -64
+  join-title: true
+
+scoreboard:
+  enabled: true
+  footer: "<gradient:#38E0FF:#B040FF>laG Network</gradient>"

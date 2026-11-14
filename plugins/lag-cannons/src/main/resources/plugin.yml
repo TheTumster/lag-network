@@ -1,0 +1,18 @@
+name: laGCannons
+version: '${version}'
+main: net.lag.cannons.LagCannons
+api-version: '1.21'
+description: laG cannon physics - predictable TNT, raid-able obsidian, cannon tools
+commands:
+  lagcannons:
+    description: laG Cannons admin
+    aliases: [lc]
+    permission: lag.cannons.admin
+  tntfill:
+    description: Fill nearby dispensers with TNT
+    permission: lag.cannons.tntfill
+permissions:
+  lag.cannons.admin:
+    default: op
+  lag.cannons.tntfill:
+    default: true

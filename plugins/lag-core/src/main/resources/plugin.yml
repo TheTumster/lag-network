@@ -1,0 +1,24 @@
+name: laGCore
+version: '${version}'
+main: net.lag.core.LagCore
+api-version: '1.21'
+description: laG Network core - hub, server selector, scoreboard, network glue
+commands:
+  hub:
+    description: Go back to the hub
+    aliases: [lobby, spawn]
+  server:
+    description: Open the server selector
+    aliases: [servers, realms, play]
+  setspawn:
+    description: Set this server's spawn point
+    permission: lag.admin
+  lagcore:
+    description: laG Core admin
+    permission: lag.admin
+permissions:
+  lag.admin:
+    default: op
+  lag.build:
+    description: Build in the hub
+    default: op
