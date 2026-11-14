@@ -84,7 +84,7 @@ def papermc(project, version=None, prefix=None):
     return dl["url"], f"{project}-{version}-{b['id']}.jar"
 
 
-def modrinth(slug, loader, mc=MC):
+def modrinth(slug, loader, mc=MC, pin=None):
     q = {"loaders": json.dumps([loader])}
     if loader != "velocity":
         q["game_versions"] = json.dumps([mc])
@@ -96,6 +96,8 @@ def modrinth(slug, loader, mc=MC):
     if not vs:
         return None
     rel = [v for v in vs if v["version_type"] == "release"] or vs
+    if pin:
+        rel = [v for v in vs if v["version_number"].startswith(pin)] or rel
     f = next((f for f in rel[0]["files"] if f["primary"]), rel[0]["files"][0])
     return f["url"], f["filename"], f["hashes"]["sha1"]
 
@@ -286,7 +288,7 @@ def main():
                 continue
             try:
                 if "modrinth" in it:
-                    res = modrinth(it["modrinth"], it["loader"])
+                    res = modrinth(it["modrinth"], it["loader"], pin=it.get("version"))
                 elif "hangar" in it:
                     res = hangar(it["hangar"])
                 else:
@@ -333,9 +335,13 @@ def main():
                      r"Ambiguous plugin name|UnknownDependencyException|Failed to load plugin|plugin .* failed", re.I)
     problems = []
     for name, lines in logs.items():
-        for l in lines:
+        for i, l in enumerate(lines):
             if bad.search(l):
                 problems.append(f"[{name}] {l}")
+                # include the cause lines that follow
+                for nxt in lines[i + 1:i + 12]:
+                    if re.search(r"Caused by|Exception|requires|version|depend", nxt, re.I):
+                        problems.append(f"[{name}]     {nxt.strip()[:300]}")
     report = {"manifest": manifest, "problems": problems}
     json.dump(report, open(os.path.join(ROOT, "dist", "bake-report.json"), "w"), indent=2)
     for name, lines in logs.items():
