@@ -25,7 +25,7 @@ jobs:
         include:
           - { name: "1.8.8", kind: "18", fix: "false", cannons: "true" }
           - { name: "ours-nomerge", kind: "121", fix: "true", cannons: "true", merge: "false" }
-          - { name: "ours-fixredstone", kind: "121", fix: "true", cannons: "true" }
+          - { name: "lag-paper", kind: "121", fix: "true", cannons: "true", merge: "false", jar: "lagpaper" }
           - { name: "ours-no-laGCannons", kind: "121", fix: "false", cannons: "false" }
     steps:
       - uses: actions/checkout@v4
@@ -97,6 +97,10 @@ jobs:
         run: |
           gh release download latest -R ${{ github.repository }} -p laG-Network.zip
           unzip -q laG-Network.zip && mv laG-Network/factions srv && cd srv
+          if [ "${{ matrix.jar }}" = "lagpaper" ]; then
+            curl -fsSL -o paper.jar https://github.com/${{ github.repository }}/releases/download/lag-paper/lag-paper-1.21.11.jar
+            rm -rf versions; echo "using laG Paper"
+          fi
           cat ../laG-Network/BUILD.txt 2>/dev/null || true
           java -Dpaperclip.patchonly=true -jar paper.jar > patch.log 2>&1 || tail -20 patch.log
           sed -i 's/^pause-when-empty-seconds=.*//' server.properties && echo "pause-when-empty-seconds=-1" >> server.properties
