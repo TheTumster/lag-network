@@ -71,6 +71,18 @@ jobs:
           tail -5 firstboot.log
           sed -i 's/max-tnt-per-tick: .*/max-tnt-per-tick: 20000/; s/timeout-time: .*/timeout-time: 600/' spigot.yml
           grep -n "max-tnt-per-tick\|timeout-time" spigot.yml
+          # what 1.8 cannon servers (Minecadia etc.) build on: PaperSpigot fix-cannons + TNT/sand load chunks
+          sed -i 's/fix-cannons: false/fix-cannons: true/; s/disable-explosion-knockback: false/disable-explosion-knockback: true/; s/optimize-explosions: false/optimize-explosions: true/' paper.yml
+          python3 - <<'PY'
+          import re
+          s = open("paper.yml").read()
+          s = re.sub(r"(remove-unloaded:\n(?:\s+\S+: \S+\n)*?\s+tnt-entities:) true", r"\1 false", s)
+          s = re.sub(r"(remove-unloaded:\n(?:\s+\S+: \S+\n)*?\s+falling-blocks:) true", r"\1 false", s)
+          s = re.sub(r"(load-chunks:\n(?:\s+\S+: \S+\n)*?\s+tnt-entities:) false", r"\1 true", s)
+          s = re.sub(r"(load-chunks:\n(?:\s+\S+: \S+\n)*?\s+falling-blocks:) false", r"\1 true", s)
+          open("paper.yml", "w").write(s)
+          PY
+          grep -n "fix-cannons\|tnt-entities\|falling-blocks" paper.yml
           CP=$(ls cache/patched*.jar 2>/dev/null | head -1); [ -n "$CP" ] || CP=paper.jar
           echo "compile against $CP"
           mkdir -p ../hbuild && javac -nowarn -source 8 -target 8 -cp "$CP" -d ../hbuild ../tools/parity/common/Harness.java ../tools/parity/h18/H18.java
