@@ -39,9 +39,12 @@ def log(*a):
 
 
 def get_json(url):
+    headers = dict(UA)
+    if "api.github.com" in url and os.environ.get("GITHUB_TOKEN"):
+        headers["Authorization"] = "Bearer " + os.environ["GITHUB_TOKEN"]
     for attempt in range(6):
         try:
-            with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
             if e.code == 429 or e.code >= 500:
@@ -63,8 +66,10 @@ def download(url, dest, sha1=None):
 
 # ------------------------------------------------------------------ sources
 
-def papermc(project, version=None):
+def papermc(project, version=None, prefix=None):
     candidates = [version] if version else [v for group in get_json(f"https://fill.papermc.io/v3/projects/{project}")["versions"].values() for v in group]
+    if prefix:
+        candidates = [v for v in candidates if v.startswith(prefix)]
     b = None
     for ver in candidates:
         builds = get_json(f"https://fill.papermc.io/v3/projects/{project}/versions/{ver}/builds")
@@ -110,10 +115,12 @@ def hangar(owner_slug):
 
 
 def github(repo, match=r"\.jar$"):
-    rel = get_json(f"https://api.github.com/repos/{repo}/releases/latest")
-    for a in rel.get("assets", []):
-        if re.search(match, a["name"]) and not re.search(r"sources|javadoc", a["name"]):
-            return a["browser_download_url"], a["name"], None
+    for rel in get_json(f"https://api.github.com/repos/{repo}/releases?per_page=10"):
+        if rel.get("prerelease") or rel.get("draft"):
+            continue
+        for a in rel.get("assets", []):
+            if re.search(match, a["name"]) and not re.search(r"sources|javadoc", a["name"]):
+                return a["browser_download_url"], a["name"], None
     return None
 
 
@@ -253,7 +260,7 @@ def main():
     os.makedirs(DIST)
 
     log("== Server software")
-    vurl, vname = papermc("velocity")
+    vurl, vname = papermc("velocity", prefix=NET.get("velocity_line", "3."))
     purl, pname = papermc("paper", MC)
     log(f"  {vname}\n  {pname}")
     download(vurl, os.path.join(DIST, "proxy", "velocity.jar"))

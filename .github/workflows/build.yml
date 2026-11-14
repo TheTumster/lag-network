@@ -36,6 +36,8 @@ jobs:
           cp "$JAR" ../localjars/FactionsUUID.jar
 
       - name: Assemble + boot-test the whole network
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install -q pyyaml
           python3 tools/bake.py localjars
