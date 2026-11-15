@@ -93,7 +93,7 @@ hub:
       text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SMP</bold></gradient>\n<gray>Chill survival with claims\n<white>{smp} <gray>playing"
     - offset: [-31.5, 16.5, 0.5]
       scale: 1.5
-      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Launch pads on every path\n<gray>Double jump with <white>SPACE"
+      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Parkour: bridge on the south-east\n<gray>Double jump with <white>SPACE"
     - offset: [32.5, 16.5, 0.5]
       scale: 1.5
       text: "<gradient:#B040FF:#38E0FF:#B040FF:{phase}><bold>DISCORD</bold></gradient>\n<gray>Coming soon"

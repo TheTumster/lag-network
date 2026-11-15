@@ -33,6 +33,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	HubBuild hubBuild;
 	Pack pack;
 	HubFx hubFx;
+	Parkour parkour;
 
 	public static LagCore get() {
 		return instance;
@@ -72,6 +73,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			hubFx = new HubFx(this, hubBuild);
 			getServer().getPluginManager().registerEvents(hubFx, this);
 			Bukkit.getScheduler().runTask(this, hubFx::start);
+			parkour = new Parkour(this, hubBuild, hubFx);
+			getServer().getPluginManager().registerEvents(parkour, this);
 		}
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);

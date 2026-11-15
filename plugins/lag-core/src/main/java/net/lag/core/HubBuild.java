@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 4;
+	static final int BUILD_VERSION = 5;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -178,8 +178,8 @@ final class HubBuild implements Listener {
 		Location o = origin();
 		if (o == null) return;
 		// keep the spawn area loaded even with nobody in the hub, so the displays aren't unloaded with it
-		for (int cx = (o.getBlockX() >> 4) - 2; cx <= (o.getBlockX() >> 4) + 2; cx++) {
-			for (int cz = (o.getBlockZ() >> 4) - 2; cz <= (o.getBlockZ() >> 4) + 2; cz++) {
+		for (int cx = (o.getBlockX() >> 4) - 6; cx <= (o.getBlockX() >> 4) + 6; cx++) {
+			for (int cz = (o.getBlockZ() >> 4) - 6; cz <= (o.getBlockZ() >> 4) + 6; cz++) {
 				o.getWorld().getChunkAt(cx, cz).addPluginChunkTicket(plugin);
 			}
 		}
@@ -195,21 +195,13 @@ final class HubBuild implements Listener {
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
 			String text = String.valueOf(m.get("text"));
 			float scale = m.containsKey("scale") ? (float) num(m.get("scale")) : 1.5f;
-			at.getChunk().load();
-			TextDisplay d = at.getWorld().spawn(at, TextDisplay.class, t -> {
-				t.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
-				t.setPersistent(false);
-				t.setBillboard(Display.Billboard.CENTER);
-				t.setShadowed(true);
-				t.setSeeThrough(false);
-				t.setDefaultBackground(false);
-				t.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
-				t.setLineWidth(400);
-				t.setViewRange(4f);
-				t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
-			});
-			live.put(d, text);
-			liveScale.put(d, scale);
+			text(at, text, scale);
+		}
+		// parkour start (leaderboard) + finish
+		if (plugin.parkour != null) {
+			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram();
+			if (ps != null) text(ps, "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>PARKOUR</bold></gradient>\n<gray>Step on the <gold>gold plate</gold> to start\n{parkour_top}", 1.4f);
+			if (pf != null) text(pf, "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>FINISH</bold></gradient>", 2f);
 		}
 		for (Map<?, ?> m : plugin.getConfig().getMapList("hub.displays")) {
 			List<?> off = (List<?>) m.get("offset");
@@ -266,6 +258,24 @@ final class HubBuild implements Listener {
 		}
 	}
 
+	private void text(Location at, String text, float scale) {
+		at.getChunk().load();
+		TextDisplay d = at.getWorld().spawn(at, TextDisplay.class, t -> {
+			t.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
+			t.setPersistent(false);
+			t.setBillboard(Display.Billboard.CENTER);
+			t.setShadowed(true);
+			t.setSeeThrough(false);
+			t.setDefaultBackground(false);
+			t.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
+			t.setLineWidth(400);
+			t.setViewRange(4f);
+			t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
+		});
+		live.put(d, text);
+		liveScale.put(d, scale);
+	}
+
 	private static double num(Object o) {
 		return o instanceof Number n ? n.doubleValue() : Double.parseDouble(String.valueOf(o));
 	}
@@ -282,6 +292,7 @@ final class HubBuild implements Listener {
 					t = t.replace("{" + k + "}", String.valueOf(plugin.count(server)));
 				}
 			}
+			if (t.contains("{parkour_top}") && plugin.parkour != null) t = t.replace("{parkour_top}", plugin.parkour.top());
 			t = t.replace("{online}", String.valueOf(plugin.count("ALL"))).replace("{network}", plugin.networkName())
 					.replace("{logo}", Pack.glyph(Pack.LOGO_HOLO))
 					.replace("{phase}", String.format(java.util.Locale.ROOT, "%.2f", ((tick * 0.02) % 2.0) - 1.0));

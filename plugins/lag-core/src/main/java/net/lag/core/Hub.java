@@ -138,7 +138,8 @@ final class Hub implements Listener {
 			p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.5f, 1.2f);
 		}
 		// re-arm double jump once you land
-		if (plugin.getConfig().getBoolean("hub.double-jump", true) && !builder(p) && p.isOnGround() && !p.getAllowFlight()) {
+		if (plugin.getConfig().getBoolean("hub.double-jump", true) && !builder(p) && p.isOnGround() && !p.getAllowFlight()
+				&& (plugin.parkour == null || !plugin.parkour.running(p))) {
 			p.setAllowFlight(true);
 		}
 	}
@@ -146,7 +147,8 @@ final class Hub implements Listener {
 	@EventHandler
 	public void onDoubleJump(PlayerToggleFlightEvent e) {
 		Player p = e.getPlayer();
-		if (builder(p) || p.getGameMode() == GameMode.SPECTATOR) return;
+		if (builder(p) || p.getGameMode() == GameMode.SPECTATOR || e.isCancelled()) return;
+		if (plugin.parkour != null && plugin.parkour.running(p)) return;
 		if (!plugin.getConfig().getBoolean("hub.double-jump", true)) return;
 		e.setCancelled(true);
 		p.setAllowFlight(false);
