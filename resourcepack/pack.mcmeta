@@ -1,0 +1,12 @@
+{
+ "pack": {
+  "pack_format": 75,
+  "supported_formats": [
+   46,
+   120
+  ],
+  "min_format": 46,
+  "max_format": 120,
+  "description": "\u00a7bRelapsed\u00a7dMC \u00a77server pack"
+ }
+}

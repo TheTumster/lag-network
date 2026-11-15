@@ -309,6 +309,10 @@ def patch_proxy():
     t = re.sub(r"\[forced-hosts\].*?(?=\n\[)", "[forced-hosts]\n", t, flags=re.S)
     open(path, "w").write(t)
     open(os.path.join(d, "forwarding.secret"), "w").write(SECRET_PLACEHOLDER)
+    # server-list icon (tools/pack/genpack.py)
+    icon = os.path.join(ROOT, "network", "server-icon.png")
+    if os.path.exists(icon):
+        shutil.copy(icon, os.path.join(d, "server-icon.png"))
 
 
 # ------------------------------------------------------------------ main

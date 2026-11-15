@@ -62,10 +62,13 @@ public final class Selector implements Listener {
 
 	public static void open(LagCore plugin, Player p) {
 		Holder h = new Holder();
-		Inventory inv = Bukkit.createInventory(h, 27, LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"));
+		boolean art = plugin.pack != null && plugin.pack.has(p);
+		Inventory inv = Bukkit.createInventory(h, 27, LagCore.mm(art
+				? plugin.pack.menuTitle(p, Pack.MENU_SELECTOR, "<white><bold>CHOOSE A REALM</bold>")
+				: "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"));
 		h.inv = inv;
 
-		border(inv);
+		if (!art) border(inv);
 
 		ConfigurationSection realms = plugin.getConfig().getConfigurationSection("realms");
 		if (realms != null) {

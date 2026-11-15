@@ -55,7 +55,10 @@ jobs:
         run: cat dist/bake-report.json 2>/dev/null || true
 
       - name: Zip
-        run: cd dist && zip -qr ../laG-Network.zip laG-Network && ls -la ../laG-Network.zip
+        run: |
+          cd dist && zip -qr ../laG-Network.zip laG-Network && ls -la ../laG-Network.zip
+          # RelapsedMC resource pack (fixed timestamps so the zip, and its SHA-1, only change when the pack does)
+          cd ../resourcepack && find . -exec touch -t 202601010000 {} + && zip -qrX ../RelapsedMC-pack.zip pack.mcmeta pack.png assets && sha1sum ../RelapsedMC-pack.zip
 
       - name: Publish as latest release
         if: github.ref == 'refs/heads/main'
@@ -63,6 +66,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest laG-Network.zip dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGCore.jar localjars/FactionsUUID.jar localjars/laGLab.jar build/laG-255-datapack.zip windows/START.bat windows/TUNNEL.bat windows/README.txt windows/START-1.8-LAB.bat windows_tools/start.ps1 windows_tools/start-lab.ps1 \
+          gh release create latest laG-Network.zip RelapsedMC-pack.zip dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGCore.jar localjars/FactionsUUID.jar localjars/laGLab.jar build/laG-255-datapack.zip windows/START.bat windows/TUNNEL.bat windows/README.txt windows/START-1.8-LAB.bat windows_tools/start.ps1 windows_tools/start-lab.ps1 \
             --title "RelapsedMC (build ${{ github.run_number }})" \
             --notes "Download laG-Network.zip, extract it anywhere, double-click START.bat." --latest

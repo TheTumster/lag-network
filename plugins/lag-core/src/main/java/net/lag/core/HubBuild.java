@@ -246,6 +246,7 @@ final class HubBuild implements Listener {
 				}
 			}
 			t = t.replace("{online}", String.valueOf(plugin.count("ALL"))).replace("{network}", plugin.networkName())
+					.replace("{logo}", Pack.glyph(Pack.LOGO_HOLO))
 					.replace("{phase}", String.format(java.util.Locale.ROOT, "%.2f", ((tick * 0.02) % 2.0) - 1.0));
 			en.getKey().text(LagCore.mm(t));
 		}

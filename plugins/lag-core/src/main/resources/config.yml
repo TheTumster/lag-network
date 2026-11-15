@@ -26,6 +26,12 @@ realms:
       - ""
       - "<#38E0FF>▶ Click to play"
 
+# Resource pack (logo, icons, menus). Built from resourcepack/ and published with every release.
+resource-pack:
+  enabled: true
+  required: false
+  url: "https://github.com/TheTumster/lag-network/releases/latest/download/RelapsedMC-pack.zip"
+
 hub:
   # Spawn is set with /setspawn; until then players spawn at the world spawn.
   spawn: ""
@@ -43,9 +49,9 @@ hub:
   # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts,
   # {phase} = moving gradient (animates every 2 ticks).
   holograms:
-    - offset: [0.5, 17, 0.5]
-      scale: 6
-      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>RELAPSEDMC</bold></gradient>"
+    - offset: [0.5, 16.5, 0.5]
+      scale: 2.2
+      text: "{logo}"
     - offset: [0.5, 15.2, 0.5]
       scale: 1.6
       text: "<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons    <white>{online} <gray>online"

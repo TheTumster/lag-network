@@ -31,6 +31,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private final Map<String, Integer> counts = new HashMap<>();
 	private Hub hub;
 	HubBuild hubBuild;
+	Pack pack;
 	HubFx hubFx;
 
 	public static LagCore get() {
@@ -56,6 +57,9 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
 
+		pack = new Pack(this);
+		getServer().getPluginManager().registerEvents(pack, this);
+		pack.start();
 		Selector selector = new Selector(this);
 		getServer().getPluginManager().registerEvents(selector, this);
 		if (isHub()) {

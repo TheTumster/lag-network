@@ -166,9 +166,12 @@ final class HubFx implements Listener {
 
 	void openCosmetics(Player p) {
 		CosmeticsHolder h = new CosmeticsHolder();
-		Inventory inv = Bukkit.createInventory(h, 36, LagCore.mm("<gradient:#B040FF:#38E0FF><bold>Cosmetics</bold></gradient> <dark_gray>» Trails"));
+		boolean art = plugin.pack != null && plugin.pack.has(p);
+		Inventory inv = Bukkit.createInventory(h, 36, LagCore.mm(art
+				? plugin.pack.menuTitle(p, Pack.MENU_COSMETICS, "<white><bold>COSMETICS</bold> <gray>» Trails")
+				: "<gradient:#B040FF:#38E0FF><bold>Cosmetics</bold></gradient> <dark_gray>» Trails"));
 		h.inv = inv;
-		Selector.border(inv);
+		if (!art) Selector.border(inv);
 		String cur = trails.getOrDefault(p.getUniqueId(), "none");
 		int[] slots = {10, 11, 12, 13, 14, 15, 16, 20, 22, 24};
 		for (int i = 0; i < TRAILS.length && i < slots.length; i++) {
@@ -250,7 +253,7 @@ final class HubFx implements Listener {
 		long end = name.length() * 2L + 2;
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
-			p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
+			p.showTitle(Title.title(LagCore.mm(plugin.pack != null && plugin.pack.has(p) ? Pack.glyph(Pack.LOGO_TITLE) : "<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
 					LagCore.mm("<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons"),
 					Title.Times.times(Duration.ZERO, Duration.ofSeconds(3), Duration.ofMillis(800))));
 			// chord
@@ -276,11 +279,13 @@ final class HubFx implements Listener {
 	private void banner(Player p) {
 		String line = "<gradient:#38E0FF:#B040FF><strikethrough>                                                  </strikethrough></gradient>";
 		p.sendMessage(LagCore.mm(line));
-		p.sendMessage(LagCore.mm("            <gray>Welcome to <gradient:#38E0FF:#B040FF><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
+		boolean art = plugin.pack != null && plugin.pack.has(p);
+		p.sendMessage(LagCore.mm("            <gray>Welcome to " + (art ? Pack.glyph(Pack.LOGO_LINE) : "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>")));
 		p.sendMessage(LagCore.mm("         <dark_gray>Factions  <gray>•  <dark_gray>SMP  <gray>•  <dark_gray>1.8 Cannons"));
 		p.sendMessage(Component.empty());
-		p.sendMessage(LagCore.mm("  <#38E0FF>▸ <gray>Walk into a portal or use your <white>compass</white> to play"));
-		p.sendMessage(LagCore.mm("  <#B040FF>▸ <gray>Grab a trail from <white>Cosmetics</white> on your hotbar"));
+		String arrow = art ? Pack.glyph(Pack.I_ARROW) : "<#38E0FF>▸";
+		p.sendMessage(LagCore.mm("  " + arrow + " <gray>Walk into a portal or use your <white>compass</white> to play"));
+		p.sendMessage(LagCore.mm("  " + arrow + " <gray>Grab a trail from <white>Cosmetics</white> on your hotbar"));
 		p.sendMessage(LagCore.mm(line));
 	}
 

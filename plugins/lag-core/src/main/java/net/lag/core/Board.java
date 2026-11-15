@@ -48,18 +48,22 @@ final class Board implements Listener {
 		}
 		String phase = String.format(java.util.Locale.ROOT, "%.2f", ((System.currentTimeMillis() / 1000.0 * 0.25) % 2.0) - 1.0);
 		String grad = "<gradient:#38E0FF:#B040FF:#38E0FF:" + phase + ">";
-		o.displayName(LagCore.mm(grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
+		Pack pk = plugin.pack;
+		boolean art = pk != null && pk.has(p);
+		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
 		line(o, 6, Component.empty());
-		line(o, 5, LagCore.mm("<gray>Realm <white>" + realm));
-		line(o, 4, LagCore.mm("<gray>Online <white>" + plugin.count("ALL")));
-		line(o, 3, LagCore.mm("<gray>Ping <white>" + p.getPing() + "ms"));
+		String star = art ? Pack.glyph(Pack.I_STAR) + " " : "", ppl = art ? Pack.glyph(Pack.I_PLAYERS) + " " : "", png = art ? Pack.glyph(Pack.I_PING) + " " : "";
+		line(o, 5, LagCore.mm(star + "<gray>Realm <white>" + realm));
+		line(o, 4, LagCore.mm(ppl + "<gray>Online <white>" + plugin.count("ALL")));
+		line(o, 3, LagCore.mm(png + "<gray>Ping <white>" + p.getPing() + "ms"));
 		line(o, 2, Component.text(" "));
 		line(o, 1, LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>RelapsedMC</gradient>")));
 		// tab list
 		p.sendPlayerListHeaderAndFooter(
-				LagCore.mm("\n" + grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n<gray>You're on <white>" + realm + "\n"),
+				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
+						+ "<gray>You're on <white>" + realm + "\n"),
 				LagCore.mm("\n<gray>Online <white>" + plugin.count("ALL") + " <dark_gray>• <gray>Ping <white>" + p.getPing() + "ms\n"
 						+ "<dark_gray>Factions • SMP • 1.8 Cannons\n"));
 	}
