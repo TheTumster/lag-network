@@ -171,7 +171,7 @@ final class HubBuild implements Listener {
 		c.set(base + ".build-version", version());
 		plugin.saveConfig();
 		w.setSpawnLocation(ox, oy + 1, oz);
-		plugin.getLogger().info("Built the hub spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
+		plugin.getLogger().info("Built the " + base + " spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
 		return n;
 	}
 
