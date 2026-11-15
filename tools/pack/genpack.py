@@ -87,12 +87,19 @@ def wordmark(scale=4):
     return out.crop(out.getbbox())
 
 
-def save_logo(img, name, target_h):
-    """Save at a power-friendly height (keeps it crisp), return (w, h) in pixels."""
+def save_logo_tiles(img, base, target_h, max_w=240):
+    """Minecraft can't draw a font image wider than 256px, so the logo is cut into tiles (one char each)."""
     r = target_h / img.height
     im = img.resize((max(1, int(img.width * r)), target_h), Image.LANCZOS)
-    im.save(os.path.join(TEX, name))
-    return im.size
+    n = -(-im.width // max_w)
+    tw = -(-im.width // n)
+    files = []
+    for i in range(n):
+        tile = im.crop((i * tw, 0, min(im.width, (i + 1) * tw), target_h))
+        name = f"{base}_{i}.png"
+        tile.save(os.path.join(TEX, name))
+        files.append(name)
+    return files
 
 
 # ------------------------------------------------------------------ pixel icons (8x8)
@@ -163,13 +170,18 @@ def panel(rows, highlight_slots, title):
 
 def main():
     logo = wordmark()
-    sizes = {
-        "logo_tab.png": 128,     # E000 shown 32 tall
-        "logo_line.png": 64,     # E001 shown 9 tall
-        "logo_title.png": 96,    # E002 shown 14 tall (titles are drawn 4x)
-        "logo_holo.png": 256,    # E003 shown 32 tall on a scaled text display
-    }
-    dims = {k: save_logo(logo, k, v) for k, v in sizes.items()}
+    for f in os.listdir(TEX):
+        if f.startswith("logo_"):
+            os.remove(os.path.join(TEX, f))
+    # name -> (texture height px, shown height, ascent, first char)
+    sizes = {"tab": (64, 24, 8, 0xE020), "line": (32, 9, 8, 0xE040), "title": (48, 14, 11, 0xE060), "holo": (128, 32, 26, 0xE080)}
+    glyphs, logo_providers = {}, []
+    for key, (tex_h, shown, ascent, first) in sizes.items():
+        files = save_logo_tiles(logo, "logo_" + key, tex_h)
+        chars = [chr(first + i) for i in range(len(files))]
+        for f, c in zip(files, chars):
+            logo_providers.append({"type": "bitmap", "file": "relapsed:font/" + f, "height": shown, "ascent": ascent, "chars": [c]})
+        glyphs["logo_" + key] = "\uF801".join(chars)  # each glyph advances width+1; pull back 1px so tiles touch
     for name, rows in ICONS.items():
         icon(rows).save(os.path.join(TEX, f"icon_{name}.png"))
     panel(3, {11, 15}, "Servers").save(os.path.join(TEX, "menu_selector.png"))
@@ -177,13 +189,10 @@ def main():
 
     providers = [
         {"type": "space", "advances": {"\uF801": -1, "\uF808": -8, "\uF8B0": -176, "\uF8B1": -169, "\uF820": 4}},
-        {"type": "bitmap", "file": "relapsed:font/logo_tab.png", "height": 32, "ascent": 8, "chars": [""]},
-        {"type": "bitmap", "file": "relapsed:font/logo_line.png", "height": 9, "ascent": 8, "chars": [""]},
-        {"type": "bitmap", "file": "relapsed:font/logo_title.png", "height": 14, "ascent": 11, "chars": [""]},
-        {"type": "bitmap", "file": "relapsed:font/logo_holo.png", "height": 32, "ascent": 26, "chars": [""]},
         {"type": "bitmap", "file": "relapsed:font/menu_selector.png", "height": 17 + 3 * 18 + 4, "ascent": 13, "chars": [""]},
         {"type": "bitmap", "file": "relapsed:font/menu_cosmetics.png", "height": 17 + 4 * 18 + 4, "ascent": 13, "chars": [""]},
     ]
+    providers[1:1] = logo_providers
     for i, name in enumerate(ICONS):
         providers.append({"type": "bitmap", "file": f"relapsed:font/icon_{name}.png", "height": 8, "ascent": 7, "chars": [chr(0xE010 + i)]})
     fdir = os.path.join(PACK, "assets", "relapsed", "font")
@@ -211,7 +220,10 @@ def main():
         im = Image.alpha_composite(im, glow.filter(ImageFilter.GaussianBlur(s // 30)))
         im = Image.alpha_composite(im, glow)
         im.resize((size, size), Image.LANCZOS).save(path)
-    print("logo sizes:", dims)
+    # glyph strings for the plugin (laGCore reads this from its jar)
+    gpath = os.path.join(ROOT, "plugins", "lag-core", "src", "main", "resources", "glyphs.json")
+    json.dump(glyphs, open(gpath, "w", encoding="utf-8"), ensure_ascii=True, indent=1)
+    print("glyphs:", {k: len(v) for k, v in glyphs.items()})
     print("pack written to", os.path.normpath(PACK))
 
 

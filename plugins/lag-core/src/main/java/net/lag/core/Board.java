@@ -53,19 +53,55 @@ final class Board implements Listener {
 		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
-		line(o, 6, Component.empty());
-		String star = art ? Pack.glyph(Pack.I_STAR) + " " : "", ppl = art ? Pack.glyph(Pack.I_PLAYERS) + " " : "", png = art ? Pack.glyph(Pack.I_PING) + " " : "";
-		line(o, 5, LagCore.mm(star + "<gray>Realm <white>" + realm));
-		line(o, 4, LagCore.mm(ppl + "<gray>Online <white>" + plugin.count("ALL")));
-		line(o, 3, LagCore.mm(png + "<gray>Ping <white>" + p.getPing() + "ms"));
-		line(o, 2, Component.text(" "));
-		line(o, 1, LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>RelapsedMC</gradient>")));
+		String head = "<gradient:#38E0FF:#B040FF><bold>";
+		String bullet = "  <dark_gray>▸ ";
+		int ping = p.getPing();
+		String pingCol = ping < 80 ? "<#7CFF6B>" : ping < 150 ? "<yellow>" : "<#FF4D6D>";
+		String ic = (art ? Pack.glyph(Pack.I_STAR) : "<#38E0FF>✦") + " ";
+		String ip = (art ? Pack.glyph(Pack.I_PLAYERS) : "<#B040FF>✦") + " ";
+		String it = (art ? Pack.glyph(Pack.I_BOLT) : "<#FF4DD2>✦") + " ";
+		java.util.List<Component> lines = new java.util.ArrayList<>();
+		lines.add(LagCore.mm("<dark_gray><strikethrough>                      </strikethrough>"));
+		lines.add(LagCore.mm(ic + head + "YOU</bold></gradient>"));
+		lines.add(LagCore.mm(bullet + "<gray>Rank " + rank(p)));
+		lines.add(LagCore.mm(bullet + "<gray>Ping " + pingCol + ping + "ms"));
+		lines.add(Component.text(" "));
+		lines.add(LagCore.mm(ip + head + "NETWORK</bold></gradient>"));
+		lines.add(LagCore.mm(bullet + "<gray>Online <white>" + plugin.count("ALL")));
+		lines.add(LagCore.mm(bullet + "<gray>Realm <white>" + realm));
+		var realms = plugin.getConfig().getConfigurationSection("realms");
+		if ("hub".equalsIgnoreCase(role) && realms != null) {
+			lines.add(Component.text("  "));
+			lines.add(LagCore.mm(it + head + "REALMS</bold></gradient>"));
+			for (String k : realms.getKeys(false)) {
+				String server = realms.getString(k + ".server", k);
+				lines.add(LagCore.mm(bullet + "<gray>" + k.substring(0, 1).toUpperCase() + k.substring(1) + " <white>" + plugin.count(server)));
+			}
+		}
+		lines.add(Component.text("   "));
+		lines.add(LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>play.relapsedmc.net</gradient>")));
+		int score = lines.size();
+		for (int n = 1; n <= 15; n++) {
+			if (n > score) o.getScoreboard().resetScores("l" + n);
+		}
+		for (Component c : lines) line(o, score--, c);
 		// tab list
 		p.sendPlayerListHeaderAndFooter(
 				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
 						+ "<gray>You're on <white>" + realm + "\n"),
 				LagCore.mm("\n<gray>Online <white>" + plugin.count("ALL") + " <dark_gray>• <gray>Ping <white>" + p.getPing() + "ms\n"
 						+ "<dark_gray>Factions • SMP • 1.8 Cannons\n"));
+	}
+
+	/** First matching LuckPerms group (group.<name> permission) from config "ranks"; ops count as the first rank. */
+	private String rank(Player p) {
+		var sec = plugin.getConfig().getConfigurationSection("ranks");
+		if (sec != null) {
+			for (String g : sec.getKeys(false)) {
+				if (p.hasPermission("group." + g)) return sec.getString(g, g);
+			}
+		}
+		return "<gray>Member";
 	}
 
 	private void line(Objective o, int score, Component text) {

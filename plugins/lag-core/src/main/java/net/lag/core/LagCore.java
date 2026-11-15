@@ -60,6 +60,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		pack = new Pack(this);
 		getServer().getPluginManager().registerEvents(pack, this);
 		pack.start();
+		getServer().getPluginManager().registerEvents(new Fresh(this), this);
 		Selector selector = new Selector(this);
 		getServer().getPluginManager().registerEvents(selector, this);
 		if (isHub()) {

@@ -29,7 +29,21 @@ final class Pack implements Listener {
 	static final String FONT = "relapsed:ui";
 
 	// glyphs (font relapsed:ui)
-	static final String LOGO_TAB = "\uE000", LOGO_LINE = "\uE001", LOGO_TITLE = "\uE002", LOGO_HOLO = "\uE003";
+	// logo glyph strings (tiled, made by tools/pack/genpack.py -> resources/glyphs.json)
+	static final String LOGO_TAB, LOGO_LINE, LOGO_TITLE, LOGO_HOLO;
+	static {
+		java.util.Map<String, String> g = new java.util.HashMap<>();
+		try (var in = Pack.class.getResourceAsStream("/glyphs.json")) {
+			if (in != null) {
+				var json = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+				for (var e : json.entrySet()) g.put(e.getKey(), e.getValue().getAsString());
+			}
+		} catch (Exception ignored) { }
+		LOGO_TAB = g.getOrDefault("logo_tab", "");
+		LOGO_LINE = g.getOrDefault("logo_line", "");
+		LOGO_TITLE = g.getOrDefault("logo_title", "");
+		LOGO_HOLO = g.getOrDefault("logo_holo", "");
+	}
 	static final String I_ARROW = "\uE010", I_PLAYERS = "\uE011", I_PING = "\uE012", I_TNT = "\uE013",
 			I_SWORD = "\uE014", I_STAR = "\uE015", I_DOT = "\uE016", I_BOLT = "\uE017";
 	static final String MENU_SELECTOR = "\uE100", MENU_COSMETICS = "\uE101";

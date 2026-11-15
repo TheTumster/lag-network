@@ -26,6 +26,36 @@ realms:
       - ""
       - "<#38E0FF>▶ Click to play"
 
+# Fresh chat: wipe the chat when you arrive on a server, then show that realm's banner (the hub has its own).
+# {bar} {logo} {arrow} {player} {online}
+fresh-chat:
+  enabled: true
+  delay-ticks: 10
+  banner:
+    factions:
+      - "{bar}"
+      - "            {logo} <dark_gray>» <gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>"
+      - ""
+      - "  {arrow} <gray>Start a faction: <white>/f create <name>"
+      - "  {arrow} <gray>Fill dispensers: <white>/tntfill <dark_gray>• <gray>faction bank: <white>/f tnt"
+      - "  {arrow} <gray>Back to the hub: <white>/hub"
+      - "{bar}"
+    smp:
+      - "{bar}"
+      - "            {logo} <dark_gray>» <gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>"
+      - ""
+      - "  {arrow} <gray>Chill survival with land claims"
+      - "  {arrow} <gray>Back to the hub: <white>/hub"
+      - "{bar}"
+
+# Ranks for the scoreboard: LuckPerms group name -> how it shows. First match wins (ops match the first).
+ranks:
+  owner: "<gradient:#FF4D6D:#FF4DD2><bold>OWNER</bold></gradient>"
+  admin: "<#FF4D6D><bold>ADMIN</bold>"
+  mod: "<#38E0FF><bold>MOD</bold>"
+  media: "<#FF4DD2><bold>MEDIA</bold>"
+  vip: "<gradient:#38E0FF:#B040FF><bold>VIP</bold></gradient>"
+
 # Resource pack (logo, icons, menus). Built from resourcepack/ and published with every release.
 resource-pack:
   enabled: true
