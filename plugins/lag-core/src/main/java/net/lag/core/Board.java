@@ -46,6 +46,9 @@ final class Board implements Listener {
 			setup(p);
 			return;
 		}
+		String phase = String.format(java.util.Locale.ROOT, "%.2f", ((System.currentTimeMillis() / 1000.0 * 0.25) % 2.0) - 1.0);
+		String grad = "<gradient:#38E0FF:#B040FF:#38E0FF:" + phase + ">";
+		o.displayName(LagCore.mm(grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
 		line(o, 6, Component.empty());
@@ -54,6 +57,11 @@ final class Board implements Listener {
 		line(o, 3, LagCore.mm("<gray>Ping <white>" + p.getPing() + "ms"));
 		line(o, 2, Component.text(" "));
 		line(o, 1, LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>RelapsedMC</gradient>")));
+		// tab list
+		p.sendPlayerListHeaderAndFooter(
+				LagCore.mm("\n" + grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n<gray>You're on <white>" + realm + "\n"),
+				LagCore.mm("\n<gray>Online <white>" + plugin.count("ALL") + " <dark_gray>• <gray>Ping <white>" + p.getPing() + "ms\n"
+						+ "<dark_gray>Factions • SMP • 1.8 Cannons\n"));
 	}
 
 	private void line(Objective o, int score, Component text) {

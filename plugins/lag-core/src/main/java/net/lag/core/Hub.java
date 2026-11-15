@@ -69,7 +69,7 @@ final class Hub implements Listener {
 		p.setHealth(p.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue());
 		p.setFoodLevel(20);
 		p.setAllowFlight(plugin.getConfig().getBoolean("hub.double-jump", true));
-		if (plugin.getConfig().getBoolean("hub.join-title", true)) {
+		if (plugin.getConfig().getBoolean("hub.join-title", true) && plugin.hubFx == null) {
 			p.showTitle(Title.title(
 					LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"),
 					LagCore.mm("<gray>Right click the compass to pick a realm"),

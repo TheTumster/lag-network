@@ -25,7 +25,12 @@ commands:
     usage: //upload <link> [name]
     aliases: [schemupload]
     permission: lag.cannons.upload
+  clearlag:
+    description: Time until the next dropped-item clear (/clearlag now to clear)
+    aliases: [lagg, cl]
 permissions:
+  lag.cannons.clearlag.now:
+    default: op
   lagcannons.tntfill.free:
     default: op
   lag.cannons.admin:

@@ -38,11 +38,14 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 1;
+	static final int BUILD_VERSION = 2;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
 	private final Map<TextDisplay, String> live = new HashMap<>();
+	private final Map<TextDisplay, Float> liveScale = new HashMap<>();
+	private final Map<org.bukkit.entity.ItemDisplay, float[]> spinners = new HashMap<>(); // {scale, spin speed}
+	private long tick;
 
 	HubBuild(LagCore plugin) {
 		this.plugin = plugin;
@@ -57,7 +60,7 @@ final class HubBuild implements Listener {
 		}
 		atmosphere(w);
 		holograms();
-		Bukkit.getScheduler().runTaskTimer(plugin, this::refresh, 100L, 100L);
+		Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 2L, 2L);
 	}
 
 	Location origin() {
@@ -147,6 +150,8 @@ final class HubBuild implements Listener {
 			if (e.getPersistentDataContainer().has(holoKey, PersistentDataType.BYTE)) e.remove();
 		}
 		live.clear();
+		liveScale.clear();
+		spinners.clear();
 		List<Map<?, ?>> list = plugin.getConfig().getMapList("hub.holograms");
 		for (Map<?, ?> m : list) {
 			List<?> off = (List<?>) m.get("offset");
@@ -167,8 +172,61 @@ final class HubBuild implements Listener {
 				t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
 			});
 			live.put(d, text);
+			liveScale.put(d, scale);
+		}
+		for (Map<?, ?> m : plugin.getConfig().getMapList("hub.displays")) {
+			List<?> off = (List<?>) m.get("offset");
+			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
+			org.bukkit.Material mat = org.bukkit.Material.matchMaterial(String.valueOf(m.get("item")));
+			if (mat == null) continue;
+			float scale = m.containsKey("scale") ? (float) num(m.get("scale")) : 2f;
+			float spin = m.containsKey("spin") ? (float) num(m.get("spin")) : 1f;
+			String glow = m.containsKey("glow") ? String.valueOf(m.get("glow")) : null;
+			at.getChunk().load();
+			org.bukkit.entity.ItemDisplay d = at.getWorld().spawn(at, org.bukkit.entity.ItemDisplay.class, t -> {
+				t.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
+				t.setPersistent(false);
+				t.setItemStack(new org.bukkit.inventory.ItemStack(mat));
+				t.setItemDisplayTransform(org.bukkit.entity.ItemDisplay.ItemDisplayTransform.FIXED);
+				t.setBillboard(Display.Billboard.FIXED);
+				t.setViewRange(4f);
+				t.setBrightness(new Display.Brightness(15, 15));
+				t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
+				if (glow != null) {
+					t.setGlowing(true);
+					t.setGlowColorOverride(org.bukkit.Color.fromRGB(Integer.parseInt(glow.replace("#", ""), 16)));
+				}
+			});
+			spinners.put(d, new float[] {scale, spin});
 		}
 		refresh();
+	}
+
+	/** Every 2 ticks: gradient sweep on text; every 40: bob text and spin items (client interpolates smoothly). */
+	private void animate() {
+		tick += 2;
+		refresh();
+		if (tick % 40 != 0) return;
+		boolean up = (tick / 40) % 2 == 0;
+		for (var en : liveScale.entrySet()) {
+			TextDisplay d = en.getKey();
+			if (!d.isValid()) continue;
+			float sc = en.getValue();
+			d.setInterpolationDelay(0);
+			d.setInterpolationDuration(40);
+			d.setTransformation(new Transformation(new Vector3f(0, up ? 0.12f : -0.12f, 0), new AxisAngle4f(),
+					new Vector3f(sc, sc, sc), new AxisAngle4f()));
+		}
+		for (var en : spinners.entrySet()) {
+			org.bukkit.entity.ItemDisplay d = en.getKey();
+			if (!d.isValid()) continue;
+			float sc = en.getValue()[0], speed = en.getValue()[1];
+			float angle = (float) ((tick / 40) * (Math.PI / 2) * speed % (Math.PI * 2));
+			d.setInterpolationDelay(0);
+			d.setInterpolationDuration(40);
+			d.setTransformation(new Transformation(new Vector3f(0, up ? 0.15f : -0.15f, 0), new AxisAngle4f(angle, 0, 1, 0),
+					new Vector3f(sc, sc, sc), new AxisAngle4f()));
+		}
 	}
 
 	private static double num(Object o) {
@@ -187,7 +245,8 @@ final class HubBuild implements Listener {
 					t = t.replace("{" + k + "}", String.valueOf(plugin.count(server)));
 				}
 			}
-			t = t.replace("{online}", String.valueOf(plugin.count("ALL"))).replace("{network}", plugin.networkName());
+			t = t.replace("{online}", String.valueOf(plugin.count("ALL"))).replace("{network}", plugin.networkName())
+					.replace("{phase}", String.format(java.util.Locale.ROOT, "%.2f", ((tick * 0.02) % 2.0) - 1.0));
 			en.getKey().text(LagCore.mm(t));
 		}
 	}

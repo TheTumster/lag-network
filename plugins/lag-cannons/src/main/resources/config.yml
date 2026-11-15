@@ -96,3 +96,16 @@ banned-items:
   - SHIELD
   - MACE
   - "*_SPEAR"
+
+# Cannon-safe ClearLag: clears dropped items (and stuck arrows) on a timer. Never touches TNT, falling sand,
+# minecarts, armor stands, item frames, mobs or named items. worlds: [] = all worlds.
+clearlag:
+  enabled: true
+  interval-seconds: 300
+  warn-at: [60, 30, 10, 5, 4, 3, 2, 1]
+  clear:
+    items: true
+    arrows: true
+    xp-orbs: false
+  keep-items: [BEACON, DRAGON_EGG, NETHER_STAR, ELYTRA]
+  worlds: []

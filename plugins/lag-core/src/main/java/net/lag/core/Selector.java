@@ -38,16 +38,34 @@ public final class Selector implements Listener {
 		}
 	}
 
+	private static ItemStack pane(Material m) {
+		ItemStack pane = new ItemStack(m);
+		ItemMeta pm = pane.getItemMeta();
+		pm.displayName(Component.text(" "));
+		pm.setHideTooltip(true);
+		pane.setItemMeta(pm);
+		return pane;
+	}
+
+	/** Cyan-to-purple glass frame, black inside. */
+	static void border(Inventory inv) {
+		int size = inv.getSize(), rows = size / 9;
+		ItemStack inner = pane(Material.BLACK_STAINED_GLASS_PANE);
+		Material[] grad = {Material.LIGHT_BLUE_STAINED_GLASS_PANE, Material.CYAN_STAINED_GLASS_PANE, Material.BLUE_STAINED_GLASS_PANE,
+				Material.PURPLE_STAINED_GLASS_PANE, Material.MAGENTA_STAINED_GLASS_PANE};
+		for (int i = 0; i < size; i++) {
+			int r = i / 9, c = i % 9;
+			boolean edge = r == 0 || r == rows - 1 || c == 0 || c == 8;
+			inv.setItem(i, edge ? pane(grad[Math.min(grad.length - 1, c * grad.length / 9)]) : inner);
+		}
+	}
+
 	public static void open(LagCore plugin, Player p) {
 		Holder h = new Holder();
 		Inventory inv = Bukkit.createInventory(h, 27, LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"));
 		h.inv = inv;
 
-		ItemStack pane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-		ItemMeta pm = pane.getItemMeta();
-		pm.displayName(Component.text(" "));
-		pane.setItemMeta(pm);
-		for (int i = 0; i < 27; i++) inv.setItem(i, pane);
+		border(inv);
 
 		ConfigurationSection realms = plugin.getConfig().getConfigurationSection("realms");
 		if (realms != null) {

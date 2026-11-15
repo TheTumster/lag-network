@@ -31,6 +31,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private final Map<String, Integer> counts = new HashMap<>();
 	private Hub hub;
 	HubBuild hubBuild;
+	HubFx hubFx;
 
 	public static LagCore get() {
 		return instance;
@@ -63,6 +64,9 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			hubBuild = new HubBuild(this);
 			getServer().getPluginManager().registerEvents(hubBuild, this);
 			Bukkit.getScheduler().runTask(this, hubBuild::start);
+			hubFx = new HubFx(this, hubBuild);
+			getServer().getPluginManager().registerEvents(hubFx, this);
+			Bukkit.getScheduler().runTask(this, hubFx::start);
 		}
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);

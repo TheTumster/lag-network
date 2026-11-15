@@ -215,6 +215,13 @@ for x, z in ((-12, -12), (12, -12), (-12, 12), (12, 12), (-20, -20), (20, -20), 
     put(x, 4, z, "minecraft:sea_lantern")
     put(x, 5, z, "minecraft:end_rod[facing=up]")
 
+# launch pads on the four paths (heavy plates; laGCore launches you outward)
+for x, z in ((0, -12), (0, 12), (-12, 0), (12, 0)):
+    put(x, 0, z, "minecraft:sea_lantern")
+    put(x, 1, z, "minecraft:heavy_weighted_pressure_plate")
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        put(x + dx, 0, z + dz, "minecraft:amethyst_block")
+
 # ------------------------------------------------------------------ floating islands around
 for i, (ang, dist, dy, r) in enumerate(((20, 58, 8, 6), (85, 64, -6, 5), (150, 55, 14, 4), (215, 66, 2, 7), (280, 60, -10, 5), (330, 70, 18, 4))):
     cx, cz = round(dist * math.cos(math.radians(ang))), round(dist * math.sin(math.radians(ang)))

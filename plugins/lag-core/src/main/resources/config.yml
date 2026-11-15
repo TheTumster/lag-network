@@ -40,26 +40,62 @@ hub:
   portals:
     factions: [0, 4, -25]
     smp: [0, 4, 25]
-  # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts.
+  # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts,
+  # {phase} = moving gradient (animates every 2 ticks).
   holograms:
     - offset: [0.5, 17, 0.5]
       scale: 6
-      text: "<gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient>"
+      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>RELAPSEDMC</bold></gradient>"
     - offset: [0.5, 15.2, 0.5]
       scale: 1.6
       text: "<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons    <white>{online} <gray>online"
     - offset: [0.5, 14.5, -25]
       scale: 2.4
-      text: "<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>\n<gray>Raid • Cannon • Conquer\n<white>{factions} <gray>playing"
+      text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>\n<gray>Raid • Cannon • Conquer\n<white>{factions} <gray>playing"
     - offset: [0.5, 14.5, 25]
       scale: 2.4
-      text: "<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>\n<gray>Chill survival with claims\n<white>{smp} <gray>playing"
+      text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SMP</bold></gradient>\n<gray>Chill survival with claims\n<white>{smp} <gray>playing"
     - offset: [-21.5, 8.5, 0.5]
       scale: 1.4
-      text: "<gradient:#38E0FF:#B040FF><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Double jump with <white>SPACE"
+      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Launch pads on every path\n<gray>Double jump with <white>SPACE"
     - offset: [22.5, 8.5, 0.5]
       scale: 1.4
-      text: "<gradient:#B040FF:#38E0FF><bold>DISCORD</bold></gradient>\n<gray>Coming soon"
+      text: "<gradient:#B040FF:#38E0FF:#B040FF:{phase}><bold>DISCORD</bold></gradient>\n<gray>Coming soon"
+  # Spinning, glowing 3D items. spin = speed (1 = a quarter turn every 2s), glow = outline colour.
+  displays:
+    - offset: [0.5, 21.5, 0.5]
+      item: NETHER_STAR
+      scale: 3.5
+      spin: 1
+      glow: "#B040FF"
+    - offset: [0.5, 19, -25]
+      item: TNT
+      scale: 2.4
+      spin: 1
+      glow: "#FF4D6D"
+    - offset: [0.5, 19, 25]
+      item: GRASS_BLOCK
+      scale: 2.4
+      spin: 1
+      glow: "#7CFF6B"
+    - offset: [-21.5, 12.5, 0.5]
+      item: AMETHYST_CLUSTER
+      scale: 1.6
+      spin: -1
+    - offset: [22.5, 12.5, 0.5]
+      item: ECHO_SHARD
+      scale: 1.6
+      spin: -1
+  # Heavy pressure plates on the paths launch you outward.
+  launch-pad:
+    speed: 1.25
+    lift: 0.85
+  # Boss bar messages, 8s each. {gradient}...</gradient> = moving brand gradient.
+  bossbar:
+    - "<gray>Welcome to {gradient}<bold>{network}</bold></gradient>"
+    - "{gradient}<bold>FACTIONS</bold></gradient> <dark_gray>» <gray>1.8 cannons, raids, faction TNT banks"
+    - "<white>{online} <gray>players online <dark_gray>• <gray>walk into a portal to play"
+    - "{gradient}<bold>COSMETICS</bold></gradient> <dark_gray>» <gray>grab a particle trail from your hotbar"
 
 scoreboard:
   enabled: true

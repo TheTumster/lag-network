@@ -70,6 +70,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		getServer().getPluginManager().registerEvents(new NoSandDrops(this), this);
 		getServer().getPluginManager().registerEvents(new BannedItems(this), this);
+		var clearLag = new ClearLag(this);
+		if (getCommand("clearlag") != null) getCommand("clearlag").setExecutor(clearLag);
 		redstoneFix = new RedstoneFix(this);
 		getServer().getPluginManager().registerEvents(redstoneFix, this);
 		sandbots = new Sandbots(this);
