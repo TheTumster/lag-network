@@ -335,7 +335,7 @@ final class Spawners implements Listener, CommandExecutor {
 			return;
 		}
 		int before = spawnerCount(p);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ss give spawner " + p.getName() + " " + t.mob() + " " + amount);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ss give " + p.getName() + " " + t.mob() + " " + amount);
 		if (spawnerCount(p) <= before) {
 			p.sendMessage(mm("<red>Couldn't give the spawner - you were not charged. Tell staff."));
 			plugin.getLogger().warning("SmartSpawner give failed for " + t.mob());

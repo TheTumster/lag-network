@@ -38,6 +38,7 @@ public final class LagSkyblock extends JavaPlugin {
 		return eco;
 	}
 	Spawners spawners;
+	Generators generators;
 
 	@Override
 	public void onLoad() {
@@ -48,6 +49,7 @@ public final class LagSkyblock extends JavaPlugin {
 		try {
 			patchSmartSpawner();
 			patchShop();
+			installIsland();
 		} catch (Exception e) {
 			getLogger().warning("Could not patch SmartSpawner / EconomyShopGUI files: " + e);
 		}
@@ -59,10 +61,17 @@ public final class LagSkyblock extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(spawners, this);
 		getCommand("spawners").setExecutor(spawners);
 		getCommand("sellheads").setExecutor(spawners);
+		generators = new Generators(this);
+		getServer().getPluginManager().registerEvents(generators, this);
+		getCommand("gen").setExecutor(generators);
+		IslandFly fly = new IslandFly(this);
+		getServer().getPluginManager().registerEvents(fly, this);
+		getCommand("islandfly").setExecutor(fly);
 		getCommand("lagskyblock").setExecutor((s, c, l, a) -> {
 			reloadConfig();
 			loadTiers();
 			spawners.load();
+			generators.load();
 			s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
 			return true;
 		});
@@ -81,6 +90,7 @@ public final class LagSkyblock extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		if (spawners != null) spawners.save();
+		if (generators != null) generators.save();
 	}
 
 	// ---------------------------------------------------------------- tiers
@@ -179,6 +189,47 @@ public final class LagSkyblock extends JavaPlugin {
 			}
 		}
 		return any;
+	}
+
+	/** Our starter island becomes the only island choice, and new islands get a bigger claim. */
+	private void installIsland() throws Exception {
+		File dir = new File(getDataFolder().getParentFile(), "BentoBox" + File.separator + "addons" + File.separator + "BSkyBlock");
+		File bps = new File(dir, "blueprints");
+		if (!bps.isDirectory()) return; // BSkyBlock hasn't run yet; next start
+		try (var in = getResource("blueprints/relapsed.blu")) {
+			if (in != null) java.nio.file.Files.copy(in, new File(bps, "relapsed.blu").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		}
+		String bundle = """
+				{
+				  "uniqueId": "relapsed",
+				  "icon": "GRASS_BLOCK",
+				  "displayName": "&a&lRelapsed Island",
+				  "description": ["&7A big starter island with a tree,", "&7a sand beach and a starter chest."],
+				  "requirePermission": false,
+				  "blueprints": {"NORMAL": "relapsed", "NETHER": "nether-island", "THE_END": "end-island"},
+				  "slot": 0
+				}
+				""";
+		java.nio.file.Files.writeString(new File(bps, "relapsed.json").toPath(), bundle);
+		// hide the stock islands so ours is the one everyone gets
+		File[] others = bps.listFiles((d, n) -> n.endsWith(".json") && !n.equals("relapsed.json"));
+		if (others != null) {
+			for (File f : others) {
+				String t = java.nio.file.Files.readString(f.toPath());
+				String u = t.replaceAll("\"requirePermission\"\\s*:\\s*false", "\"requirePermission\": true");
+				if (!u.equals(t)) java.nio.file.Files.writeString(f.toPath(), u);
+			}
+		}
+		File cfg = new File(dir, "config.yml");
+		if (cfg.exists()) {
+			int range = getConfig().getInt("island.protection-range", 75);
+			String t = java.nio.file.Files.readString(cfg.toPath());
+			String u = t.replaceFirst("(?m)^(\\s*protection-range:)\\s*\\d+", "$1 " + range);
+			if (!u.equals(t)) {
+				java.nio.file.Files.writeString(cfg.toPath(), u);
+				getLogger().info("New islands get a " + (range * 2) + "x" + (range * 2) + " claim");
+			}
+		}
 	}
 
 	private void patchShop() throws Exception {

@@ -133,8 +133,9 @@ skyblock:
           icon-size: 0.7
           title: "<#38E0FF><bold>ORE GENERATORS"
           title-size: 0.7
-          lines: ["<gray>Your cobble generator drops ores.", "<gray>Upgrade it to unlock better ones:", "<white>Coal → Iron → Gold → Diamond → Emerald", "<dark_gray>Coming soon"]
+          lines: ["<gray>Your cobble generator makes ores.", "<gray>Upgrade it for better ones:", "<white>Coal → Iron → Gold → Diamond → Emerald", "<white>/gen"]
           line-size: 0.5
+          action: "cmd:gen"
     - id: spawners
       label: SPAWNERS
       cards:

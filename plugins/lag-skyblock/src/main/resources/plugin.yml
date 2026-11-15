@@ -12,10 +12,19 @@ commands:
   sellheads:
     description: Sell every mob head in your inventory
     aliases: [sellhead]
+  gen:
+    description: Your island's ore generator tiers
+    aliases: [generator, generators, oregen]
+  islandfly:
+    description: Fly on your own island (rank perk)
+    aliases: [isfly]
   lagskyblock:
     description: laG Skyblock admin
     aliases: [lsb]
     permission: lag.skyblock.admin
 permissions:
+  lag.skyblock.islandfly:
+    description: Island fly (give it to ranks with LuckPerms)
+    default: op
   lag.skyblock.admin:
     default: op

@@ -17,3 +17,19 @@ tiers:
   - {mob: blaze,      name: Blaze,      color: "#FFB020", price: 7500000,  head-value: 6500,  unlock: 96}
   - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
   - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}
+
+# Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
+# Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen.
+generator-tiers:
+  - {name: Cobble,   color: "#9AA3AD", icon: COBBLESTONE,   price: 0,        ores: {COBBLESTONE: 90, COAL_ORE: 10}}
+  - {name: Coal,     color: "#5A5A5A", icon: COAL_ORE,      price: 25000,    ores: {COBBLESTONE: 75, COAL_ORE: 18, IRON_ORE: 7}}
+  - {name: Iron,     color: "#D8AF93", icon: IRON_ORE,      price: 100000,   ores: {COBBLESTONE: 65, COAL_ORE: 18, IRON_ORE: 12, COPPER_ORE: 5}}
+  - {name: Gold,     color: "#FFD84D", icon: GOLD_ORE,      price: 350000,   ores: {COBBLESTONE: 55, COAL_ORE: 15, IRON_ORE: 15, GOLD_ORE: 10, COPPER_ORE: 5}}
+  - {name: Lapis,    color: "#3C6EE0", icon: LAPIS_ORE,     price: 900000,   ores: {COBBLESTONE: 48, COAL_ORE: 12, IRON_ORE: 15, GOLD_ORE: 12, REDSTONE_ORE: 8, LAPIS_ORE: 5}}
+  - {name: Diamond,  color: "#5BE3E3", icon: DIAMOND_ORE,   price: 2500000,  ores: {COBBLESTONE: 42, COAL_ORE: 10, IRON_ORE: 15, GOLD_ORE: 14, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 5}}
+  - {name: Emerald,  color: "#3CDB6E", icon: EMERALD_ORE,   price: 6000000,  ores: {COBBLESTONE: 36, COAL_ORE: 8, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 8, EMERALD_ORE: 5}}
+  - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 15000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
+
+# Starter island: the RelapsedMC blueprint (bigger island, tree, beach, starter chest) and a bigger claim.
+island:
+  protection-range: 75
