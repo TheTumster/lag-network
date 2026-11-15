@@ -305,8 +305,25 @@ def patch_backend(name):
             t = open(fc).read()
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false", r"\1enable=true", t)
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b", r"\1maxRadius=48", t)
+            # Relapse ruleset: 8-man factions, no allies or truces (alts are handled by laGCannons, not FUUID members)
+            t = re.sub(r"\bfactionMemberLimit\s*=\s*\d+", "factionMemberLimit=8", t)
+            def no_allies(m):
+                b = re.sub(r"\benabled\s*=\s*\w+", "enabled=true", m.group(0), count=1)
+                b = re.sub(r"\bally\s*=\s*-?\d+", "ally=0", b, count=1)
+                return re.sub(r"\btruce\s*=\s*-?\d+", "truce=0", b, count=1)
+            t = re.sub(r"(?s)\bmaxRelations\s*\{[^{}]*\}", no_allies, t, count=1)
+            # Everyone starts (and caps) at 200 power
+            def power200(m):
+                b = re.sub(r"\bplayerStarting\s*=\s*-?[\d.]+", "playerStarting=200.0", m.group(0), count=1)
+                return re.sub(r"\bplayerMax\s*=\s*-?[\d.]+", "playerMax=200.0", b, count=1)
+            t = re.sub(r"(?s)\bpower\s*\{[^{}]*?playerStarting[^{}]*\}", power200, t, count=1)
             open(fc, "w").write(t)
             log("  factions: TNT bank on, fill radius 48" if "maxRadius=48" in t else "  ! couldn't find FactionsUUID tnt settings")
+            log("  factions: 8-man cap" if "factionMemberLimit=8" in t else "  ! couldn't set FactionsUUID factionMemberLimit")
+            log("  factions: allies/truces off" if re.search(r"(?s)maxRelations\s*\{[^{}]*ally=0[^{}]*truce=0", t)
+                else "  ! couldn't turn off FactionsUUID allies/truces")
+            log("  factions: 200 starting power" if "playerStarting=200.0" in t and "playerMax=200.0" in t
+                else "  ! couldn't set FactionsUUID starting power")
     pg = os.path.join(d, "config", "paper-global.yml")
     yaml_set(pg, "proxies.velocity.enabled", True)
     yaml_set(pg, "proxies.velocity.online-mode", True)
