@@ -32,6 +32,34 @@ hub:
   double-jump: true
   void-y: -64
   join-title: true
+  # Spawn island (tools/hub/genspawn.py). Built once at y=100 on first start; /lagcore rebuildhub places it again.
+  auto-build: true
+  night: true
+  time: 18000
+  # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre.
+  portals:
+    factions: [0, 4, -25]
+    smp: [0, 4, 25]
+  # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts.
+  holograms:
+    - offset: [0.5, 17, 0.5]
+      scale: 6
+      text: "<gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient>"
+    - offset: [0.5, 15.2, 0.5]
+      scale: 1.6
+      text: "<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons    <white>{online} <gray>online"
+    - offset: [0.5, 14.5, -25]
+      scale: 2.4
+      text: "<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>\n<gray>Raid • Cannon • Conquer\n<white>{factions} <gray>playing"
+    - offset: [0.5, 14.5, 25]
+      scale: 2.4
+      text: "<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>\n<gray>Chill survival with claims\n<white>{smp} <gray>playing"
+    - offset: [-21.5, 8.5, 0.5]
+      scale: 1.4
+      text: "<gradient:#38E0FF:#B040FF><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Double jump with <white>SPACE"
+    - offset: [22.5, 8.5, 0.5]
+      scale: 1.4
+      text: "<gradient:#B040FF:#38E0FF><bold>DISCORD</bold></gradient>\n<gray>Coming soon"
 
 scoreboard:
   enabled: true

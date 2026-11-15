@@ -30,6 +30,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private static LagCore instance;
 	private final Map<String, Integer> counts = new HashMap<>();
 	private Hub hub;
+	HubBuild hubBuild;
 
 	public static LagCore get() {
 		return instance;
@@ -59,6 +60,9 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		if (isHub()) {
 			hub = new Hub(this, selector);
 			getServer().getPluginManager().registerEvents(hub, this);
+			hubBuild = new HubBuild(this);
+			getServer().getPluginManager().registerEvents(hubBuild, this);
+			Bukkit.getScheduler().runTask(this, hubBuild::start);
 		}
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);
@@ -148,9 +152,21 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			case "lagcore" -> {
 				if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 					reloadConfig();
+					if (hubBuild != null) hubBuild.holograms();
 					sender.sendMessage(mm("<#38E0FF>RelapsedMC core reloaded."));
+				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildhub") && hubBuild != null) {
+					// re-place the spawn island (same spot), e.g. after an update or if someone broke it
+					var o = hubBuild.origin();
+					var w = o != null ? o.getWorld() : Bukkit.getWorlds().get(0);
+					int n = hubBuild.build(w, o != null ? o.getBlockX() : 0, o != null ? o.getBlockY() : 100, o != null ? o.getBlockZ() : 0);
+					hubBuild.atmosphere(w);
+					hubBuild.holograms();
+					sender.sendMessage(mm("<#38E0FF>Hub spawn rebuilt <gray>(" + n + " blocks)."));
+				} else if (args.length > 0 && args[0].equalsIgnoreCase("holograms") && hubBuild != null) {
+					hubBuild.holograms();
+					sender.sendMessage(mm("<#38E0FF>Holograms respawned."));
 				} else {
-					sender.sendMessage(mm("<gray>/lagcore reload"));
+					sender.sendMessage(mm("<gray>/lagcore reload | rebuildhub | holograms"));
 				}
 			}
 			default -> { }

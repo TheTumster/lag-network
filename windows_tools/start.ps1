@@ -96,6 +96,17 @@ if (Test-Path $pw) {
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Applied cannon settings (explosion optimizer, water doesn't push TNT)." Green }
 }
 
+# ---- Cannons send a flood of client packets: raise ViaVersion's (proxy) and Paper's (factions) packet limits
+foreach ($pair in @(@("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(  max-per-second:) 800\b', '$1 5000'),
+                    @("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(  sustained-max-per-second:) 200\b', '$1 2000'),
+                    @("$Root\factions\config\paper-global.yml", '(?m)^(    max-packet-rate:) 500\.0\b', '$1 2000.0'))) {
+    if (Test-Path $pair[0]) {
+        $t = Get-Content $pair[0] -Raw
+        $n = [regex]::Replace($t, $pair[1], $pair[2])
+        if ($n -ne $t) { Set-Content $pair[0] $n -NoNewline; Say "Raised packet limit (cannons): $(Split-Path $pair[0] -Leaf)" Green }
+    }
+}
+
 # ---- Rename: laG Network -> RelapsedMC (player-facing names only; one time, safe to re-run). UTF-8 in and out.
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $dot = [string][char]0x2022

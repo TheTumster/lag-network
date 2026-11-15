@@ -237,7 +237,10 @@ def toml_set(text, key, value_literal):
 
 
 SERVER_PROPS = {
+    # hub: empty void world; laGCore builds the floating spawn island in it on first start
     "hub":      dict(difficulty="peaceful", gamemode="adventure", pvp="false", **{"level-type": "minecraft\\:flat"},
+                     **{"level-name": "hub_void",
+                        "generator-settings": '{"layers"\\:[{"block"\\:"minecraft\\:air","height"\\:1}],"biome"\\:"minecraft\\:the_void"}'},
                      **{"generate-structures": "false", "spawn-monsters": "false", "allow-nether": "false",
                         "view-distance": "8", "simulation-distance": "4"}),
     "factions": dict(difficulty="normal", gamemode="survival", pvp="true",
