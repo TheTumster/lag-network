@@ -288,7 +288,7 @@ def patch_backend(name):
     core_dir = os.path.join(d, "plugins", "laGCore")
     os.makedirs(core_dir, exist_ok=True)
     src = open(os.path.join(ROOT, "plugins", "lag-core", "src", "main", "resources", "config.yml")).read()
-    src = src.replace("role: hub", f"role: {name}").replace('network-name: "laG Network"', f'network-name: "{NET["name"]}"')
+    src = src.replace("role: hub", f"role: {name}").replace('network-name: "RelapsedMC"', f'network-name: "{NET["name"]}"')
     open(os.path.join(core_dir, "config.yml"), "w").write(src)
 
 
@@ -297,7 +297,7 @@ def patch_proxy():
     path = os.path.join(d, "velocity.toml")
     t = open(path).read()
     t = toml_set(t, "bind", f'"0.0.0.0:{NET["public_port"]}"')
-    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient> <gray>• Factions • SMP"')
+    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient>\\n<gray>Factions • SMP • 1.8 Cannons"')
     t = toml_set(t, "player-info-forwarding-mode", '"modern"')
     t = toml_set(t, "online-mode", "true")
     t = toml_set(t, "bungee-plugin-message-channel", "true")

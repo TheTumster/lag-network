@@ -2,7 +2,7 @@ name: laGCore
 version: '${version}'
 main: net.lag.core.LagCore
 api-version: '1.21'
-description: laG Network core - hub, server selector, scoreboard, network glue
+description: RelapsedMC core - hub, server selector, scoreboard, network glue
 commands:
   hub:
     description: Go back to the hub

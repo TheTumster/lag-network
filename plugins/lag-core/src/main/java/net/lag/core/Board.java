@@ -53,7 +53,7 @@ final class Board implements Listener {
 		line(o, 4, LagCore.mm("<gray>Online <white>" + plugin.count("ALL")));
 		line(o, 3, LagCore.mm("<gray>Ping <white>" + p.getPing() + "ms"));
 		line(o, 2, Component.text(" "));
-		line(o, 1, LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>laG Network</gradient>")));
+		line(o, 1, LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>RelapsedMC</gradient>")));
 	}
 
 	private void line(Objective o, int score, Component text) {

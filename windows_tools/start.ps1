@@ -6,7 +6,7 @@ $net = Get-Content "$Root\network.json" -Raw | ConvertFrom-Json
 
 function Say($msg, $color = "Cyan") { Write-Host "  $msg" -ForegroundColor $color }
 Write-Host ""
-Write-Host "  laG Network" -ForegroundColor Magenta
+Write-Host "  RelapsedMC" -ForegroundColor Magenta
 Write-Host ""
 
 # ---- Java 25+ (uses a private copy in .\runtime if your PC doesn't have one)
@@ -95,6 +95,26 @@ if (Test-Path $pw) {
             -replace 'prevent-tnt-from-moving-in-water:\s*false', 'prevent-tnt-from-moving-in-water: true'
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Applied cannon settings (explosion optimizer, water doesn't push TNT)." Green }
 }
+
+# ---- Rename: laG Network -> RelapsedMC (player-facing names only; one time, safe to re-run). UTF-8 in and out.
+$utf8 = New-Object System.Text.UTF8Encoding($false)
+$dot = [string][char]0x2022
+$renamed = $false
+foreach ($f in @("$Root\hub\plugins\laGCore\config.yml", "$Root\factions\plugins\laGCore\config.yml", "$Root\smp\plugins\laGCore\config.yml",
+                 "$Root\hub\server.properties", "$Root\factions\server.properties", "$Root\smp\server.properties", "$Root\proxy\velocity.toml")) {
+    if (Test-Path $f) {
+        $t = [IO.File]::ReadAllText($f, $utf8)
+        if ($t -match 'laG Network') {
+            $n = $t -replace 'laG cannon physics', '1.8 cannon physics'
+            if ($f -like '*velocity.toml') {
+                $n = [regex]::Replace($n, '(?m)^motd\s*=.*$', ('motd = "<gradient:#38E0FF:#B040FF><bold>RelapsedMC</bold></gradient>\n<gray>Factions ' + $dot + ' SMP ' + $dot + ' 1.8 Cannons"'))
+            }
+            $n = $n -replace 'laG Network', 'RelapsedMC'
+            [IO.File]::WriteAllText($f, $n, $utf8); $renamed = $true
+        }
+    }
+}
+if ($renamed) { Say "Network is now RelapsedMC." Green }
 
 # ---- Sakura (factions jar): 1.8 cannon mechanics, no entity merging, cannon lag options (all parity-tested)
 $sw = "$Root\factions\config\sakura-world-defaults.yml"

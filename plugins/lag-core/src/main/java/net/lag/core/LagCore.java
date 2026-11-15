@@ -40,7 +40,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	}
 
 	public String networkName() {
-		return getConfig().getString("network-name", "laG Network");
+		return getConfig().getString("network-name", "RelapsedMC");
 	}
 
 	public boolean isHub() {
@@ -148,7 +148,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			case "lagcore" -> {
 				if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 					reloadConfig();
-					sender.sendMessage(mm("<#38E0FF>laG Core reloaded."));
+					sender.sendMessage(mm("<#38E0FF>RelapsedMC core reloaded."));
 				} else {
 					sender.sendMessage(mm("<gray>/lagcore reload"));
 				}

@@ -195,7 +195,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 			reloadConfig();
 			loadDurable();
 			sandbots.restartTask();
-			send(sender, "<#38E0FF>laG Cannons reloaded.");
+			send(sender, "<#38E0FF>Cannons reloaded.");
 		} else if (args.length > 0 && args[0].equalsIgnoreCase("clear")) {
 			damage.clear();
 			send(sender, "<#38E0FF>All block damage healed.");
@@ -234,7 +234,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 							n++;
 						}
 					}
-			p.sendMessage(ChatColor.LIGHT_PURPLE + "[laG] " + ChatColor.GRAY + "Test fill: " + ChatColor.WHITE + n + ChatColor.GRAY
+			p.sendMessage(ChatColor.LIGHT_PURPLE + "[RelapsedMC] " + ChatColor.GRAY + "Test fill: " + ChatColor.WHITE + n + ChatColor.GRAY
 					+ " dispensers, " + amount + " TNT each (radius " + r + "). Free because you're op in creative.");
 			return true;
 		}

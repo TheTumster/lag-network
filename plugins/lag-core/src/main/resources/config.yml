@@ -1,5 +1,5 @@
-# laG Core. The SAME network name goes in every server's copy of this file.
-network-name: "laG Network"
+# Core plugin. The SAME network name goes in every server's copy of this file.
+network-name: "RelapsedMC"
 
 # What this server is: hub, factions or smp. Hub features (selector item, no damage, etc.) only run on the hub.
 role: hub
@@ -13,7 +13,7 @@ realms:
     slot: 11
     lore:
       - "<gray>Raid, cannon, claim, conquer."
-      - "<gray>1.8 PvP  •  laG cannon physics"
+      - "<gray>1.8 PvP  •  1.8 cannon physics"
       - ""
       - "<#38E0FF>▶ Click to play"
   smp:
@@ -35,4 +35,4 @@ hub:
 
 scoreboard:
   enabled: true
-  footer: "<gradient:#38E0FF:#B040FF>laG Network</gradient>"
+  footer: "<gradient:#38E0FF:#B040FF>RelapsedMC</gradient>"
