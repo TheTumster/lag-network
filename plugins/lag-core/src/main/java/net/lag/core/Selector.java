@@ -70,7 +70,7 @@ public final class Selector implements Listener {
 
 		if (!art) border(inv);
 
-		ConfigurationSection realms = plugin.getConfig().getConfigurationSection("realms");
+		ConfigurationSection realms = plugin.section("realms");
 		if (realms != null) {
 			for (String key : realms.getKeys(false)) {
 				ConfigurationSection r = realms.getConfigurationSection(key);

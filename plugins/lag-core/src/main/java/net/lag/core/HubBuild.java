@@ -284,7 +284,7 @@ final class HubBuild implements Listener {
 	/** Fill in {server} player counts. */
 	void refresh() {
 		live.entrySet().removeIf(en -> !en.getKey().isValid());
-		ConfigurationSection realms = plugin.getConfig().getConfigurationSection("realms");
+		ConfigurationSection realms = plugin.section("realms");
 		for (var en : live.entrySet()) {
 			String t = en.getValue();
 			if (realms != null) {
@@ -315,7 +315,7 @@ final class HubBuild implements Listener {
 		Long last = portalCooldown.get(p.getUniqueId());
 		if (last != null && now - last < 3000) return;
 		Location o = origin();
-		ConfigurationSection portals = plugin.getConfig().getConfigurationSection("hub.portals");
+		ConfigurationSection portals = plugin.section("hub.portals");
 		if (o == null || portals == null) return;
 		String best = null;
 		double bestD = 12 * 12;
@@ -332,13 +332,15 @@ final class HubBuild implements Listener {
 		}
 		if (best == null) return;
 		portalCooldown.put(p.getUniqueId(), now);
-		if (plugin.getConfig().getBoolean("realms." + best + ".coming-soon", false)) {
+		var realmSec = plugin.section("realms");
+		var realm = realmSec == null ? null : realmSec.getConfigurationSection(best);
+		if (realm != null && realm.getBoolean("coming-soon", false)) {
 			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + best.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
 			Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(plugin.spawn()); }, 20L);
 			return;
 		}
-		String server = plugin.getConfig().getString("realms." + best + ".server", best);
+		String server = realm != null ? realm.getString("server", best) : best;
 		p.playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.25f, 1.6f);
 		p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF>Sending you to <bold>" + best.toUpperCase() + "</bold>...</gradient>"));
 		plugin.send(p, server);

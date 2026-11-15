@@ -69,7 +69,7 @@ final class Board implements Listener {
 		lines.add(LagCore.mm(ip + head + "NETWORK</bold></gradient>"));
 		lines.add(LagCore.mm(bullet + "<gray>Online <white>" + plugin.count("ALL")));
 		lines.add(LagCore.mm(bullet + "<gray>Realm <white>" + realm));
-		var realms = plugin.getConfig().getConfigurationSection("realms");
+		var realms = plugin.section("realms");
 		if ("hub".equalsIgnoreCase(role) && realms != null) {
 			lines.add(Component.text("  "));
 			lines.add(LagCore.mm(it + head + "REALMS</bold></gradient>"));

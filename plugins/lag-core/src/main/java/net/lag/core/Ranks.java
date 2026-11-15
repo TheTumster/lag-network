@@ -33,7 +33,7 @@ final class Ranks implements Listener {
 		String forced = plugin.getConfig().getString("rank-players." + p.getName());
 		if (forced == null) forced = plugin.getConfig().getString("rank-players." + p.getUniqueId());
 		if (forced != null) return forced.toLowerCase(Locale.ROOT);
-		var sec = plugin.getConfig().getConfigurationSection("ranks");
+		var sec = plugin.section("ranks");
 		if (sec != null) {
 			for (String g : sec.getKeys(false)) {
 				if (p.isPermissionSet("group." + g) && p.hasPermission("group." + g)) return g;
@@ -52,7 +52,7 @@ final class Ranks implements Listener {
 	}
 
 	private int weight(String rank) {
-		var sec = plugin.getConfig().getConfigurationSection("ranks");
+		var sec = plugin.section("ranks");
 		if (sec == null || rank == null) return 99;
 		int i = 0;
 		for (String k : sec.getKeys(false)) {

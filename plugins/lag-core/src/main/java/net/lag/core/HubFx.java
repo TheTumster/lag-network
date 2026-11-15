@@ -254,7 +254,7 @@ final class HubFx implements Listener {
 		long end = name.length() * 2L + 2;
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
-			p.showTitle(Title.title(LagCore.mm(plugin.pack != null && plugin.pack.has(p) ? Pack.glyph(Pack.LOGO_TITLE) : "<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
+			p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
 					LagCore.mm("<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons"),
 					Title.Times.times(Duration.ZERO, Duration.ofSeconds(3), Duration.ofMillis(800))));
 			// chord
@@ -363,7 +363,7 @@ final class HubFx implements Listener {
 		}
 		// portal rings
 		if (tick % 3 == 0) {
-			var portals = plugin.getConfig().getConfigurationSection("hub.portals");
+			var portals = plugin.section("hub.portals");
 			if (portals != null) {
 				for (String realm : portals.getKeys(false)) {
 					List<?> off = portals.getList(realm);

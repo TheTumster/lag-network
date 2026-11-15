@@ -48,6 +48,19 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		return getConfig().getString("network-name", "RelapsedMC");
 	}
 
+	/**
+	 * A config section, falling back to the plugin's built-in one when the server's config.yml doesn't have it.
+	 * (Bukkit's getConfigurationSection returns an EMPTY section in that case instead of the default.)
+	 */
+	public org.bukkit.configuration.ConfigurationSection section(String path) {
+		var c = getConfig();
+		var s = c.isConfigurationSection(path) ? c.getConfigurationSection(path) : null;
+		if (s != null && !s.getKeys(false).isEmpty()) return s;
+		var d = c.getDefaults();
+		var ds = d == null ? null : d.getConfigurationSection(path);
+		return ds != null ? ds : s;
+	}
+
 	public boolean isHub() {
 		return "hub".equalsIgnoreCase(getConfig().getString("role", "hub"));
 	}
@@ -108,7 +121,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		if (any == null) return;
 		java.util.List<String> servers = new java.util.ArrayList<>();
 		servers.add("ALL");
-		var realms = getConfig().getConfigurationSection("realms");
+		var realms = section("realms");
 		if (realms != null) for (String k : realms.getKeys(false)) servers.add(realms.getString(k + ".server", k));
 		for (String s : servers) {
 			try {
