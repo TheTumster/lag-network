@@ -131,7 +131,7 @@ def island(cx, cz, r, depth, top_y, seed, main=False):
             elif main and r_ < 0.168 and dep > 5:
                 ln = 2 + int(h(x, z, 9) * 5)
                 for i in range(ln):
-                    put(cx + x, bottom - i, cz + z, "chain[axis=y,waterlogged=false]")
+                    put(cx + x, bottom - i, cz + z, "iron_chain[axis=y,waterlogged=false]")
                 put(cx + x, bottom - ln, cz + z, "soul_lantern[hanging=true,waterlogged=false]")
 
 
@@ -231,7 +231,7 @@ for k in range(720):
         x, z = round((COL_R + 0.8) * math.cos(a)), round((COL_R + 0.8) * math.sin(a))
         if get(x, FLOOR + 8, z) and "slab" in get(x, FLOOR + 8, z):
             for i in range(2):
-                put(x, FLOOR + 7 - i, z, "chain[axis=y,waterlogged=false]")
+                put(x, FLOOR + 7 - i, z, "iron_chain[axis=y,waterlogged=false]")
             put(x, FLOOR + 5, z, "soul_lantern[hanging=true,waterlogged=false]")
 
 # ======================================================================= floating crystal over spawn
@@ -333,7 +333,7 @@ def gateway(zc, theme):
                 for dz in range(-w, w + 1):
                     put(x, FLOOR + 2 + y, zc + dz, roof if i < 3 else "end_rod[facing=up]")
         ix = sx - (1 if sx > 0 else -1) * 2
-        put(ix, FLOOR + 12, zc - s, "chain[axis=y,waterlogged=false]")
+        put(ix, FLOOR + 12, zc - s, "iron_chain[axis=y,waterlogged=false]")
         put(ix, FLOOR + 11, zc - s, ("soul_lantern" if theme == "factions" else "lantern") + "[hanging=true,waterlogged=false]")
     if theme == "factions":
         for x in (-6, 6):
@@ -381,7 +381,7 @@ def pavilion(xc, theme_glow):
                 if 5.6 <= d <= 6.7:
                     put(xc + x, FLOOR + 8 + y, z, "purple_stained_glass" if (x + z + y) % 3 else "amethyst_block")
     put(xc, FLOOR + 15, 0, "end_rod[facing=up]")
-    put(xc, FLOOR + 13, 0, "chain[axis=y,waterlogged=false]")
+    put(xc, FLOOR + 13, 0, "iron_chain[axis=y,waterlogged=false]")
     put(xc, FLOOR + 12, 0, "soul_lantern[hanging=true,waterlogged=false]")
     for y in range(FLOOR + 2, FLOOR + 5):
         put(xc, y, 0, "amethyst_block")

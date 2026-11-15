@@ -104,8 +104,14 @@ final class HubBuild implements Listener {
 				try {
 					palette[i] = Bukkit.createBlockData(names[i]);
 				} catch (IllegalArgumentException e) {
-					plugin.getLogger().warning("Unknown block " + names[i] + ", using stone");
-					palette[i] = Bukkit.createBlockData("minecraft:stone");
+					// try without block states, then give up with air (never leave stone blobs in the build)
+					try {
+						palette[i] = Bukkit.createBlockData(names[i].split("\\[")[0]);
+						plugin.getLogger().warning("Block states not accepted for " + names[i] + ", placed plain");
+					} catch (IllegalArgumentException e2) {
+						plugin.getLogger().warning("Unknown block " + names[i] + ", skipped");
+						palette[i] = Bukkit.createBlockData("minecraft:air");
+					}
 				}
 			}
 			String line;
