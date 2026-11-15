@@ -355,7 +355,9 @@ final class HubFx implements Listener {
 			for (int strand = 0; strand < 2; strand++) {
 				double a = tick * 0.18 + strand * Math.PI;
 				double y = (tick % 60) / 60.0 * 4.5;
-				Location l = o.clone().add(0.5 + Math.cos(a) * 1.6, 1.2 + y, 0.5 + Math.sin(a) * 1.6);
+				List<?> bo = plugin.getConfig().getList("hub.beacon", List.of(0, 0, 0));
+				Location l = o.clone().add(((Number) bo.get(0)).doubleValue() + 0.5 + Math.cos(a) * 1.6, ((Number) bo.get(1)).doubleValue() + 1.2 + y,
+						((Number) bo.get(2)).doubleValue() + 0.5 + Math.sin(a) * 1.6);
 				w.spawnParticle(Particle.DUST, l, 1, 0, 0, 0, 0, new Particle.DustOptions(strand == 0 ? CYAN : PURPLE, 1.2f));
 			}
 		}
@@ -366,7 +368,7 @@ final class HubFx implements Listener {
 				for (String realm : portals.getKeys(false)) {
 					List<?> off = portals.getList(realm);
 					if (off == null || off.size() < 3) continue;
-					Location c = o.clone().add(0.5, ((Number) off.get(1)).doubleValue() + 0.5, ((Number) off.get(2)).doubleValue() + 0.5);
+					Location c = o.clone().add(((Number) off.get(0)).doubleValue() + 0.5, ((Number) off.get(1)).doubleValue() + 0.5, ((Number) off.get(2)).doubleValue() + 0.5);
 					for (int k = 0; k < 3; k++) {
 						double a = tick * 0.12 + k * (Math.PI * 2 / 3);
 						Location l = c.clone().add(Math.cos(a) * 3.3, Math.sin(a) * 4.3, 0);

@@ -32,6 +32,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private Hub hub;
 	HubBuild hubBuild;
 	Pack pack;
+	Ranks ranks;
 	HubFx hubFx;
 	Parkour parkour;
 
@@ -62,6 +63,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		getServer().getPluginManager().registerEvents(pack, this);
 		pack.start();
 		getServer().getPluginManager().registerEvents(new Fresh(this), this);
+		ranks = new Ranks(this);
+		getServer().getPluginManager().registerEvents(ranks, this);
 		Selector selector = new Selector(this);
 		getServer().getPluginManager().registerEvents(selector, this);
 		if (isHub()) {

@@ -95,13 +95,8 @@ final class Board implements Listener {
 
 	/** First matching LuckPerms group (group.<name> permission) from config "ranks"; ops count as the first rank. */
 	private String rank(Player p) {
-		var sec = plugin.getConfig().getConfigurationSection("ranks");
-		if (sec != null) {
-			for (String g : sec.getKeys(false)) {
-				if (p.hasPermission("group." + g)) return sec.getString(g, g);
-			}
-		}
-		return "<gray>Member";
+		String t = plugin.ranks == null ? "" : plugin.ranks.tag(p);
+		return t.isEmpty() ? "<gray>Member" : t;
 	}
 
 	private void line(Objective o, int score, Component text) {

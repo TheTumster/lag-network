@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 6;
+	static final int BUILD_VERSION = 7;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -79,8 +79,8 @@ final class HubBuild implements Listener {
 		if (plugin.getConfig().getInt("hub.build-version", 0) > 0) {
 			BlockData air = Bukkit.createBlockData("minecraft:air");
 			int cleared = 0;
-			for (int x = ox - 110; x <= ox + 110; x++) {
-				for (int z = oz - 110; z <= oz + 110; z++) {
+			for (int x = ox - 120; x <= ox + 120; x++) {
+				for (int z = oz - 150; z <= oz + 110; z++) {
 					for (int y = oy - 60; y <= oy + 45; y++) {
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
@@ -179,7 +179,7 @@ final class HubBuild implements Listener {
 		if (o == null) return;
 		// keep the spawn area loaded even with nobody in the hub, so the displays aren't unloaded with it
 		for (int cx = (o.getBlockX() >> 4) - 6; cx <= (o.getBlockX() >> 4) + 6; cx++) {
-			for (int cz = (o.getBlockZ() >> 4) - 6; cz <= (o.getBlockZ() >> 4) + 6; cz++) {
+			for (int cz = (o.getBlockZ() >> 4) - 8; cz <= (o.getBlockZ() >> 4) + 5; cz++) {
 				o.getWorld().getChunkAt(cx, cz).addPluginChunkTicket(plugin);
 			}
 		}
