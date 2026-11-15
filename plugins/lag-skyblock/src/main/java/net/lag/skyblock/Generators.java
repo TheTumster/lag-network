@@ -143,7 +143,7 @@ final class Generators implements Listener, CommandExecutor {
 		m.inv = Bukkit.createInventory(m, 45, Spawners.mm("<gradient:#38E0FF:#7CFF6B><bold>ORE GENERATOR</bold></gradient> <dark_gray>· tier " + tierOf(island) + "/" + tiers.size()));
 		draw(m);
 		p.openInventory(m.inv);
-		p.playSound(p.getLocation(), Sound.BLOCK_BLAST_FURNACE_FIRE_CRACKLE, 0.8f, 1.2f);
+		p.playSound(p.getLocation(), Sound.BLOCK_FURNACE_FIRE_CRACKLE, 0.8f, 1.2f);
 	}
 
 	private static ItemStack pane(Material mat) {
