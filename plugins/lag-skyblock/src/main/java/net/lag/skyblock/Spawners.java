@@ -256,7 +256,7 @@ final class Spawners implements Listener, CommandExecutor {
 			return it;
 		}
 		return named(Material.GRAY_DYE, "<dark_gray><bold>???</bold> <dark_gray>· Tier " + n, List.of(
-				"<dark_gray>Unlock the tier before this first.")));
+				"<dark_gray>Unlock the tier before this first."));
 	}
 
 	private static List<Component> lore(List<String> lines) {
