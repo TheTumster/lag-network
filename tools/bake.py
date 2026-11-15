@@ -45,7 +45,8 @@ PLUGINS = json.load(open(os.path.join(ROOT, "tools", "plugins.json")))
 MC = NET["minecraft"]
 DIST = os.path.join(ROOT, "dist", "laG-Network")
 UA = {"User-Agent": "TheTumster/lag-network/1.0 (github.com/TheTumster/lag-network)"}
-SERVERS = ["hub", "factions", "smp"]
+SERVERS = list(NET["servers"])            # hub, factions, smp, skyblock, cannons
+SAKURA_SERVERS = {"factions", "cannons"}  # 1.8 cannon mechanics (cannons = test server, same jar + settings as factions)
 SECRET_PLACEHOLDER = "LAG_CHANGE_ME_ON_FIRST_START"
 
 
@@ -247,6 +248,15 @@ SERVER_PROPS = {
                      **{"view-distance": "10", "simulation-distance": "8"}),
     "smp":      dict(difficulty="normal", gamemode="survival", pvp="false",
                      **{"view-distance": "10", "simulation-distance": "8"}),
+    # skyblock: void main world for the spawn; BentoBox/BSkyBlock makes the island worlds
+    "skyblock": dict(difficulty="normal", gamemode="survival", pvp="false", **{"level-type": "minecraft\\:flat"},
+                     **{"generator-settings": '{"layers"\\:[{"block"\\:"minecraft\\:air","height"\\:1}],"biome"\\:"minecraft\\:the_void"}',
+                        "generate-structures": "false", "spawn-monsters": "true", "allow-nether": "true",
+                        "view-distance": "8", "simulation-distance": "6"}),
+    # cannons: flat creative test world on the exact factions jar and settings
+    "cannons":  dict(difficulty="peaceful", gamemode="creative", pvp="false", **{"level-type": "minecraft\\:flat"},
+                     **{"force-gamemode": "true", "generate-structures": "false", "spawn-monsters": "false", "allow-nether": "false",
+                        "view-distance": "10", "simulation-distance": "8"}),
 }
 
 
@@ -257,7 +267,7 @@ def patch_backend(name):
         "server-ip": "127.0.0.1", "server-port": port, "online-mode": "false", "enforce-secure-profile": "false",
         "motd": NET["name"], "spawn-protection": "0", "max-players": "100", "allow-flight": "true",
         **SERVER_PROPS[name]})
-    if name == "factions":
+    if name in SAKURA_SERVERS:
         # Cannon server settings: let big cannons tick every TNT, and use Paper's explosion cache
         yaml_set(os.path.join(d, "spigot.yml"), "world-settings.default.max-tnt-per-tick", 20000)
         yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "environment.optimize-explosions", True)
@@ -273,6 +283,19 @@ def patch_backend(name):
                      ("cannons.explosion.optimise-protected-regions", True), ("cannons.explosion.avoid-redundant-block-searches", True),
                      ("cannons.explosion.reuse-block-cache-across-explosions", True), ("technical.redstone.redstone-cache", True)):
             yaml_set(sw, k, v)
+    if name == "cannons":
+        # test server: diamond protection everywhere, free /tntfill in creative
+        lc = os.path.join(d, "plugins", "laGCannons", "config.yml")
+        if not os.path.exists(lc):
+            os.makedirs(os.path.dirname(lc), exist_ok=True)
+            shutil.copy(os.path.join(ROOT, "plugins", "lag-cannons", "src", "main", "resources", "config.yml"), lc)
+        yaml_set(lc, "cannon-protect.worlds", ["*"])
+        yaml_set(lc, "tntfill.free-for-all", True)
+        log("  cannons: diamond protection everywhere, free /tntfill")
+    if name == "factions":
+        tr = os.path.join(d, "plugins", "FactionsUUID", "config", "translations.conf")
+        if os.path.exists(tr):
+            subprocess.run([sys.executable, os.path.join(ROOT, "tools", "fuuid_theme.py"), tr], check=False)
         fc = next((c for c in (os.path.join(d, "plugins", n, "config", "main.conf") for n in ("FactionsUUID", "Factions"))
                    if os.path.exists(c)), None)
         if not fc:
@@ -300,7 +323,7 @@ def patch_proxy():
     path = os.path.join(d, "velocity.toml")
     t = open(path).read()
     t = toml_set(t, "bind", f'"0.0.0.0:{NET["public_port"]}"')
-    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient>\\n<gray>Factions • SMP • 1.8 Cannons"')
+    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient>\\n<gray>Factions • Skyblock • SMP • 1.8 Cannons"')
     t = toml_set(t, "player-info-forwarding-mode", '"modern"')
     t = toml_set(t, "online-mode", "true")
     t = toml_set(t, "bungee-plugin-message-channel", "true")
@@ -332,13 +355,13 @@ def main():
     for s in SERVERS:
         os.makedirs(os.path.join(DIST, s, "plugins"), exist_ok=True)
         open(os.path.join(DIST, s, "eula.txt"), "w").write("eula=true\n")
-        if s == "factions":
+        if s in SAKURA_SERVERS:
             # Sakura 1.21.11 (MIT, Samsuik/Sakura) in legacy 1.8 mechanics mode: matched 1.8 exactly in the parity test,
             # plus its cannon lag optimisations. Built by the lag-sakura workflow. (laG Paper stays as a fallback release.)
             lurl = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/releases/download/lag-sakura/sakura-1.21.11.jar"
             download(lurl, os.path.join(DIST, s, "paper.jar"))
             manage(s, "paper.jar", lurl)
-            log("  factions  + Sakura (1.8 cannon mechanics)")
+            log(f"  {s:9} + Sakura (1.8 cannon mechanics)")
             continue
         shutil.copy(os.path.join(DIST, "_paper.jar"), os.path.join(DIST, s, "paper.jar"))
         manage(s, "paper.jar", purl)
@@ -350,9 +373,11 @@ def main():
     for server, items in PLUGINS.items():
         if server.startswith("_"):
             continue
-        pdir = os.path.join(DIST, server, "plugins")
-        os.makedirs(pdir, exist_ok=True)
         for it in items:
+            # BentoBox addons go in plugins/BentoBox/addons
+            pdir = os.path.join(DIST, server, "plugins", *it.get("subdir", "").split("/")) if it.get("subdir") else os.path.join(DIST, server, "plugins")
+            os.makedirs(pdir, exist_ok=True)
+            rel_dir = "plugins/" + it["subdir"] if it.get("subdir") else "plugins"
             if "local" in it:
                 shutil.copy(os.path.join(local_dir, it["local"] + ".jar"), os.path.join(pdir, it["local"] + ".jar"))
                 manage(server, os.path.join("plugins", it["local"] + ".jar"), RELEASE_DL + it["local"] + ".jar")
@@ -373,7 +398,7 @@ def main():
                 continue
             url, fname, sha1 = res
             download(url, os.path.join(pdir, fname), sha1)
-            manage(server, os.path.join("plugins", fname), url)
+            manage(server, rel_dir + "/" + fname, url)
             manifest["plugins"].setdefault(server, []).append(fname)
             log(f"  {server:9} + {fname}")
     if missing:
@@ -418,7 +443,8 @@ def main():
                     if re.search(r"Caused by|Exception|requires|version|depend", nxt, re.I):
                         problems.append(f"[{name}]     {nxt.strip()[:300]}")
     # Make sure the important plugins actually ENABLED (not just loaded)
-    must = {"hub": ["laGCore"], "factions": ["laGCore", "laGCannons", "Factions"], "smp": ["laGCore"]}
+    must = {"hub": ["laGCore"], "factions": ["laGCore", "laGCannons", "Factions"], "smp": ["laGCore"],
+            "skyblock": ["laGCore", "BentoBox"], "cannons": ["laGCore", "laGCannons", "FastAsyncWorldEdit"]}
     for srv in SERVERS:
         enabled = sorted({m.group(1) for l in logs.get(srv, []) for m in [re.search(r"Enabling (\S+) v", l)] if m})
         log(f"  {srv:9} enabled: {', '.join(enabled)}")

@@ -11,11 +11,11 @@ realms:
     name: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
     icon: GRASS_BLOCK
     slot: 10
-    coming-soon: true
     lore:
       - "<gray>Competitive islands, grinding, spawners."
+      - "<gray>Island top • challenges • shop"
       - ""
-      - "<#B040FF>Coming soon"
+      - "<#38E0FF>▶ Click to play"
   factions:
     server: factions
     name: "<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>"
@@ -31,11 +31,11 @@ realms:
     name: "<gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient>"
     icon: DISPENSER
     slot: 14
-    coming-soon: true
     lore:
       - "<gray>Test cannons on the exact Factions jar."
+      - "<gray>Creative • free /tntfill • diamond protection"
       - ""
-      - "<#B040FF>Coming soon"
+      - "<#38E0FF>▶ Click to play"
   smp:
     server: smp
     name: "<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>"
@@ -82,6 +82,58 @@ rank-players:
 chat:
   enabled: true
 
+# Realm spawn islands (built once on first start of that server; walk into the purple ring = back to the hub).
+# y: a height, or "ground" to sit on the terrain at 0,0. protect-radius: no building/PvP/explosions that close.
+spawns:
+  factions:
+    y: ground
+    protect-radius: 30
+    catch-falls: false
+    portals:
+      hub: [0, 5, -15]
+    holograms:
+      - offset: [0.5, 4.6, -7.5]
+        scale: 3
+        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>"
+      - offset: [0.5, 3.2, -7.5]
+        scale: 1.1
+        text: "<gray>Make a faction <white>/f create <name>   <gray>Fill dispensers <white>/tntfill\n<gray>Faction info <white>/f who   <gray>Back to the hub: walk into the ring"
+      - offset: [0.5, 10.6, -15]
+        scale: 1.4
+        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+  skyblock:
+    y: 100
+    protect-radius: 30
+    catch-falls: true
+    portals:
+      hub: [0, 5, -15]
+    holograms:
+      - offset: [0.5, 4.6, -7.5]
+        scale: 3
+        text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>"
+      - offset: [0.5, 3.2, -7.5]
+        scale: 1.1
+        text: "<gray>Start your island <white>/is   <gray>Island top <white>/is top   <gray>Shop <white>/shop\n<gray>Challenges <white>/challenges   <gray>Back to the hub: walk into the ring"
+      - offset: [0.5, 10.6, -15]
+        scale: 1.4
+        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+  cannons:
+    y: ground
+    protect-radius: 25
+    catch-falls: false
+    portals:
+      hub: [0, 5, -15]
+    holograms:
+      - offset: [0.5, 4.6, -7.5]
+        scale: 3
+        text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>"
+      - offset: [0.5, 3.2, -7.5]
+        scale: 1.1
+        text: "<gray>Same jar + settings as Factions. Build anywhere, fly in creative.\n<white>/tntfill <gray>free fill  <dark_gray>•  <gray>diamond block under it = can't be blown up  <dark_gray>•  <white>//schem <gray>to paste"
+      - offset: [0.5, 10.6, -15]
+        scale: 1.4
+        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+
 # Resource pack (logo, icons, menus). Built from resourcepack/ and published with every release.
 resource-pack:
   enabled: true
@@ -117,13 +169,13 @@ hub:
       text: "<gray>Pick a path and walk into a portal\n<dark_gray>Discord <gray>← <dark_gray>• <gray>→ <dark_gray>Parkour    <white>{online} <gray>online"
     - offset: [-33.5, 9.8, -26.5]
       scale: 3.6
-      text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>\n<gray>Coming soon"
+      text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>\n<white>{skyblock} <gray>playing"
     - offset: [-11.5, 9.8, -38.5]
       scale: 3.6
       text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>\n<white>{factions} <gray>playing"
     - offset: [12.5, 9.8, -38.5]
       scale: 3.6
-      text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>\n<gray>Coming soon"
+      text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>\n<white>{cannons} <gray>playing"
     - offset: [34.5, 9.8, -26.5]
       scale: 3.6
       text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SMP</bold></gradient>\n<white>{smp} <gray>playing"

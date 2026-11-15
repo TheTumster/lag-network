@@ -103,5 +103,92 @@
     {
       "local": "laGCore"
     }
+  ],
+  "skyblock": [
+    {
+      "modrinth": "luckperms",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "essentialsx",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "vaultunlocked",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "fastasyncworldedit",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "modrinth": "coreprotect",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "github": "BentoBoxWorld/BentoBox"
+    },
+    {
+      "github": "BentoBoxWorld/BSkyBlock",
+      "subdir": "BentoBox/addons"
+    },
+    {
+      "github": "BentoBoxWorld/Level",
+      "subdir": "BentoBox/addons"
+    },
+    {
+      "github": "BentoBoxWorld/Challenges",
+      "subdir": "BentoBox/addons",
+      "optional": true
+    },
+    {
+      "github": "BentoBoxWorld/Warps",
+      "subdir": "BentoBox/addons",
+      "optional": true
+    },
+    {
+      "github": "BentoBoxWorld/Upgrades",
+      "subdir": "BentoBox/addons",
+      "optional": true
+    },
+    {
+      "modrinth": "smartspawner",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "modrinth": "economyshopgui",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "local": "laGCore"
+    }
+  ],
+  "cannons": [
+    {
+      "modrinth": "luckperms",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "essentialsx",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "vaultunlocked",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "fastasyncworldedit",
+      "loader": "paper"
+    },
+    {
+      "local": "laGCore"
+    },
+    {
+      "local": "laGCannons"
+    }
   ]
 }

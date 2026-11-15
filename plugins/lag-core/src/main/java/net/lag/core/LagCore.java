@@ -31,6 +31,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private final Map<String, Integer> counts = new HashMap<>();
 	private Hub hub;
 	HubBuild hubBuild;
+	HubBuild spawnBuild; // realm servers: their own spawn island
 	Pack pack;
 	Ranks ranks;
 	HubFx hubFx;
@@ -59,6 +60,22 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		var d = c.getDefaults();
 		var ds = d == null ? null : d.getConfigurationSection(path);
 		return ds != null ? ds : s;
+	}
+
+	/** Config value that also checks the built-in defaults (getX(path, def) skips them in Bukkit). */
+	public Object opt(String path, Object def) {
+		Object v = getConfig().get(path);
+		return v != null ? v : def;
+	}
+
+	public boolean optBool(String path, boolean def) {
+		Object v = opt(path, def);
+		return v instanceof Boolean b ? b : Boolean.parseBoolean(String.valueOf(v));
+	}
+
+	public double optNum(String path, double def) {
+		Object v = opt(path, def);
+		return v instanceof Number n ? n.doubleValue() : Double.parseDouble(String.valueOf(v));
 	}
 
 	public boolean isHub() {
@@ -91,6 +108,16 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			Bukkit.getScheduler().runTask(this, hubFx::start);
 			parkour = new Parkour(this, hubBuild, hubFx);
 			getServer().getPluginManager().registerEvents(parkour, this);
+		}
+		if (!isHub()) {
+			String role = getConfig().getString("role", "hub").toLowerCase();
+			String file = "spawn-" + role + ".txt.gz";
+			if (getResource(file) != null && section("spawns." + role) != null) {
+				spawnBuild = new HubBuild(this, "spawns." + role, file);
+				getServer().getPluginManager().registerEvents(spawnBuild, this);
+				getServer().getPluginManager().registerEvents(new SpawnProtect(this, spawnBuild), this);
+				Bukkit.getScheduler().runTask(this, spawnBuild::start);
+			}
 		}
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);
@@ -159,7 +186,9 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		switch (cmd.getName().toLowerCase()) {
 			case "hub" -> {
 				if (!(sender instanceof Player p)) return true;
-				if (isHub()) {
+				if (!isHub() && label.equalsIgnoreCase("spawn") && spawnBuild != null && spawnBuild.spawnPoint() != null) {
+					p.teleport(spawnBuild.spawnPoint());
+				} else if (isHub()) {
 					if (hub != null) hub.toSpawn(p);
 				} else {
 					p.sendMessage(mm("<gray>Sending you to the hub..."));

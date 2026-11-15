@@ -35,10 +35,11 @@ import org.joml.Vector3f;
  * The RelapsedMC hub spawn: places the generated floating island (resources/hub-spawn.txt.gz, made by
  * tools/hub/genspawn.py) on first start, sets spawn on it, spawns the floating titles, and turns the
  * nether portals into server portals (walk in = join that server). Offsets in config are relative to the
- * spawn floor centre ("hub.origin").
+ * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 9;
+	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -47,7 +48,19 @@ final class HubBuild implements Listener {
 	private final Map<org.bukkit.entity.ItemDisplay, float[]> spinners = new HashMap<>(); // {scale, spin speed}
 	private long tick;
 
+	/** Config section ("hub" or "spawns.<role>") and the island file in the jar. */
+	final String base;
+	private final String file;
+	private final boolean hub;
+
 	HubBuild(LagCore plugin) {
+		this(plugin, "hub", "hub-spawn.txt.gz");
+	}
+
+	HubBuild(LagCore plugin, String base, String file) {
+		this.base = base;
+		this.file = file;
+		this.hub = "hub".equals(base);
 		this.plugin = plugin;
 		this.holoKey = new NamespacedKey(plugin, "holo");
 	}
@@ -55,16 +68,38 @@ final class HubBuild implements Listener {
 	/** Called on enable (one tick later, worlds loaded). */
 	void start() {
 		World w = Bukkit.getWorlds().get(0);
-		if (plugin.getConfig().getInt("hub.build-version", 0) < BUILD_VERSION && plugin.getConfig().getBoolean("hub.auto-build", true)) {
-			build(w, 0, 100, 0);
+		if (plugin.getConfig().getInt(base + ".build-version", 0) < version() && plugin.optBool(base + ".auto-build", true)) {
+			String ys = String.valueOf(plugin.opt(base + ".y", 100));
+			int y = hub ? 100 : "ground".equalsIgnoreCase(ys) ? w.getHighestBlockYAt(0, 0) + 1 : Integer.parseInt(ys);
+			build(w, 0, y, 0);
 		}
 		atmosphere(w);
 		holograms();
 		Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 2L, 2L);
 	}
 
+	private int version() {
+		return hub ? BUILD_VERSION : SPAWN_VERSION;
+	}
+
+	/** Spawn point on the island (null until built). */
+	Location spawnPoint() {
+		String s = plugin.getConfig().getString(base + ".spawn");
+		if (s == null || s.isEmpty()) return null;
+		String[] p = s.split(",");
+		World w = Bukkit.getWorld(p[0]);
+		return w == null ? null : new Location(w, Double.parseDouble(p[1]), Double.parseDouble(p[2]), Double.parseDouble(p[3]),
+				Float.parseFloat(p[4]), Float.parseFloat(p[5]));
+	}
+
+	/** Within r blocks of the spawn island (same world). */
+	boolean near(Location l, double r) {
+		Location o = origin();
+		return o != null && l.getWorld().equals(o.getWorld()) && o.distanceSquared(l) <= r * r;
+	}
+
 	Location origin() {
-		String s = plugin.getConfig().getString("hub.origin", "");
+		String s = plugin.getConfig().getString(base + ".origin", "");
 		if (s == null || s.isEmpty()) return null;
 		String[] p = s.split(",");
 		World w = Bukkit.getWorld(p[0]);
@@ -76,7 +111,7 @@ final class HubBuild implements Listener {
 		long t0 = System.currentTimeMillis();
 		int n = 0;
 		// a newer layout replaces the old one: clear the old build's area first
-		if (plugin.getConfig().getInt("hub.build-version", 0) > 0) {
+		if (hub && plugin.getConfig().getInt(base + ".build-version", 0) > 0) {
 			BlockData air = Bukkit.createBlockData("minecraft:air");
 			int cleared = 0;
 			for (int x = ox - 120; x <= ox + 120; x++) {
@@ -92,9 +127,9 @@ final class HubBuild implements Listener {
 			}
 			plugin.getLogger().info("Cleared the old hub spawn (" + cleared + " blocks)");
 		}
-		try (InputStream in = plugin.getResource("hub-spawn.txt.gz")) {
+		try (InputStream in = plugin.getResource(file)) {
 			if (in == null) {
-				plugin.getLogger().warning("hub-spawn.txt.gz missing from the plugin jar");
+				plugin.getLogger().warning(file + " missing from the plugin jar");
 				return 0;
 			}
 			BufferedReader r = new BufferedReader(new InputStreamReader(new GZIPInputStream(in), StandardCharsets.UTF_8));
@@ -118,7 +153,9 @@ final class HubBuild implements Listener {
 			while ((line = r.readLine()) != null) {
 				if (line.isEmpty()) continue;
 				String[] p = line.split(" ");
-				w.getBlockAt(ox + Integer.parseInt(p[0]), oy + Integer.parseInt(p[1]), oz + Integer.parseInt(p[2]))
+				int by = oy + Integer.parseInt(p[1]);
+				if (by < w.getMinHeight() || by >= w.getMaxHeight()) continue;
+				w.getBlockAt(ox + Integer.parseInt(p[0]), by, oz + Integer.parseInt(p[2]))
 						.setBlockData(palette[Integer.parseInt(p[3])], false);
 				n++;
 			}
@@ -127,11 +164,11 @@ final class HubBuild implements Listener {
 			return n;
 		}
 		var c = plugin.getConfig();
-		c.set("hub.origin", w.getName() + "," + ox + "," + oy + "," + oz);
+		c.set(base + ".origin", w.getName() + "," + ox + "," + oy + "," + oz);
 		// stand on the purple glass over the beacon, facing the Factions portal (north)
-		c.set("hub.spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + 1) + "," + (oz + 0.5) + ",180.0,0.0");
-		c.set("hub.void-y", oy - 60);
-		c.set("hub.build-version", BUILD_VERSION);
+		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + 1) + "," + (oz + 0.5) + ",180.0,0.0");
+		c.set(base + ".void-y", oy - 60);
+		c.set(base + ".build-version", version());
 		plugin.saveConfig();
 		w.setSpawnLocation(ox, oy + 1, oz);
 		plugin.getLogger().info("Built the hub spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
@@ -139,7 +176,7 @@ final class HubBuild implements Listener {
 	}
 
 	void atmosphere(World w) {
-		if (!plugin.getConfig().getBoolean("hub.night", true)) return;
+		if (!hub || !plugin.getConfig().getBoolean(base + ".night", true)) return;
 		// game rule names changed in 1.21.11 (doDaylightCycle -> advance_time ...), so match either spelling
 		rule(w, false, "doDaylightCycle", "advance_time", "do_daylight_cycle");
 		rule(w, false, "doWeatherCycle", "advance_weather", "do_weather_cycle");
@@ -148,7 +185,7 @@ final class HubBuild implements Listener {
 		rule(w, 0, "randomTickSpeed", "random_tick_speed"); // nothing grows, decays or spreads on the build
 		w.setStorm(false);
 		w.setThundering(false);
-		w.setTime(plugin.getConfig().getLong("hub.time", 18000L));
+		w.setTime(plugin.getConfig().getLong(base + ".time", 18000L));
 	}
 
 	@SuppressWarnings({"unchecked", "deprecation"})
@@ -168,7 +205,7 @@ final class HubBuild implements Listener {
 
 	/** Respawn the floating text/items if any of them got unloaded or removed. */
 	void ensure() {
-		boolean bad = live.isEmpty() && !plugin.getConfig().getMapList("hub.holograms").isEmpty();
+		boolean bad = live.isEmpty() && !plugin.getConfig().getMapList(base + ".holograms").isEmpty();
 		for (TextDisplay d : live.keySet()) bad |= !d.isValid();
 		for (var d : spinners.keySet()) bad |= !d.isValid();
 		if (bad) holograms();
@@ -189,7 +226,7 @@ final class HubBuild implements Listener {
 		live.clear();
 		liveScale.clear();
 		spinners.clear();
-		List<Map<?, ?>> list = plugin.getConfig().getMapList("hub.holograms");
+		List<Map<?, ?>> list = plugin.getConfig().getMapList(base + ".holograms");
 		for (Map<?, ?> m : list) {
 			List<?> off = (List<?>) m.get("offset");
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
@@ -204,7 +241,7 @@ final class HubBuild implements Listener {
 			if (ps != null) text(ps, "<gold><bold>START</bold>\n<gray>Step on the plate", 1.2f);
 			if (pf != null) text(pf, "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>FINISH</bold></gradient>", 2f);
 		}
-		for (Map<?, ?> m : plugin.getConfig().getMapList("hub.displays")) {
+		for (Map<?, ?> m : plugin.getConfig().getMapList(base + ".displays")) {
 			List<?> off = (List<?>) m.get("offset");
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
 			org.bukkit.Material mat = org.bukkit.Material.matchMaterial(String.valueOf(m.get("item")));
@@ -305,12 +342,12 @@ final class HubBuild implements Listener {
 
 	@EventHandler
 	public void onPortal(PlayerPortalEvent e) {
-		e.setCancelled(true); // never go to the nether from the hub
+		if (hub || near(e.getFrom(), 80)) e.setCancelled(true); // the spawn's portals are server portals, not nether ones
 	}
 
 	@EventHandler
 	public void onEnter(EntityPortalEnterEvent e) {
-		if (e.getEntity() instanceof Player p) tryPortal(p);
+		if (e.getEntity() instanceof Player p && (hub || near(p.getLocation(), 80))) tryPortal(p);
 	}
 
 	/** Backup for the portal event: standing in a portal block sends you too. */
@@ -320,7 +357,7 @@ final class HubBuild implements Listener {
 				&& e.getFrom().getBlockZ() == e.getTo().getBlockZ()) return;
 		var feet = e.getTo().getBlock().getType();
 		var head = e.getTo().clone().add(0, 1, 0).getBlock().getType();
-		if (feet == org.bukkit.Material.NETHER_PORTAL || head == org.bukkit.Material.NETHER_PORTAL) tryPortal(e.getPlayer());
+		if ((feet == org.bukkit.Material.NETHER_PORTAL || head == org.bukkit.Material.NETHER_PORTAL) && (hub || near(e.getTo(), 80))) tryPortal(e.getPlayer());
 	}
 
 	void tryPortal(Player p) {
@@ -328,7 +365,7 @@ final class HubBuild implements Listener {
 		Long last = portalCooldown.get(p.getUniqueId());
 		if (last != null && now - last < 3000) return;
 		Location o = origin();
-		ConfigurationSection portals = plugin.section("hub.portals");
+		ConfigurationSection portals = plugin.section(base + ".portals");
 		if (o == null || portals == null) return;
 		String best = null;
 		double bestD = 12 * 12;
@@ -350,7 +387,7 @@ final class HubBuild implements Listener {
 		if (realm != null && realm.getBoolean("coming-soon", false)) {
 			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + best.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
-			Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(plugin.spawn()); }, 20L);
+			Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(spawnPoint() != null ? spawnPoint() : plugin.spawn()); }, 20L);
 			return;
 		}
 		String server = realm != null ? realm.getString("server", best) : best;
@@ -360,7 +397,7 @@ final class HubBuild implements Listener {
 		// bounce them back out so they don't stand in the portal if the server is offline
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (p.isOnline() && p.getWorld().equals(o.getWorld())) {
-				Location s = plugin.spawn();
+				Location s = spawnPoint() != null ? spawnPoint() : plugin.spawn();
 				if (s.distanceSquared(p.getLocation()) > 25) p.teleport(s);
 			}
 		}, 40L);
