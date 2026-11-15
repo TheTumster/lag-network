@@ -200,7 +200,7 @@ def build(realm):
 
 if __name__ == "__main__":
     prev = sys.argv[sys.argv.index("--preview") + 1] if "--preview" in sys.argv else None
-    for r in THEMES:
+    for r in [t for t in THEMES if t != "skyblock"]:  # skyblock has its own generator (genspawn_skyblock.py)
         b = build(r)
         if prev:
             import matplotlib

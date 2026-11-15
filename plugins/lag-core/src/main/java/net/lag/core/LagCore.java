@@ -32,6 +32,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	private Hub hub;
 	HubBuild hubBuild;
 	HubBuild spawnBuild; // realm servers: their own spawn island
+	InfoPanel infoPanel; // realm servers: the Getting Started panel (panels.yml)
 	Pack pack;
 	Ranks ranks;
 	HubFx hubFx;
@@ -117,8 +118,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 				getServer().getPluginManager().registerEvents(spawnBuild, this);
 				getServer().getPluginManager().registerEvents(new SpawnProtect(this, spawnBuild), this);
 				Bukkit.getScheduler().runTask(this, spawnBuild::start);
-				InfoPanel panel = new InfoPanel(this, spawnBuild, role);
-				if (panel.active()) getServer().getPluginManager().registerEvents(panel, this);
+				infoPanel = new InfoPanel(this, spawnBuild, role);
+				getServer().getPluginManager().registerEvents(infoPanel, this);
 			}
 		}
 		// one-time setup commands for this server (e.g. import Skyblock's default challenges)
@@ -229,6 +230,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 				if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 					reloadConfig();
 					if (hubBuild != null) hubBuild.holograms();
+					if (spawnBuild != null) spawnBuild.holograms();
+					if (infoPanel != null) infoPanel.reload();
 					sender.sendMessage(mm("<#38E0FF>RelapsedMC core reloaded."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildhub") && hubBuild != null) {
 					// re-place the spawn island (same spot), e.g. after an update or if someone broke it

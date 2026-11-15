@@ -3,3 +3,4 @@ build/
 dist/
 run/
 *.class
+__pycache__/

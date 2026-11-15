@@ -120,20 +120,26 @@ spawns:
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
   skyblock:
     y: 100
-    protect-radius: 30
+    protect-radius: 46
     catch-falls: true
     portals:
-      hub: [0, 5, -15]
+      hub: [0, 5, -21]
     holograms:
       - offset: [0.5, 4.6, -7.5]
         scale: 3
         text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>"
-      - offset: [0.5, 3.2, -7.5]
-        scale: 1.1
-        text: "<gray>Start your island <white>/is   <gray>Island top <white>/is top   <gray>Shop <white>/shop\n<gray>Challenges <white>/challenges   <gray>Back to the hub: walk into the ring"
-      - offset: [0.5, 10.6, -15]
+      - offset: [0.5, 3.5, -7.5]
+        scale: 1
+        text: "<gray>Turn left for the <white>Getting Started</white> board"
+      - offset: [0.5, 13.2, -20.5]
         scale: 1.4
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+      - offset: [16.5, 6.2, 0.5]
+        scale: 1.6
+        text: "<gradient:#7CFF6B:#38E0FF><bold>MARKET</bold></gradient>"
+      - offset: [16.5, 5.5, 0.5]
+        scale: 0.9
+        text: "<gray>Buy and sell <white>/shop"
   cannons:
     y: ground
     protect-radius: 25

@@ -52,20 +52,21 @@ final class InfoPanel implements Listener {
 		Box box;
 		String action;
 		BlockDisplay face;
-		Interaction click;
 	}
 
 	private static final class View {
 		String tab;
 		final List<Entity> ents = new ArrayList<>();
 		final List<Hit> hits = new ArrayList<>();
+		final List<Entity> layer = new ArrayList<>();
 		Hit hovered;
 		long lastClick;
 	}
 
 	private final LagCore plugin;
 	private final HubBuild anchor;
-	private final ConfigurationSection def;
+	private final String role;
+	private ConfigurationSection def;
 	private final Map<UUID, View> views = new HashMap<>();
 	private Location origin;     // bottom centre of the panel, on its front face
 	private Vector f, r;         // f = way the panel faces, r = viewer's right
@@ -74,12 +75,30 @@ final class InfoPanel implements Listener {
 	InfoPanel(LagCore plugin, HubBuild anchor, String role) {
 		this.plugin = plugin;
 		this.anchor = anchor;
-		YamlConfiguration y = new YamlConfiguration();
-		try (var in = plugin.getResource("panels.yml")) {
-			if (in != null) y = YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
-		} catch (Exception ignored) { }
-		this.def = y.getConfigurationSection(role);
+		this.role = role;
+		load();
 		Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 3L);
+	}
+
+	/** plugins/laGCore/panels.yml if it exists (live edits), else the one in the jar. */
+	private void load() {
+		YamlConfiguration y = new YamlConfiguration();
+		java.io.File f = new java.io.File(plugin.getDataFolder(), "panels.yml");
+		if (f.exists()) {
+			y = YamlConfiguration.loadConfiguration(f);
+		} else {
+			try (var in = plugin.getResource("panels.yml")) {
+				if (in != null) y = YamlConfiguration.loadConfiguration(new InputStreamReader(in, StandardCharsets.UTF_8));
+			} catch (Exception ignored) { }
+		}
+		def = y.getConfigurationSection(role);
+	}
+
+	/** /lc reload: re-read the layout and redraw everyone's copy. */
+	void reload() {
+		clear();
+		origin = null;
+		load();
 	}
 
 	boolean active() {
@@ -199,22 +218,36 @@ final class InfoPanel implements Listener {
 		h.box = b;
 		h.action = action;
 		h.face = face;
-		double w = Math.min(b.u2 - b.u1, 1.6);
-		Location l = at((b.u1 + b.u2) / 2, b.v1, 0.1);
-		h.click = l.getWorld().spawn(l, Interaction.class, e -> {
-			e.setInteractionWidth((float) Math.max(b.u2 - b.u1, 0.2));
-			e.setInteractionHeight((float) (b.v2 - b.v1));
-			e.setResponsive(true);
-			hide(e, p);
-		});
-		v.ents.add(h.click);
 		v.hits.add(h);
+	}
+
+	/**
+	 * Interaction boxes are square (same depth as width), so one per card would stick out in front of the panel and
+	 * swallow clicks meant for other cards. Instead: a row of thin 0.5-wide columns whose front sits just in front of
+	 * the panel face; any click on them goes to the card under the crosshair.
+	 */
+	private void clickLayer(Player p, View v) {
+		double cw = 0.5;
+		int cols = (int) Math.ceil(width / cw);
+		for (int i = 0; i < cols; i++) {
+			double u = -width / 2 + cw / 2 + i * cw;
+			Location l = at(u, -0.05, 0.08 - cw / 2);
+			Interaction it = l.getWorld().spawn(l, Interaction.class, e -> {
+				e.setInteractionWidth((float) cw);
+				e.setInteractionHeight((float) (height + 0.1));
+				e.setResponsive(true);
+				hide(e, p);
+			});
+			v.ents.add(it);
+			v.layer.add(it);
+		}
 	}
 
 	private void build(Player p, View v) {
 		for (Entity e : v.ents) e.remove();
 		v.ents.clear();
 		v.hits.clear();
+		v.layer.clear();
 		v.hovered = null;
 		double hw = width / 2;
 		// frame: screen, accent bars
@@ -238,6 +271,7 @@ final class InfoPanel implements Listener {
 		}
 		// cards for the current tab
 		Map<?, ?> tab = tabs.stream().filter(t -> String.valueOf(t.get("id")).equals(v.tab)).findFirst().orElse(tabs.isEmpty() ? null : tabs.get(0));
+		clickLayer(p, v);
 		if (tab == null) return;
 		Object cards = tab.get("cards");
 		if (!(cards instanceof List<?> list)) return;
@@ -306,6 +340,19 @@ final class InfoPanel implements Listener {
 	}
 
 	private void hover(Player p, View v) {
+		Hit found = aim(p, v);
+		if (found == v.hovered) return;
+		if (v.hovered != null && v.hovered.face.isValid()) v.hovered.face.setGlowing(false);
+		v.hovered = found;
+		if (found != null) {
+			found.face.setGlowColorOverride(Color.fromRGB(0x38E0FF));
+			found.face.setGlowing(true);
+			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.25f, 1.9f);
+		}
+	}
+
+	/** The card under the player's crosshair, or null. */
+	private Hit aim(Player p, View v) {
 		Location eye = p.getEyeLocation();
 		Vector dir = eye.getDirection();
 		double denom = f.dot(dir);
@@ -325,28 +372,19 @@ final class InfoPanel implements Listener {
 				}
 			}
 		}
-		if (found == v.hovered) return;
-		if (v.hovered != null && v.hovered.face.isValid()) v.hovered.face.setGlowing(false);
-		v.hovered = found;
-		if (found != null) {
-			found.face.setGlowColorOverride(Color.fromRGB(0x38E0FF));
-			found.face.setGlowing(true);
-			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.25f, 1.9f);
-		}
+		return found;
 	}
 
 	private void click(Player p, Entity e) {
 		View v = views.get(p.getUniqueId());
 		if (v == null) return;
-		for (Hit h : v.hits) {
-			if (h.click.equals(e)) {
-				long now = System.currentTimeMillis();
-				if (now - v.lastClick < 250) return;
-				v.lastClick = now;
-				run(p, v, h.action);
-				return;
-			}
-		}
+		if (!v.layer.contains(e)) return;
+		Hit h = aim(p, v);
+		if (h == null) return;
+		long now = System.currentTimeMillis();
+		if (now - v.lastClick < 250) return;
+		v.lastClick = now;
+		run(p, v, h.action);
 	}
 
 	private void run(Player p, View v, String action) {

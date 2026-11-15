@@ -79,7 +79,8 @@ final class HubBuild implements Listener {
 	}
 
 	private int version() {
-		return hub ? BUILD_VERSION : SPAWN_VERSION;
+		if (hub) return BUILD_VERSION;
+		return "spawns.skyblock".equals(base) ? 2 : SPAWN_VERSION; // skyblock v2: full rebuild
 	}
 
 	/** Spawn point on the island (null until built). */
@@ -111,6 +112,31 @@ final class HubBuild implements Listener {
 		long t0 = System.currentTimeMillis();
 		int n = 0;
 		// a newer layout replaces the old one: clear the old build's area first
+		if (!hub && plugin.getConfig().getInt(base + ".build-version", 0) > 0) {
+			BlockData air = Bukkit.createBlockData("minecraft:air");
+			int cleared = 0;
+			for (int x = ox - 48; x <= ox + 48; x++) {
+				for (int z = oz - 48; z <= oz + 48; z++) {
+					for (int y = oy - 48; y <= oy + 32; y++) {
+						var b = w.getBlockAt(x, y, z);
+						if (!b.getType().isAir()) {
+							b.setBlockData(air, false);
+							cleared++;
+						}
+					}
+				}
+			}
+			plugin.getLogger().info("Cleared the old " + base + " build (" + cleared + " blocks)");
+			// the new layout ships its own holograms / portal / protection settings: take them from the jar
+			var defs = plugin.getConfig().getDefaults();
+			if (defs != null) {
+				for (String k : new String[] {"holograms", "portals", "protect-radius", "catch-falls"}) {
+					Object dv = defs.get(base + "." + k);
+					if (dv instanceof ConfigurationSection cs) plugin.getConfig().createSection(base + "." + k, cs.getValues(false));
+					else if (dv != null) plugin.getConfig().set(base + "." + k, dv);
+				}
+			}
+		}
 		if (hub && plugin.getConfig().getInt(base + ".build-version", 0) > 0) {
 			BlockData air = Bukkit.createBlockData("minecraft:air");
 			int cleared = 0;

@@ -2,7 +2,7 @@
 # box: [left, bottom, right, top] in blocks from the panel's bottom centre (width 6.4 -> -3.2..3.2, height 3.6).
 # action: cmd:<command run as the player> | tab:<tab id> | msg:<MiniMessage text>
 skyblock:
-  at: [-12, 1, -1]
+  at: [-11.92, 2.0, 0.5]
   facing: east
   width: 6.4
   height: 3.6
