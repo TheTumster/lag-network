@@ -154,9 +154,8 @@
       "optional": true
     },
     {
-      "modrinth": "smartspawner",
-      "loader": "paper",
-      "optional": true
+      "modrinth": "rosestacker",
+      "loader": "paper"
     },
     {
       "modrinth": "economyshopgui",

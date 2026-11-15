@@ -143,7 +143,7 @@ final class Spawners implements Listener, CommandExecutor {
 			inv[i] = null;
 		}
 		if (count == 0) {
-			p.sendMessage(mm("<gray>You have no mob heads to sell. Spawners drop them into their storage."));
+			p.sendMessage(mm("<gray>You have no mob heads to sell. Spawner mobs drop them when they die."));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
 			return;
 		}
@@ -191,9 +191,10 @@ final class Spawners implements Listener, CommandExecutor {
 		if (tiers.size() > 7) inv.setItem(LINK, pane(top >= 8 ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE));
 		// unused path slots stay dark
 		inv.setItem(INFO, named(Material.BOOK, "<#38E0FF><bold>HOW IT WORKS", List.of(
-				"<gray>Place spawners on your island.",
-				"<gray>While you're nearby they fill up with",
-				"<gray>loot and <white>mob heads</white>.",
+				"<gray>Spawners spawn real mobs that stack up.",
+				"<gray>Build a <white>grinder</white>: drop or burn the stack",
+				"<gray>and the whole stack dies into your hoppers.",
+				"<gray>Some drop their <white>mob head</white>.",
 				"",
 				"<gray>Heads can be <gold>sold</gold>, or traded in to",
 				"<gray>unlock the <white>next spawner tier</white>.",
@@ -292,15 +293,24 @@ final class Spawners implements Listener, CommandExecutor {
 		}
 	}
 
-	/** Our own short note when a spawner goes down (SmartSpawner's chat message is switched off). */
+	/** The tier head players collect (sellable, counts toward unlocks). */
+	ItemStack head(Tier t) {
+		try {
+			return Bukkit.getItemFactory().createItemStack(plugin.headSpec(t, true));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/** A short note when a spawner goes down. */
 	@EventHandler(priority = org.bukkit.event.EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlace(org.bukkit.event.block.BlockPlaceEvent e) {
 		if (e.getBlockPlaced().getType() != Material.SPAWNER) return;
 		Player p = e.getPlayer();
 		Bukkit.getScheduler().runTask(plugin, () -> {
-			// stacking onto an existing spawner cancels the place; SmartSpawner shows its own stack message then
+			// stacking onto an existing spawner cancels the place; RoseStacker shows the new stack size then
 			if (e.getBlockPlaced().getType() == Material.SPAWNER) {
-				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>it fills with loot and heads while you're nearby"));
+				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>mobs spawn while you're nearby. Build a grinder: drop them, burn them."));
 			}
 		});
 	}
@@ -348,10 +358,11 @@ final class Spawners implements Listener, CommandExecutor {
 			return;
 		}
 		int before = spawnerCount(p);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ss give " + p.getName() + " " + t.mob() + " " + amount);
+		// RoseStacker: /rs give spawner <player> <type> <stackSize> [amount] -> `amount` single spawners
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rs give spawner " + p.getName() + " " + t.mob() + " 1 " + amount);
 		if (spawnerCount(p) <= before) {
 			p.sendMessage(mm("<red>Couldn't give the spawner - you were not charged. Tell staff."));
-			plugin.getLogger().warning("SmartSpawner give failed for " + t.mob());
+			plugin.getLogger().warning("RoseStacker give failed for " + t.mob());
 			return;
 		}
 		plugin.eco().withdrawPlayer(p, cost);
