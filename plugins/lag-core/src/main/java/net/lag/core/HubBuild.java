@@ -310,7 +310,20 @@ final class HubBuild implements Listener {
 
 	@EventHandler
 	public void onEnter(EntityPortalEnterEvent e) {
-		if (!(e.getEntity() instanceof Player p)) return;
+		if (e.getEntity() instanceof Player p) tryPortal(p);
+	}
+
+	/** Backup for the portal event: standing in a portal block sends you too. */
+	@EventHandler(ignoreCancelled = true)
+	public void onMovePortal(org.bukkit.event.player.PlayerMoveEvent e) {
+		if (e.getFrom().getBlockX() == e.getTo().getBlockX() && e.getFrom().getBlockY() == e.getTo().getBlockY()
+				&& e.getFrom().getBlockZ() == e.getTo().getBlockZ()) return;
+		var feet = e.getTo().getBlock().getType();
+		var head = e.getTo().clone().add(0, 1, 0).getBlock().getType();
+		if (feet == org.bukkit.Material.NETHER_PORTAL || head == org.bukkit.Material.NETHER_PORTAL) tryPortal(e.getPlayer());
+	}
+
+	void tryPortal(Player p) {
 		long now = System.currentTimeMillis();
 		Long last = portalCooldown.get(p.getUniqueId());
 		if (last != null && now - last < 3000) return;
