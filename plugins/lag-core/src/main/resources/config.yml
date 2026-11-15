@@ -59,6 +59,22 @@ fresh-chat:
       - "  {arrow} <gray>Fill dispensers: <white>/tntfill <dark_gray>• <gray>faction bank: <white>/f tnt"
       - "  {arrow} <gray>Back to the hub: <white>/hub"
       - "{bar}"
+    skyblock:
+      - "{bar}"
+      - "            {logo} <dark_gray>» <gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
+      - ""
+      - "  {arrow} <gray>Start your island: <white>/is"
+      - "  {arrow} <gray>Island top: <white>/is top <dark_gray>• <gray>Shop: <white>/shop <dark_gray>• <gray>Challenges: <white>/challenges"
+      - "  {arrow} <gray>Back to the hub: <white>/hub"
+      - "{bar}"
+    cannons:
+      - "{bar}"
+      - "            {logo} <dark_gray>» <gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient>"
+      - ""
+      - "  {arrow} <gray>Same jar and cannon settings as Factions"
+      - "  {arrow} <gray>Free fill: <white>/tntfill <dark_gray>• <gray>Diamond block under = unbreakable"
+      - "  {arrow} <gray>Back to the hub: <white>/hub"
+      - "{bar}"
     smp:
       - "{bar}"
       - "            {logo} <dark_gray>» <gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>"
@@ -133,6 +149,11 @@ spawns:
       - offset: [0.5, 10.6, -15]
         scale: 1.4
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+
+# Console commands run once, the first time that server starts (per role).
+first-start-commands:
+  skyblock:
+    - "bsbadmin challenges import"
 
 # Resource pack (logo, icons, menus). Built from resourcepack/ and published with every release.
 resource-pack:

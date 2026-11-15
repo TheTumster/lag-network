@@ -119,6 +119,23 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 				Bukkit.getScheduler().runTask(this, spawnBuild::start);
 			}
 		}
+		// one-time setup commands for this server (e.g. import Skyblock's default challenges)
+		Bukkit.getScheduler().runTaskLater(this, () -> {
+			String role = getConfig().getString("role", "hub").toLowerCase();
+			if (getConfig().getBoolean("first-start-done", false)) return;
+			Object list = opt("first-start-commands." + role, null);
+			if (list instanceof java.util.List<?> cmds) {
+				for (Object c : cmds) {
+					try {
+						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), String.valueOf(c));
+					} catch (Exception e) {
+						getLogger().warning("First-start command failed: " + c + " (" + e.getMessage() + ")");
+					}
+				}
+			}
+			getConfig().set("first-start-done", true);
+			saveConfig();
+		}, 200L);
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);
 			getServer().getPluginManager().registerEvents(board, this);

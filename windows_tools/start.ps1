@@ -65,6 +65,7 @@ function Update-Network {
                 }
                 Move-Item "$dest.download" $dest -Force
                 $changed++
+                if ($f.path -eq "tools/start.ps1") { $script:selfUpdated = $true }
             }
         }
         # remove old versions of plugins the network manages (your own extra plugins are left alone)
@@ -79,7 +80,61 @@ function Update-Network {
     Set-Content "$Root\BUILD.txt" "$($m.build)" -NoNewline
     Say "Updated ($changed files)." Green
 }
+# ---- New servers in the network (e.g. skyblock, cannons): install their folders, register them with the proxy
+function Install-NewServers {
+    try {
+        $netNew = Invoke-RestMethod "https://github.com/TheTumster/lag-network/releases/latest/download/network.json" -TimeoutSec 15
+    } catch { return }
+    $missing = @($netNew.servers.PSObject.Properties.Name | Where-Object { -not (Test-Path "$Root\$_\server.properties") })
+    if ($missing.Count -gt 0) {
+        Say "New servers: $($missing -join ', ') - downloading the network package (one time)..." Yellow
+        $zip = "$Root\_new-servers.zip"; $tmp = "$Root\_new-servers"
+        Invoke-WebRequest "https://github.com/TheTumster/lag-network/releases/latest/download/laG-Network.zip" -OutFile $zip -UseBasicParsing
+        if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
+        Expand-Archive $zip $tmp -Force
+        foreach ($s in $missing) {
+            $src = Get-ChildItem $tmp -Directory | ForEach-Object { Join-Path $_.FullName $s } | Where-Object { Test-Path $_ } | Select-Object -First 1
+            if ($src) {
+                New-Item -ItemType Directory -Force -Path "$Root\$s" | Out-Null
+                Copy-Item (Join-Path $src "*") "$Root\$s" -Recurse -Force
+                Say "  added $s" Green
+            }
+        }
+        Remove-Item $zip -Force; Remove-Item $tmp -Recurse -Force
+    }
+    $netNew | ConvertTo-Json -Depth 6 | Set-Content "$Root\network.json"
+    $script:net = $netNew
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    $vt = "$Root\proxy\velocity.toml"
+    if (Test-Path $vt) {
+        $t = [IO.File]::ReadAllText($vt, $utf8)
+        $n = $t
+        foreach ($p in $netNew.servers.PSObject.Properties) {
+            if ($n -notmatch "(?m)^$($p.Name)\s*=") {
+                $n = [regex]::Replace($n, '(?m)^\[servers\][ \t]*\r?$', "[servers]`n$($p.Name) = `"127.0.0.1:$($p.Value.port)`"")
+            }
+        }
+        if ($n -ne $t) { [IO.File]::WriteAllText($vt, $n, $utf8); Say "Proxy now knows every server." Green }
+    }
+    $secret = (Get-Content "$Root\proxy\forwarding.secret" -Raw).Trim()
+    if ($secret -ne "LAG_CHANGE_ME_ON_FIRST_START") {
+        foreach ($s in $netNew.servers.PSObject.Properties.Name) {
+            $pg = "$Root\$s\config\paper-global.yml"
+            if ((Test-Path $pg) -and ((Get-Content $pg -Raw) -match "LAG_CHANGE_ME_ON_FIRST_START")) {
+                (Get-Content $pg -Raw) -replace "LAG_CHANGE_ME_ON_FIRST_START", $secret | Set-Content $pg -NoNewline
+            }
+        }
+    }
+}
+$script:selfUpdated = $false
 Update-Network
+if ($script:selfUpdated -and -not $env:LAG_RELAUNCHED) {
+    # this launcher itself was updated: run the new version right away
+    $env:LAG_RELAUNCHED = "1"
+    & powershell -NoProfile -ExecutionPolicy Bypass -File "$Root\tools\start.ps1"
+    exit $LASTEXITCODE
+}
+Install-NewServers
 
 # ---- Cannon settings for the factions server (safe to run every start; only touches these two values)
 $sp = "$Root\factions\spigot.yml"
@@ -160,7 +215,7 @@ if ((Get-Content $secretFile -Raw).Trim() -eq "LAG_CHANGE_ME_ON_FIRST_START") {
     [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
     $secret = ($bytes | ForEach-Object { $_.ToString("x2") }) -join ""
     Set-Content $secretFile $secret -NoNewline
-    foreach ($s in "hub", "factions", "smp") {
+    foreach ($s in $net.servers.PSObject.Properties.Name) {
         $pg = "$Root\$s\config\paper-global.yml"
         (Get-Content $pg -Raw) -replace "LAG_CHANGE_ME_ON_FIRST_START", $secret | Set-Content $pg -NoNewline
     }
@@ -187,7 +242,7 @@ if ($old.Count -gt 0) {
 # ---- Start everything: one Windows Terminal window with a tab per server (separate windows if Terminal isn't installed)
 $flags = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20"
 $runs = [ordered]@{}
-foreach ($s in "hub", "factions", "smp") {
+foreach ($s in $net.servers.PSObject.Properties.Name) {
     $mem = $net.servers.$s.memory
     $runs[$s] = "`"$java`" -Xms$mem -Xmx$mem $flags -jar paper.jar --nogui"
 }
@@ -203,7 +258,7 @@ try {
     # Start-Process finds Windows Terminal through its app alias even when it isn't on PATH
     Start-Process wt.exe -ArgumentList ("-w laG " + ($tabs -join " ; ")) -ErrorAction Stop
     $tabbed = $true
-    Say "Started hub, factions, smp and proxy in one window (tabs)." Green
+    Say "Started $(($net.servers.PSObject.Properties.Name) -join ', ') and proxy in one window (tabs)." Green
 } catch { }
 if (-not $tabbed) {
     foreach ($s in $runs.Keys) {

@@ -310,12 +310,20 @@ def patch_backend(name):
     yaml_set(pg, "proxies.velocity.enabled", True)
     yaml_set(pg, "proxies.velocity.online-mode", True)
     yaml_set(pg, "proxies.velocity.secret", SECRET_PLACEHOLDER)
-    # laG Core role + name
-    core_dir = os.path.join(d, "plugins", "laGCore")
+    write_core_config(name)
+
+
+def write_core_config(name):
+    """laG Core config for a server (role + name). Re-written after the boot test so no build markers ship."""
+    core_dir = os.path.join(DIST, name, "plugins", "laGCore")
     os.makedirs(core_dir, exist_ok=True)
     src = open(os.path.join(ROOT, "plugins", "lag-core", "src", "main", "resources", "config.yml")).read()
     src = src.replace("role: hub", f"role: {name}").replace('network-name: "RelapsedMC"', f'network-name: "{NET["name"]}"')
     open(os.path.join(core_dir, "config.yml"), "w").write(src)
+    for junk in ("parkour.yml",):
+        p = os.path.join(core_dir, junk)
+        if os.path.exists(p):
+            os.remove(p)
 
 
 def patch_proxy():
@@ -467,10 +475,14 @@ def main():
     make_255_datapack()
 
     log("== Cleaning test worlds/logs")
+    for s in SERVERS:
+        write_core_config(s)   # spawns get built on the real first start, not the test one
     for s in SERVERS + ["proxy"]:
         for junk in ("world", "world_nether", "world_the_end", "logs", "cache", "usercache.json",
                      "banned-ips.json", "banned-players.json", "ops.json", "whitelist.json", "libraries", "versions",
-                     os.path.join("plugins", ".paper-remapped")):
+                     os.path.join("plugins", ".paper-remapped"), "hub_void", "hub_void_nether", "hub_void_the_end",
+                     "bskyblock_world", "bskyblock_world_nether", "bskyblock_world_the_end",
+                     os.path.join("plugins", "BentoBox", "database")):
             pth = os.path.join(DIST, s, junk)
             if os.path.isdir(pth):
                 shutil.rmtree(pth)
