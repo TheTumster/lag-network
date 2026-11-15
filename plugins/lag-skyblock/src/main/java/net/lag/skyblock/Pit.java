@@ -1,6 +1,5 @@
 package net.lag.skyblock;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -45,11 +43,9 @@ final class Pit implements Listener, CommandExecutor {
 	private final LagSkyblock plugin;
 	private final Map<UUID, Long> tagged = new HashMap<>();
 	private final Map<UUID, Integer> streak = new HashMap<>();
-	private final File state;
 
 	Pit(LagSkyblock plugin) {
 		this.plugin = plugin;
-		this.state = new File(plugin.getDataFolder(), "pit.yml");
 		Bukkit.getScheduler().runTask(plugin, this::start);
 		Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 10L);
 	}
@@ -106,14 +102,9 @@ final class Pit implements Listener, CommandExecutor {
 			World.class.getMethod("setPVP", boolean.class).invoke(w, true);
 		} catch (Throwable ignored) { }
 		holograms();
-		YamlConfiguration y = YamlConfiguration.loadConfiguration(state);
-		if (!y.getBoolean("built", false)) {
-			int n = build();
-			y.set("built", true);
-			try {
-				y.save(state);
-			} catch (Exception ignored) { }
-			plugin.getLogger().info("The Pit built (" + n + " blocks)");
+		// built = its centre block is there (lives with the world, so a new or wiped world gets a new Pit)
+		if (center().getBlock().getType() != Material.CRYING_OBSIDIAN) {
+			plugin.getLogger().info("The Pit built (" + build() + " blocks)");
 		}
 	}
 

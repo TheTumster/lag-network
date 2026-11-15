@@ -250,7 +250,7 @@ final class Season implements CommandExecutor {
 				new File(plugins, "BentoBox/database"),
 				new File(plugins, "SmartSpawner/spawners.db"), new File(plugins, "SmartSpawner/spawners.db-wal"),
 				new File(plugins, "SmartSpawner/spawners.db-shm"), new File(plugins, "SmartSpawner/spawners_data.yml"),
-				new File(dataFolder, "generators.yml"), new File(dataFolder, "unlocks.yml"), new File(dataFolder, "pit.yml")));
+				new File(dataFolder, "generators.yml"), new File(dataFolder, "unlocks.yml")));
 		// inventories, ender chests, positions
 		File pd = new File(new File(root, level), "playerdata");
 		File[] dats = pd.listFiles((d, n) -> n.endsWith(".dat") || n.endsWith(".dat_old"));

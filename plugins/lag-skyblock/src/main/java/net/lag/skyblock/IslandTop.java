@@ -155,8 +155,10 @@ final class IslandTop implements Listener, CommandExecutor {
 			out.add(new Entry(id, Islands.owner(is), Islands.name(is), Set.copyOf(Islands.members(is)), t[0], (int) t[1], sorted));
 		});
 		out.sort(Comparator.comparingDouble(Entry::value).reversed());
+		boolean first = updated == 0;
 		ranking = List.copyOf(out);
 		updated = System.currentTimeMillis();
+		if (first) plugin.getLogger().info("Island top: " + all.size() + " spawners read, " + out.size() + " islands ranked");
 	}
 
 	/** This player's island on the board (rank from 1), or null if their island has no spawners yet. */

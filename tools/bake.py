@@ -462,6 +462,9 @@ def main():
                 problems.append(f"[{srv}] {want} did not enable")
     report = {"manifest": manifest, "problems": problems}
     json.dump(report, open(os.path.join(ROOT, "dist", "bake-report.json"), "w"), indent=2)
+    for l in logs.get("skyblock", []):
+        if "[laGSkyblock]" in l:
+            log("  " + l.strip()[:200])
     for name, lines in logs.items():
         log(f"----- {name} (last 25 lines)")
         for l in lines[-25:]:
