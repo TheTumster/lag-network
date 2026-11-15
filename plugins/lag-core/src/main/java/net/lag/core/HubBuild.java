@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 3;
+	static final int BUILD_VERSION = 4;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
