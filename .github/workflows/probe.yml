@@ -1,0 +1,14 @@
+name: probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['tools/probe/**']
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/probe/probe.py
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

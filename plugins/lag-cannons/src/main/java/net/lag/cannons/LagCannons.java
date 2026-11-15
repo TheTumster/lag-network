@@ -216,7 +216,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	 */
 	private boolean tntfill(CommandSender sender, String[] args) {
 		if (!(sender instanceof Player p)) return true;
-		if (p.hasPermission("lagcannons.tntfill.free") && p.getGameMode() == org.bukkit.GameMode.CREATIVE) {
+		if ((p.hasPermission("lagcannons.tntfill.free") || getConfig().getBoolean("tntfill.free-for-all", false))
+				&& p.getGameMode() == org.bukkit.GameMode.CREATIVE) {
 			int r = 32, amount = 576;
 			try {
 				if (args.length > 0) r = Math.max(1, Math.min(64, Integer.parseInt(args[0])));

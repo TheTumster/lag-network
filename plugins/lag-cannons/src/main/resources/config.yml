@@ -109,3 +109,7 @@ clearlag:
     xp-orbs: false
   keep-items: [BEACON, DRAGON_EGG, NETHER_STAR, ELYTRA]
   worlds: []
+
+# Cannon test server: anyone in creative gets free /tntfill (no faction bank needed).
+tntfill:
+  free-for-all: false
