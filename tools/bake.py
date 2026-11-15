@@ -483,7 +483,8 @@ def main():
                      "banned-ips.json", "banned-players.json", "ops.json", "whitelist.json", "libraries", "versions",
                      os.path.join("plugins", ".paper-remapped"), "hub_void", "hub_void_nether", "hub_void_the_end",
                      "bskyblock_world", "bskyblock_world_nether", "bskyblock_world_the_end",
-                     os.path.join("plugins", "BentoBox", "database")):
+                     os.path.join("plugins", "BentoBox", "database"), "plots", os.path.join("plugins", "laGCannons", "plots.yml"),
+                     os.path.join("plugins", "WorldGuard", "worlds")):
             pth = os.path.join(DIST, s, junk)
             if os.path.isdir(pth):
                 shutil.rmtree(pth)
@@ -493,8 +494,9 @@ def main():
     # fresh installs: the factions world is created 0..255 (datapack must exist before the world does)
     pack = os.path.join(ROOT, "build", "laG-255")
     if os.path.isdir(pack):
-        shutil.copytree(pack, os.path.join(DIST, "factions", "world", "datapacks", "laG-255"))
-        log("  factions/world/datapacks/laG-255 added")
+        for srv in ("factions", "cannons"):   # cannons = test server: same 0..255 height (plots world too)
+            shutil.copytree(pack, os.path.join(DIST, srv, "world", "datapacks", "laG-255"))
+            log(f"  {srv}/world/datapacks/laG-255 added")
 
     log("== Start scripts")
     for f in os.listdir(os.path.join(ROOT, "windows")):
