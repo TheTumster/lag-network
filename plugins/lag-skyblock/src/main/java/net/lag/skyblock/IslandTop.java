@@ -97,8 +97,10 @@ final class IslandTop implements Listener, CommandExecutor {
 		Plugin ss = Bukkit.getPluginManager().getPlugin("SmartSpawner");
 		if (ss == null || !ss.isEnabled()) return null;
 		try {
-			Object api = ss.getClass().getMethod("getAPI").invoke(ss);
-			Class<?> apiType = Class.forName("github.nighter.smartspawner.api.SmartSpawnerAPI", true, ss.getClass().getClassLoader());
+			// through the API interfaces: reflecting on SmartSpawner's main class drags in its optional ShopGUI+ hooks
+			ClassLoader cl = ss.getClass().getClassLoader();
+			Object api = Class.forName("github.nighter.smartspawner.api.SmartSpawnerPlugin", true, cl).getMethod("getAPI").invoke(ss);
+			Class<?> apiType = Class.forName("github.nighter.smartspawner.api.SmartSpawnerAPI", true, cl);
 			return (List<?>) apiType.getMethod("getAllSpawners").invoke(api);
 		} catch (Throwable t) {
 			if (!warned) {
