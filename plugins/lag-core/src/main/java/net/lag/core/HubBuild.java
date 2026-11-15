@@ -143,9 +143,23 @@ final class HubBuild implements Listener {
 
 	// ---------------------------------------------------------------- holograms
 
+	/** Respawn the floating text/items if any of them got unloaded or removed. */
+	void ensure() {
+		boolean bad = live.isEmpty() && !plugin.getConfig().getMapList("hub.holograms").isEmpty();
+		for (TextDisplay d : live.keySet()) bad |= !d.isValid();
+		for (var d : spinners.keySet()) bad |= !d.isValid();
+		if (bad) holograms();
+	}
+
 	void holograms() {
 		Location o = origin();
 		if (o == null) return;
+		// keep the spawn area loaded even with nobody in the hub, so the displays aren't unloaded with it
+		for (int cx = (o.getBlockX() >> 4) - 2; cx <= (o.getBlockX() >> 4) + 2; cx++) {
+			for (int cz = (o.getBlockZ() >> 4) - 2; cz <= (o.getBlockZ() >> 4) + 2; cz++) {
+				o.getWorld().getChunkAt(cx, cz).addPluginChunkTicket(plugin);
+			}
+		}
 		for (Entity e : o.getWorld().getEntities()) {
 			if (e.getPersistentDataContainer().has(holoKey, PersistentDataType.BYTE)) e.remove();
 		}

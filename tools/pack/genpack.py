@@ -41,49 +41,49 @@ def gradient(w, h, stops):
 
 
 def wordmark(scale=4):
-    """RELAPSED (heavy italic, gradient, dark outline + glow) with a small MC tag."""
-    big = ImageFont.truetype(os.path.join(FONT_DIR, "Inter-BlackItalic.otf"), 40 * scale)
-    small = ImageFont.truetype(os.path.join(FONT_DIR, "Inter-ExtraBoldItalic.otf") if os.path.exists(os.path.join(FONT_DIR, "Inter-ExtraBoldItalic.otf")) else os.path.join(FONT_DIR, "Inter-BlackItalic.otf"), 17 * scale)
-    word, tag = "RELAPSED", "MC"
-    bb = big.getbbox(word)
-    tb = small.getbbox(tag)
-    pad = 6 * scale
-    w = bb[2] - bb[0] + tb[2] - tb[0] + pad * 3 + 4 * scale
+    """Logo B: white spaced RELAPSED with a purple glow, cyan->purple->pink bar underneath, MC tucked bottom-right."""
+    f = ImageFont.truetype(os.path.join(FONT_DIR, "InterDisplay-Black.otf"), 38 * scale)
+    word, spacing, pad = "RELAPSED", 5 * scale, 6 * scale
+    bb = f.getbbox(word)
+    w = int(bb[2] - bb[0] + spacing * len(word) + pad * 2)
     h = bb[3] - bb[1] + pad * 2
-    mask = Image.new("L", (w, h))
-    d = ImageDraw.Draw(mask)
-    d.text((pad - bb[0], pad - bb[1]), word, font=big, fill=255)
-    wx = pad + bb[2] - bb[0] + 4 * scale
-    tag_mask = Image.new("L", (w, h))
-    td = ImageDraw.Draw(tag_mask)
-    # MC tag sits top-right like a badge
-    td.rounded_rectangle((wx - 2 * scale, pad, wx + tb[2] - tb[0] + 4 * scale, pad + tb[3] - tb[1] + 6 * scale), radius=3 * scale, fill=255)
-    tag_text = Image.new("L", (w, h))
-    ImageDraw.Draw(tag_text).text((wx + 1 * scale - tb[0], pad + 3 * scale - tb[1]), tag, font=small, fill=255)
-
-    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    # glow
-    glow_src = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    glow_src.paste(gradient(w, h, [CYAN, PURPLE, PINK]), (0, 0), mask)
-    out = Image.alpha_composite(out, glow_src.filter(ImageFilter.GaussianBlur(5 * scale)))
-    # outline
-    outline = mask.filter(ImageFilter.MaxFilter(2 * scale + 1))
-    dark = Image.new("RGBA", (w, h), (12, 6, 26, 255))
-    o = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    o.paste(dark, (0, 0), outline)
-    out = Image.alpha_composite(out, o)
-    # gradient fill
-    fill = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    fill.paste(gradient(w, h, [CYAN, PURPLE, PINK]), (0, 0), mask)
-    out = Image.alpha_composite(out, fill)
-    # MC badge: gradient pill with dark text cut out
-    badge = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    badge.paste(gradient(w, h, [PURPLE, PINK]), (0, 0), tag_mask)
-    out = Image.alpha_composite(out, badge)
-    cut = Image.new("RGBA", (w, h), (12, 6, 26, 255))
-    holes = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    holes.paste(cut, (0, 0), tag_text)
-    out = Image.alpha_composite(out, holes)
+    m = Image.new("L", (w, h))
+    d = ImageDraw.Draw(m)
+    x = pad
+    for ch in word:
+        d.text((x - bb[0], pad - bb[1]), ch, font=f, fill=255)
+        x += f.getlength(ch) + spacing
+    W, H = w + 4 * scale, h + 24 * scale
+    out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    glow.paste((176, 64, 255, 255), (2 * scale, 0), m)
+    out = Image.alpha_composite(out, glow.filter(ImageFilter.GaussianBlur(5 * scale)))
+    face = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    face.paste((255, 255, 255, 255), (2 * scale, 0), m)
+    out = Image.alpha_composite(out, face)
+    # MC, bottom right, gradient, tucked under the end of RELAPSED
+    f2 = ImageFont.truetype(os.path.join(FONT_DIR, "InterDisplay-Black.otf"), 14 * scale)
+    mb = f2.getbbox("MC")
+    mw = int(mb[2] - mb[0] + 3 * scale * 2)
+    mm = Image.new("L", (mw + 2, mb[3] - mb[1] + 2))
+    md = ImageDraw.Draw(mm)
+    mx = 0
+    for ch in "MC":
+        md.text((mx - mb[0], -mb[1]), ch, font=f2, fill=255)
+        mx += f2.getlength(ch) + 3 * scale
+    mcx, mcy = W - mm.width - 3 * scale, h - 1 * scale
+    mcl = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    mcl.paste(gradient(mm.width, mm.height, [PURPLE, PINK]), (mcx, mcy), mm)
+    out = Image.alpha_composite(out, mcl.filter(ImageFilter.GaussianBlur(3 * scale)))
+    out = Image.alpha_composite(out, mcl)
+    # gradient bar from the left edge up to the MC
+    bar = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    bm = Image.new("L", (W, H))
+    by = mcy + mm.height // 2 - 1 * scale
+    ImageDraw.Draw(bm).rounded_rectangle((4 * scale, by, mcx - 4 * scale, by + 3 * scale), radius=2 * scale, fill=255)
+    bar.paste(gradient(W, H, [CYAN, PURPLE, PINK]), (0, 0), bm)
+    out = Image.alpha_composite(out, bar.filter(ImageFilter.GaussianBlur(2 * scale)))
+    out = Image.alpha_composite(out, bar)
     return out.crop(out.getbbox())
 
 

@@ -224,6 +224,7 @@ final class HubFx implements Listener {
 			if (h != null) h.hidePlayer(plugin, p);
 		}
 		p.showBossBar(bar);
+		build.ensure();
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
 			giveHotbar(p);

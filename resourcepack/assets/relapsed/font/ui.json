@@ -48,15 +48,6 @@
   },
   {
    "type": "bitmap",
-   "file": "relapsed:font/logo_title_1.png",
-   "height": 14,
-   "ascent": 11,
-   "chars": [
-    "\ue061"
-   ]
-  },
-  {
-   "type": "bitmap",
    "file": "relapsed:font/logo_holo_0.png",
    "height": 32,
    "ascent": 26,
@@ -80,15 +71,6 @@
    "ascent": 26,
    "chars": [
     "\ue082"
-   ]
-  },
-  {
-   "type": "bitmap",
-   "file": "relapsed:font/logo_holo_3.png",
-   "height": 32,
-   "ascent": 26,
-   "chars": [
-    "\ue083"
    ]
   },
   {
