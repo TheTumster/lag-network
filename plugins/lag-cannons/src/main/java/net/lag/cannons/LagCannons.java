@@ -37,6 +37,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  *  - /tntfill to load every dispenser in a radius
  */
 public final class LagCannons extends JavaPlugin implements Listener {
+	/** Running on Sakura (its legacy mechanics already do the 1.8 fuse). */
+	static final boolean SAKURA = classExists("me.samsuik.sakura.mechanics.MechanicVersion");
+
+	private static boolean classExists(String n) {
+		try { Class.forName(n); return true; } catch (Throwable t) { return false; }
+	}
+
 	private final Map<Long, Hit> damage = new HashMap<>();
 	private final Map<Material, Integer> durable = new HashMap<>();
 
@@ -97,7 +104,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		if (!(e.getEntity() instanceof TNTPrimed tnt)) return;
 		// 1.8 counts the fuse down past zero before exploding (81 ticks for an 80 fuse); modern versions explode at
 		// zero (80). Cannons are timed to the tick, so give TNT the 1.8 fuse length.
-		if (getConfig().getBoolean("tnt.legacy-fuse", true)) tnt.setFuseTicks(tnt.getFuseTicks() + 1);
+		if (getConfig().getBoolean("tnt.legacy-fuse", true) && !SAKURA) tnt.setFuseTicks(tnt.getFuseTicks() + 1); // Sakura legacy mode adds the 1.8 tick itself
 		if (getConfig().getBoolean("tnt.random-kick", false)) return;
 		double y = getConfig().getDouble("tnt.prime-y-velocity", 0.2);
 		Vector v = tnt.getVelocity();

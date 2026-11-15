@@ -25,6 +25,21 @@ import urllib.parse
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SAKURA_WORLD = """_version: 12
+cannons:
+  merge-level: none
+  explosion:
+    optimise-protected-regions: true
+    avoid-redundant-block-searches: true
+    reuse-block-cache-across-explosions: true
+  mechanics:
+    mechanics-target:
+      mechanic-version: legacy
+      server-type: paper
+technical:
+  redstone:
+    redstone-cache: true
+"""
 NET = json.load(open(os.path.join(ROOT, "network", "network.json")))
 PLUGINS = json.load(open(os.path.join(ROOT, "tools", "plugins.json")))
 MC = NET["minecraft"]
@@ -245,6 +260,16 @@ def patch_backend(name):
         yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "environment.optimize-explosions", True)
         # 1.8 fix-cannons: flowing water doesn't push TNT
         yaml_set(os.path.join(d, "config", "paper-world-defaults.yml"), "fixes.prevent-tnt-from-moving-in-water", True)
+        # Sakura: 1.8 cannon mechanics, no entity merging (it changes shots), cannon lag options (all parity-tested)
+        sw = os.path.join(d, "config", "sakura-world-defaults.yml")
+        if not os.path.exists(sw):
+            os.makedirs(os.path.dirname(sw), exist_ok=True)
+            open(sw, "w").write(SAKURA_WORLD)
+        for k, v in (("cannons.merge-level", "none"), ("cannons.mechanics.mechanics-target.mechanic-version", "legacy"),
+                     ("cannons.mechanics.mechanics-target.server-type", "paper"),
+                     ("cannons.explosion.optimise-protected-regions", True), ("cannons.explosion.avoid-redundant-block-searches", True),
+                     ("cannons.explosion.reuse-block-cache-across-explosions", True), ("technical.redstone.redstone-cache", True)):
+            yaml_set(sw, k, v)
         fc = next((c for c in (os.path.join(d, "plugins", n, "config", "main.conf") for n in ("FactionsUUID", "Factions"))
                    if os.path.exists(c)), None)
         if not fc:
@@ -301,11 +326,12 @@ def main():
         os.makedirs(os.path.join(DIST, s, "plugins"), exist_ok=True)
         open(os.path.join(DIST, s, "eula.txt"), "w").write("eula=true\n")
         if s == "factions":
-            # laG Paper: Paper 1.21.11 + 1.8 cannon patches (built by the lag-paper workflow)
-            lurl = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/releases/download/lag-paper/lag-paper-1.21.11.jar"
+            # Sakura 1.21.11 (MIT, Samsuik/Sakura) in legacy 1.8 mechanics mode: matched 1.8 exactly in the parity test,
+            # plus its cannon lag optimisations. Built by the lag-sakura workflow. (laG Paper stays as a fallback release.)
+            lurl = f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/releases/download/lag-sakura/sakura-1.21.11.jar"
             download(lurl, os.path.join(DIST, s, "paper.jar"))
             manage(s, "paper.jar", lurl)
-            log("  factions  + laG Paper (cannon patches)")
+            log("  factions  + Sakura (1.8 cannon mechanics)")
             continue
         shutil.copy(os.path.join(DIST, "_paper.jar"), os.path.join(DIST, s, "paper.jar"))
         manage(s, "paper.jar", purl)

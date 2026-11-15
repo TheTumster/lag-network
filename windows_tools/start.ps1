@@ -96,6 +96,24 @@ if (Test-Path $pw) {
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Applied cannon settings (explosion optimizer, water doesn't push TNT)." Green }
 }
 
+# ---- Sakura (factions jar): 1.8 cannon mechanics, no entity merging, cannon lag options (all parity-tested)
+$sw = "$Root\factions\config\sakura-world-defaults.yml"
+if (-not (Test-Path $sw)) {
+    New-Item -ItemType Directory -Force (Split-Path $sw) | Out-Null
+    $sakura = "_version: 12`ncannons:`n  merge-level: none`n  explosion:`n    optimise-protected-regions: true`n    avoid-redundant-block-searches: true`n    reuse-block-cache-across-explosions: true`n  mechanics:`n    mechanics-target:`n      mechanic-version: legacy`n      server-type: paper`ntechnical:`n  redstone:`n    redstone-cache: true`n"
+    Set-Content $sw $sakura -NoNewline
+    Say "Set up Sakura cannon settings (1.8 mechanics)." Green
+} else {
+    $t = Get-Content $sw -Raw
+    $n = $t -replace 'merge-level:\s*\w+', 'merge-level: none' `
+            -replace 'mechanic-version:\s*\S+', 'mechanic-version: legacy' `
+            -replace 'optimise-protected-regions:\s*false', 'optimise-protected-regions: true' `
+            -replace 'avoid-redundant-block-searches:\s*false', 'avoid-redundant-block-searches: true' `
+            -replace 'reuse-block-cache-across-explosions:\s*false', 'reuse-block-cache-across-explosions: true' `
+            -replace 'redstone-cache:\s*false', 'redstone-cache: true'
+    if ($n -ne $t) { Set-Content $sw $n -NoNewline; Say "Applied Sakura cannon settings (1.8 mechanics)." Green }
+}
+
 # ---- FactionsUUID: turn on faction TNT banks (/f tnt, /f tntfill) and allow a bigger fill radius
 $fc = @("$Root\factions\plugins\FactionsUUID\config\main.conf", "$Root\factions\plugins\Factions\config\main.conf") | Where-Object { Test-Path $_ } | Select-Object -First 1
 if ($fc) {
