@@ -53,7 +53,7 @@ final class Parkour implements Listener {
 	private final HubFx fx;
 	private final NamespacedKey itemKey;
 	private final Map<UUID, Run> runs = new HashMap<>();
-	private int[] start, finish;
+	private int[] start, finish, entrance;
 	private final List<int[]> checkpoints = new ArrayList<>();
 	private final File file;
 	private final YamlConfiguration times;
@@ -70,6 +70,7 @@ final class Parkour implements Listener {
 				JsonObject o = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
 				start = arr(o.getAsJsonArray("start"));
 				finish = arr(o.getAsJsonArray("finish"));
+				if (o.has("entrance") && o.get("entrance").isJsonArray()) entrance = arr(o.getAsJsonArray("entrance"));
 				for (var e : o.getAsJsonArray("checkpoints")) checkpoints.add(arr(e.getAsJsonArray()));
 			}
 		} catch (Exception e) {
@@ -94,7 +95,13 @@ final class Parkour implements Listener {
 
 	Location startHologram() {
 		Location l = at(start);
-		return l == null ? null : l.add(0.5, 4.2, 0.5);
+		return l == null ? null : l.add(0.5, 2.6, 0.5);
+	}
+
+	/** Leaderboard: under the entrance arch (falls back to the start pad). */
+	Location boardHologram() {
+		Location l = at(entrance != null ? entrance : start);
+		return l == null ? null : l.add(0.5, entrance != null ? 3.2 : 4.2, 0.5);
 	}
 
 	Location finishHologram() {

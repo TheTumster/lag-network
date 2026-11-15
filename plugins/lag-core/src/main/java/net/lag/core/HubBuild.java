@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 5;
+	static final int BUILD_VERSION = 6;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -199,8 +199,9 @@ final class HubBuild implements Listener {
 		}
 		// parkour start (leaderboard) + finish
 		if (plugin.parkour != null) {
-			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram();
-			if (ps != null) text(ps, "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>PARKOUR</bold></gradient>\n<gray>Step on the <gold>gold plate</gold> to start\n{parkour_top}", 1.4f);
+			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram(), pb = plugin.parkour.boardHologram();
+			if (pb != null) text(pb, "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>PARKOUR</bold></gradient>\n<gray>Follow the bridge to the <gold>gold plate</gold>\n{parkour_top}", 1.3f);
+			if (ps != null) text(ps, "<gold><bold>START</bold>\n<gray>Step on the plate", 1.2f);
 			if (pf != null) text(pf, "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>FINISH</bold></gradient>", 2f);
 		}
 		for (Map<?, ?> m : plugin.getConfig().getMapList("hub.displays")) {

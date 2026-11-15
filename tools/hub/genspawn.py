@@ -467,10 +467,10 @@ for a_deg in (55, 125, 235, 305):
             put(ox, y, oz, "water[level=8]")
 
 # ======================================================================= parkour (helix around the island)
-PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 57, 15, 300, 90, 30
+PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 57, 15, 300, 80, 30
 PK_MATS = ["purpur_block", "amethyst_block", "light_blue_stained_glass", "sea_lantern", "purple_stained_glass",
            "polished_blackstone_bricks", "pearlescent_froglight", "cyan_concrete", "magenta_stained_glass"]
-parkour = {"start": None, "checkpoints": [], "finish": None}
+parkour = {"start": None, "checkpoints": [], "finish": None, "entrance": None}
 
 
 def pk_platform(x, y, z, top, plate, rr=1):
@@ -498,12 +498,32 @@ for t in range(36, PK_R - 1):
             z = round(t * math.sin(a0) + w * math.cos(a0))
             put(x, FLOOR + 1, z, WALL_POST)
             put(x, FLOOR + 2, z, "sea_lantern" if t % 8 else "pearlescent_froglight")
+# entrance arch at the island edge
+ER = 40
+ex, ez = round(ER * math.cos(a0)), round(ER * math.sin(a0))
+for w in (-3, 3):
+    px, pz = round(ER * math.cos(a0) - w * math.sin(a0)), round(ER * math.sin(a0) + w * math.cos(a0))
+    for y in range(FLOOR + 1, FLOOR + 9):
+        put(px, y, pz, "polished_blackstone_bricks" if y % 3 else "chiseled_polished_blackstone")
+    put(px, FLOOR + 5, pz, "pearlescent_froglight")
+    put(px, FLOOR + 9, pz, "amethyst_block")
+    put(px, FLOOR + 10, pz, "end_rod[facing=up]")
+for w in range(-3, 4):
+    px, pz = round(ER * math.cos(a0) - w * math.sin(a0)), round(ER * math.sin(a0) + w * math.cos(a0))
+    put(px, FLOOR + 8, pz, GRAD[(w + 3) % len(GRAD)])
+    if abs(w) <= 2:
+        put(px, FLOOR + 9, pz, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+    if abs(w) == 1:
+        put(px, FLOOR + 7, pz, "iron_chain[axis=y,waterlogged=false]")
+        put(px, FLOOR + 6, pz, "soul_lantern[hanging=true,waterlogged=false]")
+parkour["entrance"] = [ex, FLOOR + 1, ez]
 sx, sz = round(PK_R * math.cos(a0)), round(PK_R * math.sin(a0))
 pk_platform(sx, FLOOR, sz, "polished_blackstone_bricks", "light_weighted_pressure_plate[power=0]", rr=2)
 parkour["start"] = [sx, FLOOR + 1, sz]
 
 prev = (sx, FLOOR, sz)
 pk_path = [prev]
+prev_slab = False
 for i in range(1, PK_N + 1):
     t = i / PK_N
     a = math.radians(PK_A0 + PK_SWEEP * t)
@@ -511,12 +531,16 @@ for i in range(1, PK_N + 1):
     x, z = round(rr * math.cos(a)), round(rr * math.sin(a))
     # keep every jump makeable: at most +1 up, ~2.5 block gap going up, ~3 block gap flat
     dxz = math.hypot(x - prev[0], z - prev[2])
+    if dxz < 3.0 and (x, z) != (prev[0], prev[2]):
+        k = 3.2 / max(dxz, 0.1)
+        x, z = round(prev[0] + (x - prev[0]) * k), round(prev[2] + (z - prev[2]) * k)
+        dxz = math.hypot(x - prev[0], z - prev[2])
     k = 1.0
     while dxz > 4.0 and k > 0.3:
         k -= 0.05
         x, z = round(prev[0] + (x - prev[0]) * k), round(prev[2] + (z - prev[2]) * k)
         dxz = math.hypot(x - prev[0], z - prev[2])
-    y = min(FLOOR + round(PK_RISE * t), prev[1] + 1)
+    y = min(FLOOR + round(PK_RISE * t), prev[1] + (0 if prev_slab else 1))
     if y > prev[1] and dxz > 3.3:
         y = prev[1]
     if (x, z) == (prev[0], prev[2]):
@@ -537,11 +561,26 @@ for i in range(1, PK_N + 1):
         pk_platform(x, y, z, "polished_deepslate", "polished_blackstone_pressure_plate[powered=false]")
         parkour["checkpoints"].append([x, y + 1, z])
     else:
-        put(x, y, z, PK_MATS[i % len(PK_MATS)])
+        kind = h(i, 61)
+        if i > 8 and kind < 0.14 and y <= prev[1] and dxz <= 3.7:
+            # thin post landing (glass pane / iron bars), no rise
+            put(x, y, z, "purple_stained_glass_pane[east=false,north=false,south=false,waterlogged=false,west=false]" if i % 2 else "iron_bars[east=false,north=false,south=false,waterlogged=false,west=false]")
+            put(x, y - 1, z, "amethyst_block")
+        elif i > 8 and kind < 0.24 and y <= prev[1] and i % 15 != 14 and i != PK_N - 1:
+            put(x, y, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+            prev = (x, y, z)
+            pk_path.append(prev)
+            prev_slab = True
+            continue
+        elif i > 8 and kind < 0.30 and y <= prev[1] and dxz <= 3.2:
+            put(x, y, z, WALL_POST)   # 1.5 tall: lands half a block up
+        else:
+            put(x, y, z, PK_MATS[i % len(PK_MATS)])
         if i % 9 == 4:
             put(x, y - 1, z, "amethyst_cluster[facing=down,waterlogged=false]")
     prev = (x, y, z)
     pk_path.append(prev)
+    prev_slab = False
 
 _j = [(math.hypot(b[0] - a[0], b[2] - a[2]), b[1] - a[1]) for a, b in zip(pk_path, pk_path[1:])]
 print(f"parkour jumps: {len(_j)}, longest {max(d for d, _ in _j):.2f}, shortest {min(d for d, _ in _j):.2f}, longest going up {max([d for d, r in _j if r > 0] or [0]):.2f}, max rise {max(r for _, r in _j)}")
