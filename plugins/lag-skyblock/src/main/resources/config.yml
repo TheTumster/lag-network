@@ -18,6 +18,14 @@ tiers:
   - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
   - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}
 
+# SmartSpawner's own chat messages: our prefix instead of "SmartSpawner ⏩", and these messages switched off
+# (/spawners already says what you bought; placing a spawner shows a short action bar from us instead).
+smartspawner:
+  prefix: "<gradient:#38E0FF:#B040FF><bold>RELAPSED</bold></gradient> <dark_gray>» <reset>"
+  muted-messages:
+    - command.give.spawner_received
+    - spawner.activated
+
 # Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
 # Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen.
 generator-tiers:

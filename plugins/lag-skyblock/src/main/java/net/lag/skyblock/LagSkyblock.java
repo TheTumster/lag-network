@@ -216,6 +216,30 @@ public final class LagSkyblock extends JavaPlugin {
 				getLogger().info("Added tier heads to SmartSpawner loot (" + chance + "% per mob)");
 			}
 		}
+		// SmartSpawner's chat: our branding instead of "SmartSpawner ⏩", and no duplicate buy/place messages
+		// (SmartSpawner re-adds missing keys on start, so these are switched off with enabled: false, not deleted)
+		YamlConfiguration ssCfg = YamlConfiguration.loadConfiguration(ssFile("config.yml"));
+		File lang = ssFile("language" + File.separator + ssCfg.getString("language", "en_US") + File.separator + "messages.yml");
+		if (lang.exists()) {
+			YamlConfiguration y = YamlConfiguration.loadConfiguration(lang);
+			boolean changed = false;
+			String prefix = getConfig().getString("smartspawner.prefix", "<gradient:#38E0FF:#B040FF><bold>RELAPSED</bold></gradient> <dark_gray>» <reset>");
+			if (!prefix.equals(y.getString("prefix"))) {
+				y.set("prefix", prefix);
+				changed = true;
+			}
+			for (String key : getConfig().getStringList("smartspawner.muted-messages")) {
+				if (y.isConfigurationSection(key) && y.getBoolean(key + ".enabled", true)) {
+					y.set(key + ".enabled", false);
+					changed = true;
+				}
+			}
+			if (changed) {
+				y.save(lang);
+				any = true;
+				getLogger().info("Rebranded SmartSpawner's chat messages");
+			}
+		}
 		// heads are sold through /spawners at tier prices, never by SmartSpawner's sell button
 		File sell = ssFile("sell_integration.yml");
 		if (sell.exists()) {
