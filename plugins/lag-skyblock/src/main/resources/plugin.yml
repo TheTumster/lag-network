@@ -2,8 +2,8 @@ name: laGSkyblock
 version: '${version}'
 main: net.lag.skyblock.LagSkyblock
 api-version: '1.21'
-softdepend: [Vault, Essentials, SmartSpawner, EconomyShopGUI, BentoBox]
-loadbefore: [SmartSpawner, EconomyShopGUI]
+softdepend: [Vault, Essentials, RoseStacker, EconomyShopGUI, BentoBox]
+loadbefore: [EconomyShopGUI]
 description: RelapsedMC Skyblock - spawner tiers, mob heads, ore gens, island top, the Pit, seasons
 commands:
   spawners:

@@ -1,0 +1,11 @@
+# Mob head textures (Mojang texture hashes) for the tier heads. Bundled so no other plugin is needed.
+chicken: "4e8f3ea46735ad0c106c549ccb6cd489c97a41e73d092497ee424becd9dfd29c"
+pig: "9b1760e3778f8087046b86bec6a0a83a567625f30f0d6bce866d4bed95dba6c1"
+cow: "b667c0e107be79d7679bfe89bbc57c6bf198ecb529a3295fcfdfd2f24408dca3"
+spider: "35e248da2e108f09813a6b848a0fcef111300978180eda41d3d1a7a8e4dba3c3"
+slime: "c7d29dbf3d98213ec2fb0ca25da74779e57bd0c1234268f828a3ec9869e15a9c"
+silverfish: "bfe13237e1109cab7264dc53b0aa697cf9a7c62c984a269fb0755a288912bbca"
+witch: "8aa986a6e1c2d88ff198ab2c3259e8d2674cb83a6d206f883bad2c8ada819"
+blaze: "737623f79f7eb4f3f80da65b652cc44b2148eea41f9ffe2e86a23bdf49ab77b1"
+enderman: "4f24767c8138b3dfec02f77bd151994d480d4e869664ce09a26b19289212162b"
+iron_golem: "4271913a3fc8f56bdf6b90a4b4ed6a05c562ce0076b5344d444fb2b040ae57d"

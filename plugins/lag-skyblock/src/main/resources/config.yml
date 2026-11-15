@@ -1,7 +1,8 @@
 # RelapsedMC Skyblock: spawner tiers.
 # Tiers go cheapest first. Tier 1 is unlocked for everyone; each next tier is unlocked by trading in
-# `unlock` heads of the tier before it (/spawners). Spawners drop their mob's head into spawner storage.
-# head-chance: chance (percent) that each generated mob drops its head.
+# `unlock` heads of the tier before it (/spawners). Spawner mobs drop their head when they die - in a grinder or
+# to a sword - so: grind a tier, collect its heads, unlock the next, build a grinder for it.
+# head-chance: chance (percent) that each spawner mob drops its head when it dies (whole stacks roll per mob).
 head-chance: 4.0
 tiers:
   - {mob: chicken,    name: Chicken,    color: "#F4E7C8", price: 25000,    head-value: 40,    unlock: 0}
@@ -18,13 +19,18 @@ tiers:
   - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
   - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}
 
-# SmartSpawner's own chat messages: our prefix instead of "SmartSpawner ⏩", and these messages switched off
-# (/spawners already says what you bought; placing a spawner shows a short action bar from us instead).
-smartspawner:
-  prefix: "<gradient:#38E0FF:#B040FF><bold>RELAPSED</bold></gradient> <dark_gray>» <reset>"
-  muted-messages:
-    - command.give.spawner_received
-    - spawner.activated
+# RoseStacker (real mobs, stacked): written into its config on start.
+# kill-entire-stack-on: damage causes that kill a WHOLE stack at once with loot for every mob - these are the AFK
+#   grinders (drop chutes = FALL, lava blades = LAVA/FIRE, magma floors = HOT_FLOOR...). A player's sword kills
+#   one mob at a time (that's how you farm XP).
+# player-activation-range: how close someone has to be for spawners to run (blocks).
+# settings: any other RoseStacker config.yml key, e.g. global-spawner-settings.spawn-max-nearby-entities: 8
+# prefix: RoseStacker's chat prefix (its own colour format: & codes, <g:#from:#to> gradients).
+rosestacker:
+  kill-entire-stack-on: [FALL, LAVA, FIRE, FIRE_TICK, HOT_FLOOR, DROWNING, SUFFOCATION, CRAMMING, CONTACT, FREEZE, CAMPFIRE]
+  player-activation-range: 24
+  settings: {}
+  prefix: "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7"
 
 # Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
 # Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen.
