@@ -1,0 +1,152 @@
+# In-world panels, one per server role. Positions are relative to that server's spawn origin (spawns.<role>.origin).
+# box: [left, bottom, right, top] in blocks from the panel's bottom centre (width 6.4 -> -3.2..3.2, height 3.6).
+# action: cmd:<command run as the player> | tab:<tab id> | msg:<MiniMessage text>
+skyblock:
+  at: [-12, 1, -1]
+  facing: east
+  width: 6.4
+  height: 3.6
+  range: 26
+  frame: polished_blackstone
+  background: black_concrete
+  title: "<gradient:#7CFF6B:#38E0FF><bold>GETTING STARTED</bold></gradient>"
+  subtitle: "<dark_gray>Look at a card · <gray>click</gray> to open"
+  tabs:
+    - id: home
+      label: HOME
+      cards:
+        - box: [-3.05, 0.95, -1.35, 2.5]
+          color: gray_concrete
+          accent: lime_concrete
+          icon: PLAYER_HEAD
+          icon-size: 0.55
+          title: "<white><bold>{player}"
+          title-size: 0.55
+          lines: ["<gray>Welcome to", "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK"]
+          line-size: 0.45
+        - box: [-1.25, 0.95, 0.12, 2.5]
+          color: gray_concrete
+          accent: lime_concrete
+          icon: GRASS_BLOCK
+          title: "<#7CFF6B><bold>1. ISLAND"
+          title-size: 0.5
+          lines: ["<gray>Create your", "<gray>island", "<white>/is"]
+          action: "cmd:is"
+        - box: [0.22, 0.95, 1.59, 2.5]
+          color: gray_concrete
+          accent: light_blue_concrete
+          icon: DIAMOND_ORE
+          title: "<#38E0FF><bold>2. GENERATE"
+          title-size: 0.5
+          lines: ["<gray>Mine ores,", "<gray>upgrade tiers", "<white>/gen"]
+          action: "tab:gens"
+        - box: [1.69, 0.95, 3.06, 2.5]
+          color: gray_concrete
+          accent: purple_concrete
+          icon: SPAWNER
+          title: "<#B040FF><bold>3. AFK"
+          title-size: 0.5
+          lines: ["<gray>Stack spawners,", "<gray>sell the loot", "<white>/spawners"]
+          action: "tab:spawners"
+        - box: [-3.05, 0.15, -1.6, 0.85]
+          color: gray_concrete
+          icon: EMERALD
+          icon-size: 0.32
+          title: "<white><bold>SHOP"
+          title-size: 0.45
+          action: "cmd:shop"
+        - box: [-1.5, 0.15, -0.05, 0.85]
+          color: gray_concrete
+          icon: GOLDEN_HELMET
+          icon-size: 0.32
+          title: "<white><bold>ISLAND TOP"
+          title-size: 0.45
+          action: "cmd:is top"
+        - box: [0.05, 0.15, 1.5, 0.85]
+          color: gray_concrete
+          icon: WRITABLE_BOOK
+          icon-size: 0.32
+          title: "<white><bold>CHALLENGES"
+          title-size: 0.45
+          action: "cmd:is challenges"
+        - box: [1.6, 0.15, 3.05, 0.85]
+          color: gray_concrete
+          icon: OAK_SIGN
+          icon-size: 0.32
+          title: "<white><bold>WARPS"
+          title-size: 0.45
+          action: "cmd:is warps"
+    - id: island
+      label: ISLAND
+      cards:
+        - box: [-3.05, 0.95, -0.05, 2.5]
+          color: gray_concrete
+          accent: lime_concrete
+          icon: GRASS_BLOCK
+          title: "<#7CFF6B><bold>YOUR ISLAND"
+          title-size: 0.55
+          lines: ["<white>/is <gray>create or go home", "<white>/is invite <name> <gray>add a teammate", "<white>/is sethome <gray>move your home"]
+          line-size: 0.4
+          action: "cmd:is"
+        - box: [0.05, 0.95, 3.05, 2.5]
+          color: gray_concrete
+          accent: light_blue_concrete
+          icon: EXPERIENCE_BOTTLE
+          title: "<#38E0FF><bold>LEVEL UP"
+          title-size: 0.55
+          lines: ["<gray>Every block placed", "<gray>adds island level", "<white>/is level"]
+          line-size: 0.4
+          action: "cmd:is level"
+        - box: [-3.05, 0.15, -0.05, 0.85]
+          color: gray_concrete
+          icon: ANVIL
+          icon-size: 0.32
+          title: "<white><bold>UPGRADES <gray>/is upgrades"
+          title-size: 0.42
+          action: "cmd:is upgrades"
+        - box: [0.05, 0.15, 3.05, 0.85]
+          color: gray_concrete
+          icon: ENDER_PEARL
+          icon-size: 0.32
+          title: "<white><bold>VISIT <gray>/is warps"
+          title-size: 0.42
+          action: "cmd:is warps"
+    - id: gens
+      label: GENERATORS
+      cards:
+        - box: [-3.05, 0.15, 3.05, 2.5]
+          color: gray_concrete
+          accent: light_blue_concrete
+          icon: DIAMOND_ORE
+          icon-size: 0.6
+          title: "<#38E0FF><bold>ORE GENERATORS"
+          title-size: 0.6
+          lines: ["<gray>Your cobble generator drops ores.", "<gray>Upgrade it to unlock better ores:", "<white>Coal → Iron → Gold → Diamond → Emerald", "<dark_gray>Coming next update"]
+          line-size: 0.42
+          action: "msg:<#38E0FF>Generators</#38E0FF> <gray>are coming in the next update."
+    - id: spawners
+      label: SPAWNERS
+      cards:
+        - box: [-3.05, 0.15, 3.05, 2.5]
+          color: gray_concrete
+          accent: purple_concrete
+          icon: SPAWNER
+          icon-size: 0.6
+          title: "<#B040FF><bold>SPAWNERS"
+          title-size: 0.6
+          lines: ["<gray>Stack spawners to grind while AFK.", "<gray>Loot goes into spawner storage,", "<gray>sell it all with one click.", "<white>Buy spawners in /shop"]
+          line-size: 0.42
+          action: "cmd:shop"
+    - id: season
+      label: SEASON
+      cards:
+        - box: [-3.05, 0.15, 3.05, 2.5]
+          color: gray_concrete
+          accent: yellow_concrete
+          icon: NETHER_STAR
+          icon-size: 0.6
+          title: "<gradient:#FFD84D:#FF8A3D><bold>SEASON 1"
+          title-size: 0.6
+          lines: ["<gray>Top islands at the end of the season", "<gray>win prizes. Island level decides it.", "<white>/is top"]
+          line-size: 0.42
+          action: "cmd:is top"

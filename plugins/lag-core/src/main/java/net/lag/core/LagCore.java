@@ -117,6 +117,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 				getServer().getPluginManager().registerEvents(spawnBuild, this);
 				getServer().getPluginManager().registerEvents(new SpawnProtect(this, spawnBuild), this);
 				Bukkit.getScheduler().runTask(this, spawnBuild::start);
+				InfoPanel panel = new InfoPanel(this, spawnBuild, role);
+				if (panel.active()) getServer().getPluginManager().registerEvents(panel, this);
 			}
 		}
 		// one-time setup commands for this server (e.g. import Skyblock's default challenges)
