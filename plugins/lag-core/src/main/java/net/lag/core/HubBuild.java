@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 7;
+	static final int BUILD_VERSION = 8;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -332,6 +332,12 @@ final class HubBuild implements Listener {
 		}
 		if (best == null) return;
 		portalCooldown.put(p.getUniqueId(), now);
+		if (plugin.getConfig().getBoolean("realms." + best + ".coming-soon", false)) {
+			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + best.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
+			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
+			Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(plugin.spawn()); }, 20L);
+			return;
+		}
 		String server = plugin.getConfig().getString("realms." + best + ".server", best);
 		p.playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.25f, 1.6f);
 		p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF>Sending you to <bold>" + best.toUpperCase() + "</bold>...</gradient>"));

@@ -184,7 +184,7 @@ def main():
         glyphs["logo_" + key] = "\uF801".join(chars)  # each glyph advances width+1; pull back 1px so tiles touch
     for name, rows in ICONS.items():
         icon(rows).save(os.path.join(TEX, f"icon_{name}.png"))
-    panel(3, {11, 15}, "Servers").save(os.path.join(TEX, "menu_selector.png"))
+    panel(3, {10, 12, 14, 16}, "Servers").save(os.path.join(TEX, "menu_selector.png"))
     panel(4, {10, 11, 12, 13, 14, 15, 16, 20, 22, 24}, "Cosmetics").save(os.path.join(TEX, "menu_cosmetics.png"))
 
     providers = [

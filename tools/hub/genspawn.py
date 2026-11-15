@@ -192,115 +192,200 @@ for x in range(-R - 6, R + 7):
                     put(x, top + 1, z, "moss_carpet")
 
 # ======================================================================= layout (island coords; spawn is moved to (0,0,0) on write)
-SPAWN_Z = 32          # arrival platform, facing north
-PLAZA_C = (0, -12)    # choice plaza centre (beacon + crystal)
-PLAZA_R = 13
-GATE_Z = -27          # portal plane of the three gates
-GATE_X = {"smp": -21, "factions": 0, "soon": 21}
-SIDE_Z = 10           # side paths: west -> Discord pavilion, east -> parkour
+SPAWN_Z = 30
+# realm portals (round), left to right as you face north from the spawn
+PORTALS = {"skyblock": (-34, -6), "factions": (-12, -18), "cannons": (12, -18), "smp": (34, -6)}
+RING_R = 6                      # portal ring radius
+reserved = set()                # paved cells (trees/flora stay off them)
 
 
-def paved(x, z):
-    """Areas kept clear of trees/terrain bumps."""
-    if abs(x) <= 8 and -4 <= z <= SPAWN_Z + 7:
-        return True
-    if math.hypot(x - PLAZA_C[0], z - PLAZA_C[1]) <= PLAZA_R + 3:
-        return True
-    if z <= GATE_Z + 7 and abs(x) <= 33:
-        return True
-    if abs(z - SIDE_Z) <= 4 and abs(x) <= 42:
-        return True
-    if math.hypot(x + 30, z - SIDE_Z) <= 9:
-        return True
-    return False
+def clear_above(x, z, up=10):
+    for y in range(FLOOR + 1, FLOOR + up):
+        blocks.pop((x, y, z), None)
 
 
-def floor_tile(x, z, d):
-    chk = (x + z) % 2 == 0
-    b = "polished_blackstone_bricks" if chk else "deepslate_bricks"
-    if h(x, z, 5) < 0.07:
-        b = "cracked_polished_blackstone_bricks" if chk else "cracked_deepslate_bricks"
-    return b
+def pave(x, z, b):
+    clear_above(x, z)
+    put(x, FLOOR, z, b)
+    reserved.add((x, z))
 
 
-# clear terrain bumps/flora on paved areas, then pave
-for x in range(-R - 6, R + 7):
-    for z in range(-R - 6, R + 7):
-        if not paved(x, z) or math.hypot(x, z) > edge_r(x, z, R) - 1:
-            continue
-        for y in range(FLOOR + 1, FLOOR + 9):
-            blocks.pop((x, y, z), None)
-        put(x, FLOOR, z, floor_tile(x, z, 0))
+THEME = {
+    "skyblock": dict(edge="mossy_stone_bricks", fill="moss_block", line="verdant_froglight", alt="moss_block", lamp="verdant_froglight"),
+    "factions": dict(edge="red_nether_bricks", fill="polished_blackstone_bricks", line="shroomlight", alt="polished_blackstone", lamp="shroomlight"),
+    "cannons": dict(edge="obsidian", fill="polished_deepslate", line="redstone_lamp[lit=true]", alt="deepslate_tiles", lamp="redstone_lamp[lit=true]"),
+    "smp": dict(edge="spruce_planks", fill="packed_mud", line="pearlescent_froglight", alt="mud_bricks", lamp="lantern[hanging=false,waterlogged=false]"),
+}
 
-# --- arrival platform (spawn)
-for x in range(-7, 8):
-    for z in range(SPAWN_Z - 7, SPAWN_Z + 8):
+
+def bezier(p0, p1, p2, t):
+    return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+            (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1])
+
+
+# --- arrival platform (open, no walls): the whole island is in view
+for x in range(-8, 9):
+    for z in range(SPAWN_Z - 8, SPAWN_Z + 9):
         d = math.hypot(x, z - SPAWN_Z)
-        if d <= 5.5:
-            put(x, 0, z, "amethyst_block" if 3.5 < d <= 4.5 else "polished_deepslate" if d > 4.5 else "deepslate_tiles")
+        if d <= 6.5:
+            clear_above(x, z)
+            put(x, 0, z, "amethyst_block" if 4.5 < d <= 5.5 else "polished_deepslate" if d > 5.5 else ("deepslate_tiles" if (x + z) % 2 else "polished_deepslate"))
             put(x, FLOOR, z, "deepslate")
-        elif d <= 6.6:
+            reserved.add((x, z))
+        elif d <= 7.6:
+            clear_above(x, z)
             stairs(x, 0, z, "polished_deepslate", facing_in(x, z - SPAWN_Z))
+            reserved.add((x, z))
 put(0, 0, SPAWN_Z, "pearlescent_froglight")
-for x, z in ((4, SPAWN_Z + 4), (-4, SPAWN_Z + 4)):
-    for y in range(1, 5):
-        put(x, y, z, WALL_POST)
-    put(x, 5, z, "pearlescent_froglight")
-    put(x, 6, z, "end_rod[facing=up]")
+for i in range(8):
+    a = i * math.pi / 4 + math.pi / 8
+    x, z = round(6 * math.cos(a)), round(SPAWN_Z + 6 * math.sin(a))
+    put(x, 1, z, "end_rod[facing=up]")
 
-# --- grand avenue north from the spawn to the plaza
-AV_N = PLAZA_C[1] + PLAZA_R - 2
-for z in range(AV_N, SPAWN_Z - 5):
-    for x in range(-4, 5):
-        if abs(x) == 4:
-            b = "polished_blackstone_bricks"
-        elif x == 0:
-            b = "sea_lantern" if z % 4 == 0 else "pearlescent_froglight" if z % 4 == 2 else grad_at(1, -1 + (z % 7) * 0.3)
-        elif abs(x) == 1:
-            b = "amethyst_block" if z % 4 == 0 else "polished_deepslate"
-        else:
-            b = "polished_deepslate"
-        put(x, FLOOR, z, b)
-for zc in range(SPAWN_Z - 9, AV_N + 2, -7):
-    for sx in (-7, 7):
-        for dx in (0, 1 if sx > 0 else -1):
-            for y in range(FLOOR + 1, FLOOR + 9):
-                put(sx + dx, y, zc, "chiseled_polished_blackstone" if y in (FLOOR + 1, FLOOR + 8) else ("pearlescent_froglight" if y == FLOOR + 5 else "polished_deepslate"))
-    # arch across the avenue
-    for x in range(-8, 9):
-        put(x, FLOOR + 9, zc, "polished_blackstone_bricks" if abs(x) >= 6 else "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
-    for x in (-3, 3):
-        put(x, FLOOR + 8, zc, "iron_chain[axis=y,waterlogged=false]")
-        put(x, FLOOR + 7, zc, "soul_lantern[hanging=true,waterlogged=false]")
-    put(0, FLOOR + 10, zc, "amethyst_block")
-    put(0, FLOOR + 11, zc, "amethyst_cluster[facing=up,waterlogged=false]")
+# --- four realm paths fanning out from the spawn
+for realm, (px, pz) in PORTALS.items():
+    th = THEME[realm]
+    p0 = (px * 0.12, SPAWN_Z - 7)
+    p2 = (px, pz + RING_R + 3)
+    p1 = (px * 0.85, (p0[1] + p2[1]) / 2 + 6)
+    steps = 160
+    last_lamp = -99
+    for k in range(steps + 1):
+        t = k / steps
+        cx, cz = bezier(p0, p1, p2, t)
+        # tangent for the side offset
+        tx, tz = bezier(p0, p1, p2, min(1, t + 0.01))
+        dx, dz = tx - cx, tz - cz
+        ln = math.hypot(dx, dz) or 1
+        nx, nz = -dz / ln, dx / ln
+        for w in range(-3, 4):
+            x, z = round(cx + nx * w), round(cz + nz * w)
+            if (x, z) in reserved and abs(w) == 3:
+                continue
+            if abs(w) == 3:
+                b = th["edge"]
+            elif w == 0:
+                b = th["line"] if k % 6 == 0 else th["alt"]
+            else:
+                b = th["fill"]
+            pave(x, z, b)
+        if k - last_lamp >= 18 and 0.12 < t < 0.92:
+            last_lamp = k
+            for side in (-4.5, 4.5):
+                x, z = round(cx + nx * side), round(cz + nz * side)
+                for y in range(FLOOR + 1, FLOOR + 4):
+                    put(x, y, z, WALL_POST)
+                put(x, FLOOR + 4, z, th["lamp"] if "lantern" not in th["lamp"] else "pearlescent_froglight")
+                put(x, FLOOR + 5, z, "end_rod[facing=up]")
+                reserved.add((x, z))
 
-# --- choice plaza: beacon + crystal
-cx0, cz0 = PLAZA_C
-for x in range(-PLAZA_R, PLAZA_R + 1):
-    for z in range(-PLAZA_R, PLAZA_R + 1):
+
+# --- round portals
+def ring_portal(cx, cz, realm):
+    th = THEME[realm]
+    cy = FLOOR + 2 + RING_R          # ring centre height
+    # round pedestal with steps
+    for x in range(-9, 10):
+        for z in range(-5, 6):
+            d = math.hypot(x, z * 1.6)
+            if d <= 8.5:
+                clear_above(cx + x, cz + z, 4)
+                put(cx + x, FLOOR + 1, cz + z, th["fill"] if d < 7 else th["edge"])
+                reserved.add((cx + x, cz + z))
+    for x in range(-3, 4):
+        stairs(cx + x, FLOOR + 1, cz + 6, "polished_blackstone_brick" if realm != "smp" else "spruce", "north")
+    # the ring (XY plane) and the portal inside it
+    for x in range(-RING_R - 2, RING_R + 3):
+        for y in range(-RING_R - 2, RING_R + 3):
+            d = math.hypot(x, y)
+            yy = cy + y
+            if yy < FLOOR + 2:
+                continue
+            if d <= RING_R - 0.6:
+                put(cx + x, yy, cz, "nether_portal[axis=x]")
+            elif d <= RING_R + 0.7:
+                ang = math.atan2(y, x)
+                seg = int((ang + math.pi) / (2 * math.pi) * 16)
+                if realm == "factions":
+                    b = "tnt[unstable=false]" if seg % 4 == 0 else ("red_nether_bricks" if seg % 2 else "polished_blackstone_bricks")
+                elif realm == "cannons":
+                    b = "redstone_lamp[lit=true]" if seg % 4 == 0 else ("obsidian" if seg % 2 else "crying_obsidian")
+                elif realm == "skyblock":
+                    b = "grass_block[snowy=false]" if y > 1 else ("moss_block" if seg % 2 else "rooted_dirt")
+                else:
+                    b = "oak_log[axis=z]" if seg % 2 else "stripped_oak_log[axis=z]"
+                put(cx + x, yy, cz, b)
+                put(cx + x, yy, cz + 1, th["edge"] if realm != "skyblock" else "dirt")
+            elif d <= RING_R + 1.6 and h(x, y, cz) < 0.5 and realm in ("smp", "skyblock"):
+                put(cx + x, yy, cz, "flowering_azalea_leaves[distance=1,persistent=true,waterlogged=false]" if h(x, y) < 0.5 else "azalea_leaves[distance=1,persistent=true,waterlogged=false]", force=False)
+    top = cy + RING_R + 1
+    # theme crown / details
+    if realm == "skyblock":
+        # mini floating island on top with a tree, vines hanging off the ring
+        for x in range(-4, 5):
+            for z in range(-2, 3):
+                if x * x / 16 + z * z / 4 <= 1:
+                    put(cx + x, top, cz + z, "grass_block[snowy=false]")
+                    put(cx + x, top - 1, cz + z, "dirt")
+                    if abs(x) <= 2 and abs(z) <= 1:
+                        put(cx + x, top - 2, cz + z, "dirt")
+        for y in range(1, 5):
+            put(cx, top + y, cz, "oak_log[axis=y]")
+        for x in range(-2, 3):
+            for z in range(-2, 3):
+                for y in range(4, 7):
+                    if abs(x) + abs(z) + (y - 4) <= 3 and (x or z or y > 4):
+                        put(cx + x, top + y, cz + z, "oak_leaves[distance=1,persistent=true,waterlogged=false]", force=False)
+        for x in (-5, -3, 3, 5):
+            for i in range(3):
+                put(cx + x, cy + 2 - i, cz - 1, "vine[east=false,north=false,south=true,up=false,west=false]")
+    elif realm == "factions":
+        for x in (-8, 8):
+            for y in range(FLOOR + 2, FLOOR + 14):
+                put(cx + x, y, cz, "polished_blackstone_bricks" if y % 4 else "red_nether_bricks")
+            put(cx + x, FLOOR + 14, cz, "shroomlight")
+            put(cx + x, FLOOR + 15, cz, "tnt[unstable=false]")
+        put(cx, top, cz, "crimson_hyphae[axis=y]")
+        put(cx, top + 1, cz, "shroomlight")
+    elif realm == "cannons":
+        for x in (-8, 8):
+            for y in range(FLOOR + 2, FLOOR + 14):
+                if y % 3 == 0:
+                    put(cx + x, y, cz, "dispenser[facing=" + ("west" if x > 0 else "east") + ",triggered=false]")
+                else:
+                    put(cx + x, y, cz, "obsidian")
+            put(cx + x, FLOOR + 14, cz, "redstone_lamp[lit=true]")
+        put(cx, top, cz, "observer[facing=up,powered=false]")
+        put(cx, top + 1, cz, "redstone_lamp[lit=true]")
+    else:
+        for x in (-8, 8):
+            for y in range(FLOOR + 2, FLOOR + 13):
+                put(cx + x, y, cz, "spruce_log[axis=y]")
+            put(cx + x, FLOOR + 13, cz, "lantern[hanging=false,waterlogged=false]")
+            for dz in (-1, 1):
+                put(cx + x, FLOOR + 11, cz + dz, "oak_leaves[distance=1,persistent=true,waterlogged=false]")
+        for x in range(-7, 8, 2):
+            put(cx + x, FLOOR + 2, cz + 3, "poppy" if x % 4 else "cornflower")
+        put(cx, top, cz, "oak_leaves[distance=1,persistent=true,waterlogged=false]")
+
+
+for realm, (px, pz) in PORTALS.items():
+    ring_portal(px, pz, realm)
+
+# --- beacon + crystal over the island centre (between the paths)
+cx0, cz0 = 0, 2
+for x in range(-3, 4):
+    for z in range(-3, 4):
         d = math.hypot(x, z)
-        if d > PLAZA_R:
-            continue
-        if d > PLAZA_R - 1.3:
-            b = "polished_blackstone_bricks"
-        elif d > PLAZA_R - 2.8:
-            b = grad_at(x, z)
-        elif int(d) % 4 == 0:
-            b = "chiseled_deepslate" if (x * 3 + z) % 5 == 0 else "deepslate_tiles"
-        else:
-            b = floor_tile(x, z, d)
-        put(cx0 + x, FLOOR, cz0 + z, b)
+        if d <= 3.3:
+            pave(cx0 + x, cz0 + z, "amethyst_block" if d > 2.3 else "polished_deepslate")
 for x in range(-1, 2):
     for z in range(-1, 2):
         put(cx0 + x, FLOOR - 2, cz0 + z, "iron_block")
         put(cx0 + x, FLOOR - 1, cz0 + z, "deepslate")
 put(cx0, FLOOR - 1, cz0, "beacon")
 put(cx0, FLOOR, cz0, "purple_stained_glass")
-for d in range(2, 4):
-    for x, z in ((d, 0), (-d, 0), (0, d), (0, -d)):
-        put(cx0 + x, FLOOR, cz0 + z, "amethyst_block")
-CY0 = 16
+CY0 = 20
 for y in range(0, 17):
     rr = (8 - abs(y - 7)) * 0.75 if y <= 7 else (8 - (y - 7) * 0.85) * 0.75
     rr = max(0, rr)
@@ -308,16 +393,8 @@ for y in range(0, 17):
         for z in range(-7, 8):
             d = abs(x) + abs(z)
             if d <= rr:
-                if x == 0 and z == 0:
-                    b = "magenta_stained_glass"
-                elif d > rr - 1.2:
-                    b = "amethyst_block" if (x + y + z) % 3 else "purple_stained_glass"
-                else:
-                    b = "purple_stained_glass"
+                b = "magenta_stained_glass" if x == 0 and z == 0 else ("amethyst_block" if (x + y + z) % 3 else "purple_stained_glass") if d > rr - 1.2 else "purple_stained_glass"
                 put(cx0 + x, CY0 + y, cz0 + z, b)
-for (dx, dz), f in (((1, 0), "east"), ((-1, 0), "west"), ((0, 1), "south"), ((0, -1), "north")):
-    put(cx0 + dx * 2, CY0 - 1, cz0 + dz * 2, "amethyst_cluster[facing=down,waterlogged=false]")
-    put(cx0 + dx * 6, CY0 + 7, cz0 + dz * 6, f"end_rod[facing={f}]")
 put(cx0, CY0 + 17, cz0, "end_rod[facing=up]")
 for i in range(8):
     a = i * math.pi / 4
@@ -326,117 +403,23 @@ for i in range(8):
     put(cx0 + x, y, cz0 + z, "amethyst_block")
     put(cx0 + x, y + 1, cz0 + z, "amethyst_cluster[facing=up,waterlogged=false]")
     put(cx0 + x, y - 1, cz0 + z, "amethyst_cluster[facing=down,waterlogged=false]")
-# lamp ring around the plaza
-for i in range(10):
-    a = i * math.pi / 5 + math.pi / 10
-    x, z = round(cx0 + (PLAZA_R + 1.5) * math.cos(a)), round(cz0 + (PLAZA_R + 1.5) * math.sin(a))
-    if z < cz0 - 6 or abs(x) <= 5:
-        continue
-    for y in range(FLOOR + 1, FLOOR + 4):
-        put(x, y, z, WALL_POST)
-    put(x, FLOOR + 4, z, "pearlescent_froglight" if i % 2 else "sea_lantern")
-    put(x, FLOOR + 5, z, "end_rod[facing=up]")
 
 
-# --- the three gates
-def gateway(xc, zc, theme):
-    s = -1
-    if theme == "factions":
-        brick, stair_mat, accent, glow, trim, roof = "polished_blackstone_bricks", "polished_blackstone_brick", "red_nether_bricks", "shroomlight", "crimson_hyphae[axis=y]", "crimson_planks"
-    elif theme == "smp":
-        brick, stair_mat, accent, glow, trim, roof = "mossy_stone_bricks", "mossy_stone_brick", "moss_block", "verdant_froglight", "spruce_log[axis=y]", "spruce_planks"
-    else:
-        brick, stair_mat, accent, glow, trim, roof = "end_stone_bricks", "end_stone_brick", "purpur_pillar[axis=y]", "pearlescent_froglight", "purpur_pillar[axis=y]", "purpur_block"
-
-    def P(x, y, z, b):
-        put(xc + x, y, z, b)
-
-    for x in range(-9, 10):
-        for dz in range(-4, 5):
-            P(x, FLOOR + 1, zc + dz, brick)
-    for x in range(-3, 4):
-        stairs(xc + x, FLOOR + 1, zc - s * 5, stair_mat, "north")
-    for x in range(-3, 4):
-        for y in range(0, 9):
-            yy = FLOOR + 2 + y
-            if abs(x) == 3 or y in (0, 8):
-                P(x, yy, zc, "obsidian" if theme != "soon" else "crying_obsidian")
-            elif theme == "soon":
-                P(x, yy, zc, "purple_stained_glass_pane[east=true,north=false,south=false,waterlogged=false,west=true]")
-            else:
-                P(x, yy, zc, "nether_portal[axis=x]")
-    for x in range(-6, 7):
-        for y in range(0, 14):
-            yy = FLOOR + 2 + y
-            if abs(x) <= 3 and y <= 8:
+# --- side paths off the spawn: west to the Discord pavilion, east to the parkour arch
+def straight(x0, z0, x1, z1, edge, fill):
+    n = int(max(abs(x1 - x0), abs(z1 - z0)))
+    for k in range(n + 1):
+        t = k / max(n, 1)
+        cx, cz = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
+        for w in range(-2, 3):
+            x, z = round(cx), round(cz + w)
+            if (x, z) in reserved:
                 continue
-            if abs(x) >= 4 and y <= 11:
-                P(x, yy, zc, brick if (x + y) % 4 else accent)
-                P(x, yy, zc + s, brick)
-            elif y in (9, 10) and abs(x) <= 5:
-                P(x, yy, zc, accent if y == 9 else brick)
-            elif y == 11 and abs(x) <= 5:
-                P(x, yy, zc, "chiseled_polished_blackstone" if theme == "factions" else "chiseled_stone_bricks" if theme == "smp" else "purpur_block")
-            elif y == 12 and abs(x) <= 3:
-                P(x, yy, zc, glow if x == 0 else brick)
-            elif y == 13 and abs(x) <= 1:
-                P(x, yy, zc, roof)
-    for y in range(0, 10):
-        P(-4, FLOOR + 2 + y, zc, trim)
-        P(4, FLOOR + 2 + y, zc, trim)
-    tall = 16 if theme == "factions" else 13
-    for sx in (-8, 8):
-        for x in range(sx - 1, sx + 2):
-            for dz in (-1, 0, 1):
-                for y in range(0, tall):
-                    edge = abs(x - sx) == 1 or abs(dz) == 1
-                    if edge:
-                        P(x, FLOOR + 2 + y, zc + dz, brick if (y % 5) else accent)
-                    elif y % 5 == 4:
-                        P(x, FLOOR + 2 + y, zc + dz, glow)
-        for i, y in enumerate(range(tall, tall + 4)):
-            w = 1 if i < 2 else 0
-            for x in range(sx - w, sx + w + 1):
-                for dz in range(-w, w + 1):
-                    P(x, FLOOR + 2 + y, zc + dz, roof if i < 3 else "end_rod[facing=up]")
-        ix = sx - (1 if sx > 0 else -1) * 2
-        P(ix, FLOOR + 12, zc - s, "iron_chain[axis=y,waterlogged=false]")
-        P(ix, FLOOR + 11, zc - s, ("soul_lantern" if theme != "smp" else "lantern") + "[hanging=true,waterlogged=false]")
-    if theme == "factions":
-        for x in (-6, 6):
-            P(x, FLOOR + 2, zc - s * 3, "tnt[unstable=false]")
-            P(x, FLOOR + 3, zc - s * 3, "tnt[unstable=false]")
-            P(x, FLOOR + 4, zc - s * 3, "redstone_torch[lit=true]")
-    elif theme == "smp":
-        for x in range(-9, 10):
-            if h(x, zc, 4) < 0.5:
-                P(x, FLOOR + 2, zc + s * 4, "flowering_azalea_leaves[distance=1,persistent=true,waterlogged=false]" if h(x, 1) < 0.5 else "azalea_leaves[distance=1,persistent=true,waterlogged=false]")
-        for x in (-5, 5):
-            for i in range(2):
-                P(x, FLOOR + 12 - i, zc - s, "cave_vines_plant[berries=true]" if i == 0 else "cave_vines[age=25,berries=true]")
-    else:
-        for x in (-6, 6):
-            P(x, FLOOR + 2, zc - s * 3, "end_rod[facing=up]")
-            P(x, FLOOR + 3, zc - s * 3, "end_rod[facing=up]")
+            pave(x, z, edge if abs(w) == 2 else fill)
 
 
-for theme, xc in GATE_X.items():
-    gateway(xc, GATE_Z, theme)
-
-
-# --- side paths: west to the Discord pavilion, east to the parkour arch
-for x in range(-36, 41):
-    if abs(x) <= 4:
-        continue
-    for dz in range(-2, 3):
-        z = SIDE_Z + dz
-        if math.hypot(x, z) > edge_r(x, z, R) - 1:
-            continue
-        put(x, FLOOR, z, "polished_blackstone_bricks" if abs(dz) == 2 else "polished_deepslate" if dz else grad_at(x, -1))
-    if x % 6 == 0 and abs(x) >= 8:
-        for side in (-3, 3):
-            put(x, FLOOR + 1, SIDE_Z + side, WALL_POST)
-            put(x, FLOOR + 2, SIDE_Z + side, "sea_lantern" if x % 12 else "pearlescent_froglight")
+straight(-8, SPAWN_Z, -20, SPAWN_Z - 4, "polished_blackstone_bricks", "polished_deepslate")
+straight(8, SPAWN_Z, 30, SPAWN_Z - 4, "polished_blackstone_bricks", "polished_deepslate")
 
 
 def pavilion(xc, zc, theme_glow):
@@ -444,9 +427,13 @@ def pavilion(xc, zc, theme_glow):
         for z in range(-7, 8):
             d = math.hypot(x, z)
             if d <= 6.5:
+                clear_above(xc + x, zc + z)
                 put(xc + x, FLOOR + 1, zc + z, "polished_deepslate" if d < 5 else "polished_blackstone_bricks")
+                reserved.add((xc + x, zc + z))
             elif d <= 7.4:
+                clear_above(xc + x, zc + z)
                 stairs(xc + x, FLOOR + 1, zc + z, "polished_blackstone_brick", facing_in(x, z))
+                reserved.add((xc + x, zc + z))
     for i in range(8):
         a = i * math.pi / 4
         x, z = round(5.5 * math.cos(a)), round(5.5 * math.sin(a))
@@ -470,7 +457,15 @@ def pavilion(xc, zc, theme_glow):
         put(xc + dx * 2, FLOOR + 2, zc + dz * 2, theme_glow)
 
 
-pavilion(-30, SIDE_Z, "pearlescent_froglight")
+pavilion(-27, SPAWN_Z - 4, "pearlescent_froglight")
+
+
+def paved(x, z):
+    for dx in (-2, 0, 2):
+        for dz in (-2, 0, 2):
+            if (x + dx, z + dz) in reserved:
+                return True
+    return False
 
 
 # ======================================================================= trees
@@ -542,7 +537,7 @@ for a_deg in (55, 125, 235, 305):
             put(ox, y, oz, "water[level=8]")
 
 # ======================================================================= parkour (helix around the island)
-PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 57, 14, 300, 80, 30
+PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 57, 38, 300, 80, 30
 PK_MATS = ["purpur_block", "amethyst_block", "light_blue_stained_glass", "sea_lantern", "purple_stained_glass",
            "polished_blackstone_bricks", "pearlescent_froglight", "cyan_concrete", "magenta_stained_glass"]
 parkour = {"start": None, "checkpoints": [], "finish": None, "entrance": None}

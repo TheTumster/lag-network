@@ -85,8 +85,12 @@ public final class Selector implements Listener {
 				m.lore(lore);
 				m.setEnchantmentGlintOverride(true);
 				m.addItemFlags(ItemFlag.values());
-				m.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "realm"),
-						org.bukkit.persistence.PersistentDataType.STRING, r.getString("server", key));
+				if (!r.getBoolean("coming-soon", false)) {
+					m.getPersistentDataContainer().set(new org.bukkit.NamespacedKey(plugin, "realm"),
+							org.bukkit.persistence.PersistentDataType.STRING, r.getString("server", key));
+				} else {
+					m.setEnchantmentGlintOverride(false);
+				}
 				it.setItemMeta(m);
 				inv.setItem(r.getInt("slot", 13), it);
 			}
