@@ -231,13 +231,37 @@ $old = @(Get-LagJava)
 if ($old.Count -gt 0) {
     Write-Host ""
     Say "The network is already running ($($old.Count) servers from an earlier start)." Yellow
-    Say "Best: close it properly by typing 'stop' in each server tab, then run START again." White
-    $ans = Read-Host "  Or force-stop the old ones now and restart? (y/N)"
-    if ($ans -notmatch '^[yY]') { exit 0 }
-    $old | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-    Start-Sleep -Seconds 3
-    Say "Old servers stopped." Green
+    $ans = Read-Host "  Stop it cleanly (saves worlds) and restart? (Y/n)"
+    if ($ans -match '^[nN]') { exit 0 }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File "$PSScriptRoot\stop.ps1"
+    if (@(Get-LagJava).Count -gt 0) { Say "Some servers are still running - not starting a second copy." Yellow; exit 1 }
 }
+
+# ---- RCON on every server (local password, never shipped) so STOP.bat can stop them cleanly
+function Enable-Rcon {
+    $secretFile = "$Root\.rcon-secret"
+    if (-not (Test-Path $secretFile)) {
+        $bytes = New-Object byte[] 24
+        [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+        $pw = [Convert]::ToBase64String($bytes) -replace '[^A-Za-z0-9]', ''
+        Set-Content $secretFile $pw -NoNewline
+    }
+    $pw = (Get-Content $secretFile -Raw).Trim()
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    foreach ($s in $net.servers.PSObject.Properties.Name) {
+        $sp = "$Root\$s\server.properties"
+        if (-not (Test-Path $sp)) { continue }
+        $want = [ordered]@{ "enable-rcon" = "true"; "rcon.port" = "$([int]$net.servers.$s.port + 10000)"; "rcon.password" = $pw; "broadcast-rcon-to-ops" = "false" }
+        $lines = [Collections.Generic.List[string]]([IO.File]::ReadAllLines($sp, $utf8))
+        foreach ($k in $want.Keys) {
+            $i = -1
+            for ($j = 0; $j -lt $lines.Count; $j++) { if ($lines[$j].StartsWith("$k=")) { $i = $j; break } }
+            if ($i -ge 0) { $lines[$i] = "$k=$($want[$k])" } else { $lines.Add("$k=$($want[$k])") }
+        }
+        [IO.File]::WriteAllLines($sp, $lines, $utf8)
+    }
+}
+Enable-Rcon
 
 # ---- Start everything: one Windows Terminal window with a tab per server (separate windows if Terminal isn't installed)
 $flags = "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20"
@@ -270,8 +294,8 @@ if (-not $tabbed) {
 }
 
 Write-Host ""
-Say "All 4 servers are starting. When each tab says 'Done', join:" Green
+Say "All servers are starting. When each tab says 'Done', join:" Green
 Say "   You:      localhost" White
 Say "   Friends:  run TUNNEL.bat and send them the address it gives you" White
-Say "To stop: type 'stop' in each server tab (and 'end' in the proxy tab)." DarkGray
+Say "To stop everything: double-click STOP.bat (saves every world first)." DarkGray
 Write-Host ""

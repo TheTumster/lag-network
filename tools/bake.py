@@ -507,10 +507,11 @@ def main():
     shutil.copy(os.path.join(ROOT, "network", "network.json"), os.path.join(DIST, "network.json"))
 
     log("== Update manifest")
-    for f in ("START.bat", "TUNNEL.bat", "README.txt", "START-1.8-LAB.bat"):
+    for f in ("START.bat", "STOP.bat", "TUNNEL.bat", "README.txt", "START-1.8-LAB.bat"):
         manage(".", f, RELEASE_DL + f)
     manage(".", os.path.join("tools", "start.ps1"), RELEASE_DL + "start.ps1")
     manage(".", os.path.join("tools", "start-lab.ps1"), RELEASE_DL + "start-lab.ps1")
+    manage(".", os.path.join("tools", "stop.ps1"), RELEASE_DL + "stop.ps1")
     build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
     json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
     for srv, files in MANAGED.items():
