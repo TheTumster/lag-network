@@ -54,8 +54,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 /**
- * Cannon test plots (config plots.*). A "plots" world of PLOT x PLOT plots separated by ROAD-wide roads, flat at y=60.
- * /plot auto|claim|home|add|remove|clear|delete|info|list. Only the owner and trusted players build in a plot; TNT, sand,
+ * Cannon test plots (config plots.*): private PLOT x PLOT islands in a "plots" world, GAP blocks of void apart (out of view range),
+ * players can only be in plots they own or were added to. /plot auto|claim|home|add|remove|clear|delete|info. TNT, sand,
  * pistons and water can't affect another plot (TNT and sand are traced back to the plot they came from).
  */
 final class Plots implements Listener, CommandExecutor, TabCompleter {
@@ -65,15 +65,15 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 	private final File file;
 	private final YamlConfiguration data;
 	private final NamespacedKey originKey;
-	private final int plot, road, cell;
+	private final int plot, gap, cell;
 	private World world;
 	private final Set<String> clearing = new HashSet<>();
 
 	Plots(JavaPlugin plugin) {
 		this.plugin = plugin;
 		this.plot = plugin.getConfig().getInt("plots.size", 128);
-		this.road = plugin.getConfig().getInt("plots.road", 7);
-		this.cell = plot + road;
+		this.gap = plugin.getConfig().getInt("plots.gap", 400);   // void between plots: nobody can see another plot
+		this.cell = plot + gap;
 		this.file = new File(plugin.getDataFolder(), "plots.yml");
 		this.data = YamlConfiguration.loadConfiguration(file);
 		this.originKey = new NamespacedKey(plugin, "plot");
@@ -88,32 +88,25 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 			for (int x = 0; x < 16; x++) {
 				for (int z = 0; z < 16; z++) {
 					int wx = chunkX * 16 + x, wz = chunkZ * 16 + z;
+					if (isGap(wx) || isGap(wz)) continue; // void between plots
 					d.setBlock(x, min, z, Material.BEDROCK);
 					for (int y = min + 1; y < SURFACE - 3; y++) d.setBlock(x, y, z, Material.STONE);
-					boolean onRoad = isRoad(wx) || isRoad(wz);
-					if (onRoad) {
-						for (int y = SURFACE - 3; y < SURFACE; y++) d.setBlock(x, y, z, Material.DEEPSLATE);
-						int lx = Math.floorMod(wx, cell), lz = Math.floorMod(wz, cell);
-						boolean edge = lx == road - 1 || lz == road - 1 || lx == 0 || lz == 0;
-						boolean centre = lx == road / 2 || lz == road / 2;
-						d.setBlock(x, SURFACE, z, centre ? Material.POLISHED_BLACKSTONE_BRICKS : Material.POLISHED_DEEPSLATE);
-						if (edge && !(isRoad(wx) && isRoad(wz))) d.setBlock(x, SURFACE + 1, z, Material.POLISHED_BLACKSTONE_BRICK_SLAB);
-					} else {
-						for (int y = SURFACE - 3; y < SURFACE; y++) d.setBlock(x, y, z, Material.DIRT);
-						d.setBlock(x, SURFACE, z, Material.GRASS_BLOCK);
-					}
+					for (int y = SURFACE - 3; y < SURFACE; y++) d.setBlock(x, y, z, Material.DIRT);
+					int lx = Math.floorMod(wx, cell), lz = Math.floorMod(wz, cell);
+					boolean edge = lx == 0 || lz == 0 || lx == plot - 1 || lz == plot - 1;
+					d.setBlock(x, SURFACE, z, edge ? Material.POLISHED_BLACKSTONE_BRICKS : Material.GRASS_BLOCK);
 				}
 			}
 		}
 
 		@Override
 		public Location getFixedSpawnLocation(World w, Random r) {
-			return new Location(w, road / 2.0, SURFACE + 1, road / 2.0);
+			return new Location(w, plot / 2.0, SURFACE + 1, 2.5);
 		}
 	}
 
-	boolean isRoad(int c) {
-		return Math.floorMod(c, cell) < road;
+	boolean isGap(int c) {
+		return Math.floorMod(c, cell) >= plot;
 	}
 
 	void start() {
@@ -141,6 +134,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 				plugin.getLogger().warning("WorldGuard plot regions unavailable: " + t);
 			}
 		}
+		Bukkit.getScheduler().runTaskTimer(plugin, this::sweep, 1L, 1L);
 		plugin.getLogger().info("Plot world '" + name + "' ready (" + plot + "x" + plot + " plots, " + ids().size() + " claimed)");
 	}
 
@@ -159,7 +153,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 	String idAt(Location l) {
 		if (world == null || l.getWorld() == null || !l.getWorld().equals(world)) return null;
 		int x = l.getBlockX(), z = l.getBlockZ();
-		if (isRoad(x) || isRoad(z)) return null;
+		if (isGap(x) || isGap(z)) return null;
 		return Math.floorDiv(x, cell) + ";" + Math.floorDiv(z, cell);
 	}
 
@@ -171,13 +165,13 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 	/** Inclusive block bounds {x1, z1, x2, z2} of a plot's interior. */
 	int[] bounds(String id) {
 		int[] c = xz(id);
-		int x1 = c[0] * cell + road, z1 = c[1] * cell + road;
+		int x1 = c[0] * cell, z1 = c[1] * cell;
 		return new int[] {x1, z1, x1 + plot - 1, z1 + plot - 1};
 	}
 
 	Location home(String id) {
 		int[] b = bounds(id);
-		Location l = new Location(world, (b[0] + b[2]) / 2.0 + 0.5, SURFACE + 1, b[1] - road / 2.0);
+		Location l = new Location(world, (b[0] + b[2]) / 2.0 + 0.5, SURFACE + 1, b[1] + 2.5);
 		l.setYaw(0); // facing +z, into the plot
 		return l;
 	}
@@ -202,6 +196,13 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		List<String> out = new ArrayList<>();
 		for (String id : ids()) if (u.equals(owner(id))) out.add(id);
 		return out;
+	}
+
+	/** May this player be inside this plot at all? Owner, added players and admins only. */
+	boolean allowed(Player p, String id) {
+		if (p.hasPermission("lag.cannons.plot.admin")) return true;
+		UUID o = owner(id);
+		return o != null && (o.equals(p.getUniqueId()) || trusted(id).contains(p.getUniqueId()));
 	}
 
 	boolean canBuild(Player p, Location l) {
@@ -237,14 +238,14 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 
 	private void border(String id, boolean claimed) {
 		int[] b = bounds(id);
-		BlockData slab = Bukkit.createBlockData(claimed ? Material.PURPUR_SLAB : Material.POLISHED_BLACKSTONE_BRICK_SLAB);
-		for (int x = b[0] - 1; x <= b[2] + 1; x++) {
-			world.getBlockAt(x, SURFACE + 1, b[1] - 1).setBlockData(slab, false);
-			world.getBlockAt(x, SURFACE + 1, b[3] + 1).setBlockData(slab, false);
+		BlockData edge = Bukkit.createBlockData(claimed ? Material.PURPUR_BLOCK : Material.POLISHED_BLACKSTONE_BRICKS);
+		for (int x = b[0]; x <= b[2]; x++) {
+			world.getBlockAt(x, SURFACE, b[1]).setBlockData(edge, false);
+			world.getBlockAt(x, SURFACE, b[3]).setBlockData(edge, false);
 		}
-		for (int z = b[1] - 1; z <= b[3] + 1; z++) {
-			world.getBlockAt(b[0] - 1, SURFACE + 1, z).setBlockData(slab, false);
-			world.getBlockAt(b[2] + 1, SURFACE + 1, z).setBlockData(slab, false);
+		for (int z = b[1]; z <= b[3]; z++) {
+			world.getBlockAt(b[0], SURFACE, z).setBlockData(edge, false);
+			world.getBlockAt(b[2], SURFACE, z).setBlockData(edge, false);
 		}
 	}
 
@@ -287,11 +288,17 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 					claim(p, id);
 				}
 			}
-			case "home", "h", "tp" -> {
+			case "home", "h", "tp", "visit" -> {
 				List<String> mine = owned(p.getUniqueId());
-				if (args.length > 1 && !sub.equals("home")) {
+				if (args.length > 1) {
+					// only plots you were added to (no peeking at other people's cannons)
 					OfflinePlayer t = Bukkit.getOfflinePlayer(args[1]);
-					mine = owned(t.getUniqueId());
+					mine = new ArrayList<>();
+					for (String id : owned(t.getUniqueId())) if (allowed(p, id)) mine.add(id);
+					if (mine.isEmpty()) {
+						msg(p, "You haven't been added to <white>" + args[1] + "<gray>'s plot.");
+						return true;
+					}
 				}
 				if (mine.isEmpty()) {
 					msg(p, "No plot yet. Get one with <white>/plot auto");
@@ -354,7 +361,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 			case "info", "i" -> {
 				String id = idAt(p.getLocation());
 				if (id == null) {
-					msg(p, "You're on a road.");
+					msg(p, "You're not in a plot.");
 					return true;
 				}
 				UUID o = owner(id);
@@ -412,6 +419,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		int min = world.getMinHeight() + 1, max = world.getMaxHeight();
 		BlockData air = Bukkit.createBlockData(Material.AIR), stone = Bukkit.createBlockData(Material.STONE),
 				dirt = Bukkit.createBlockData(Material.DIRT), grass = Bukkit.createBlockData(Material.GRASS_BLOCK);
+		BlockData edgeData = Bukkit.createBlockData(owner(id) != null ? Material.PURPUR_BLOCK : Material.POLISHED_BLACKSTONE_BRICKS);
 		for (Entity e : world.getEntities()) {
 			if (!(e instanceof Player) && id.equals(idAt(e.getLocation()))) e.remove();
 		}
@@ -423,7 +431,8 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 				int x = b[0] + col[0] % plot, z = b[1] + col[0] / plot;
 				for (int y = min; y < max; y++) {
 					Block bl = world.getBlockAt(x, y, z);
-					BlockData want = y < SURFACE - 3 ? stone : y < SURFACE ? dirt : y == SURFACE ? grass : air;
+					boolean rim = x == b[0] || x == b[2] || z == b[1] || z == b[3];
+					BlockData want = y == min - 1 ? stone : y < SURFACE - 3 ? stone : y < SURFACE ? dirt : y == SURFACE ? (rim ? edgeData : grass) : air;
 					if (bl.getType() != want.getMaterial()) bl.setBlockData(want, false);
 				}
 				col[0]++;
@@ -436,6 +445,54 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 			}
 		}, 1L, 1L);
 		msg(who, "Clearing plot <white>" + id + "<gray>...");
+	}
+
+	// ---------------------------------------------------------------- privacy
+
+	private Location safeSpot(Player p) {
+		List<String> mine = owned(p.getUniqueId());
+		if (!mine.isEmpty()) return home(mine.get(0));
+		World main = Bukkit.getWorlds().get(0);
+		return main.getSpawnLocation().add(0.5, 0, 0.5);
+	}
+
+	/** Players stay inside plots they're allowed in: walking/flying off the edge or into the void puts them back. */
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onMove(org.bukkit.event.player.PlayerMoveEvent e) {
+		Player p = e.getPlayer();
+		Location to = e.getTo();
+		if (!inWorld(to) || p.hasPermission("lag.cannons.plot.admin")) return;
+		if (e.getFrom().getBlockX() == to.getBlockX() && e.getFrom().getBlockZ() == to.getBlockZ() && to.getY() > world.getMinHeight() + 2) return;
+		String id = idAt(to);
+		if (id != null && allowed(p, id) && to.getY() > world.getMinHeight() + 2) return;
+		String from = idAt(e.getFrom());
+		if (from != null && allowed(p, from) && to.getY() > world.getMinHeight() + 2) {
+			e.setCancelled(true); // stopped at the plot's edge
+		} else {
+			e.setTo(safeSpot(p));
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onTeleport(org.bukkit.event.player.PlayerTeleportEvent e) {
+		Player p = e.getPlayer();
+		if (!inWorld(e.getTo()) || p.hasPermission("lag.cannons.plot.admin")) return;
+		String id = idAt(e.getTo());
+		if (id == null || !allowed(p, id)) {
+			e.setCancelled(true);
+			msg(p, "You can only go to plots you own or were added to.");
+		}
+	}
+
+	/** TNT and sand that leave the plot they were fired from just vanish. */
+	private void sweep() {
+		if (world == null) return;
+		for (Entity en : world.getEntities()) {
+			if (!(en instanceof TNTPrimed) && !(en instanceof FallingBlock)) continue;
+			String o = origin(en);
+			String now = idAt(en.getLocation());
+			if (now == null || !now.equals(o)) en.remove();
+		}
 	}
 
 	// ---------------------------------------------------------------- protection

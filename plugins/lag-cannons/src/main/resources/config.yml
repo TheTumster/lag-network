@@ -114,10 +114,12 @@ clearlag:
 tntfill:
   free-for-all: false
 
-# Cannon test plots: a separate "plots" world (only switch on for the cannon test server).
+# Cannon test plots: private islands in a separate "plots" world (only switch on for the cannon test server).
+# gap = empty void between plots, wider than view distance, so nobody can see (or skid) another plot.
+# Players can only be inside plots they own or were /plot add-ed to.
 plots:
   enabled: false
   world: plots
   size: 128
-  road: 7
+  gap: 400
   max-per-player: 1
