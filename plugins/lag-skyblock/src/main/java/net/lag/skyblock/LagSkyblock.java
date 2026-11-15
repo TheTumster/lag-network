@@ -39,12 +39,21 @@ public final class LagSkyblock extends JavaPlugin {
 	}
 	Spawners spawners;
 	Generators generators;
+	IslandTop top;
+	Season season;
+	Pit pit;
 
 	@Override
 	public void onLoad() {
 		saveDefaultConfig();
 		reloadConfig();
 		loadTiers();
+		// a season was ended: wipe islands/spawners/money before anything loads them
+		try {
+			Season.wipeIfPending(getDataFolder(), getConfig(), getLogger());
+		} catch (Exception e) {
+			getLogger().severe("Season wipe failed: " + e);
+		}
 		// before SmartSpawner / EconomyShopGUI read their files: heads in spawner loot, head selling off there, old spawner shop off
 		try {
 			patchSmartSpawner();
@@ -67,12 +76,41 @@ public final class LagSkyblock extends JavaPlugin {
 		IslandFly fly = new IslandFly(this);
 		getServer().getPluginManager().registerEvents(fly, this);
 		getCommand("islandfly").setExecutor(fly);
+		top = new IslandTop(this);
+		getServer().getPluginManager().registerEvents(top, this);
+		getCommand("istop").setExecutor(top);
+		season = new Season(this);
+		getCommand("season").setExecutor(season);
+		pit = new Pit(this);
+		getServer().getPluginManager().registerEvents(pit, this);
+		getCommand("pit").setExecutor(pit);
+		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		getCommand("lagskyblock").setExecutor((s, c, l, a) -> {
-			reloadConfig();
-			loadTiers();
-			spawners.load();
-			generators.load();
-			s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
+			String sub = a.length > 0 ? a[0].toLowerCase() : "reload";
+			switch (sub) {
+				case "season" -> season.admin(s, a);
+				case "pit" -> {
+					if (a.length > 1 && a[1].equalsIgnoreCase("build")) {
+						int n = pit.build();
+						pit.holograms();
+						s.sendMessage(Spawners.mm("<#7CFF6B>The Pit rebuilt <gray>(" + n + " blocks)"));
+					}
+					else s.sendMessage(Spawners.mm("<gray>/lsb pit build <dark_gray>- place the arena again (center/radius: pit in config.yml)"));
+				}
+				case "top" -> {
+					top.refresh();
+					s.sendMessage(Spawners.mm("<#7CFF6B>Island top recalculated <gray>(" + top.ranking().size() + " islands)"));
+				}
+				case "reload" -> {
+					reloadConfig();
+					loadTiers();
+					spawners.load();
+					generators.load();
+					top.refresh();
+					s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
+				}
+				default -> s.sendMessage(Spawners.mm("<gray>/lsb reload | top | pit build | season [ends <date> <time> | end]"));
+			}
 			return true;
 		});
 		getLogger().info(tiers.size() + " spawner tiers loaded");
@@ -225,9 +263,13 @@ public final class LagSkyblock extends JavaPlugin {
 			int range = getConfig().getInt("island.protection-range", 75);
 			String t = java.nio.file.Files.readString(cfg.toPath());
 			String u = t.replaceFirst("(?m)^(\\s*protection-range:)\\s*\\d+", "$1 " + range);
+			// island teams: max-team-size members; coop/trusted would let extra players grind an island, so capped too
+			u = u.replaceFirst("(?m)^(\\s*max-team-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-team-size", 4));
+			u = u.replaceFirst("(?m)^(\\s*max-coop-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-coop-size", 0));
+			u = u.replaceFirst("(?m)^(\\s*max-trusted-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-trusted-size", 0));
 			if (!u.equals(t)) {
 				java.nio.file.Files.writeString(cfg.toPath(), u);
-				getLogger().info("New islands get a " + (range * 2) + "x" + (range * 2) + " claim");
+				getLogger().info("BSkyBlock: " + (range * 2) + "x" + (range * 2) + " claims, teams of " + getConfig().getInt("island.max-team-size", 4));
 			}
 		}
 	}

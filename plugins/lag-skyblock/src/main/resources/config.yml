@@ -31,5 +31,43 @@ generator-tiers:
   - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 15000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
 
 # Starter island: the RelapsedMC blueprint (bigger island, tree, beach, starter chest) and a bigger claim.
+# Team sizes are written into BSkyBlock's config on start. Coop/trusted players can build and grind on an island,
+# so they're 0 to keep the 4-player cap real.
 island:
   protection-range: 75
+  max-team-size: 4
+  max-coop-size: 0
+  max-trusted-size: 0
+
+# Island top (/is top, /istop): islands ranked by placed spawner value only. A spawner is worth its tier price above,
+# times its stack size. Spawner types that aren't in the ladder are worth extra-values (mob: value) or nothing.
+island-top:
+  refresh-seconds: 60
+  extra-values: {}
+
+# The Pit: the only PvP on Skyblock, an arena south of spawn in the spawn world. Islands are always safe.
+# center: [x, y, z] of the arena floor in the spawn world. /lsb pit build places it again after you change it.
+pit:
+  enabled: true
+  center: [0, 100, 80]
+  radius: 16
+  tag-seconds: 15
+  keep-inventory: false
+  kill-reward: 0
+  # commands still allowed while in combat
+  allowed-commands: [msg, tell, w, r, reply, m, whisper]
+
+# Seasons (monthly). The number and end date live in plugins/laGSkyblock/season.yml (/lsb season ends <date> <time>).
+# /lsb season end confirm: saves the final top to seasons/season-N.yml, gives titles, stops the server; the next start
+# wipes islands, spawners, ore gen and spawner unlocks, money (back to Essentials' starting-balance) and inventories.
+season:
+  # titles per final island-top place, given to every member of that island. {n} = season number.
+  titles:
+    1: "<gradient:#FFD84D:#FF8A3D><bold>S{n} CHAMPION</bold></gradient>"
+  # store credit per place, only recorded in the season snapshot (pay it on the store). e.g. {1: 50, 2: 25, 3: 10}
+  store-credit: {}
+  keep-top: 25
+  # shared with every server (laGCore reads it for chat/tab), relative to this server's folder
+  titles-file: "../shared/titles.yml"
+  wipe-economy: true
+  wipe-inventories: true
