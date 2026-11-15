@@ -1,0 +1,19 @@
+# RelapsedMC Skyblock: spawner tiers.
+# Tiers go cheapest first. Tier 1 is unlocked for everyone; each next tier is unlocked by trading in
+# `unlock` heads of the tier before it (/spawners). Spawners drop their mob's head into spawner storage.
+# head-chance: chance (percent) that each generated mob drops its head.
+head-chance: 4.0
+tiers:
+  - {mob: chicken,    name: Chicken,    color: "#F4E7C8", price: 25000,    head-value: 40,    unlock: 0}
+  - {mob: pig,        name: Pig,        color: "#F2A3B5", price: 60000,    head-value: 90,    unlock: 16}
+  - {mob: cow,        name: Cow,        color: "#B98A62", price: 125000,   head-value: 175,   unlock: 24}
+  - {mob: spider,     name: Spider,     color: "#C0392B", price: 250000,   head-value: 325,   unlock: 32}
+  - {mob: zombie,     name: Zombie,     color: "#5DAE4A", price: 450000,   head-value: 550,   unlock: 32}
+  - {mob: skeleton,   name: Skeleton,   color: "#E0E0E0", price: 750000,   head-value: 850,   unlock: 48}
+  - {mob: slime,      name: Slime,      color: "#7CFF6B", price: 1200000,  head-value: 1300,  unlock: 48}
+  - {mob: silverfish, name: Silverfish, color: "#9AA3AD", price: 2000000,  head-value: 2000,  unlock: 64}
+  - {mob: creeper,    name: Creeper,    color: "#4CDB4C", price: 3250000,  head-value: 3000,  unlock: 64}
+  - {mob: witch,      name: Witch,      color: "#9B59B6", price: 5000000,  head-value: 4500,  unlock: 96}
+  - {mob: blaze,      name: Blaze,      color: "#FFB020", price: 7500000,  head-value: 6500,  unlock: 96}
+  - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
+  - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}

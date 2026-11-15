@@ -1,0 +1,7 @@
+// Vault economy API (VaultUnlocked provides it at runtime).
+repositories {
+	maven { url = 'https://jitpack.io' }
+}
+dependencies {
+	compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') { transitive = false }
+}

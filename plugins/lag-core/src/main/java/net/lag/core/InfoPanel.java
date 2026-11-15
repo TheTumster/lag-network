@@ -255,9 +255,9 @@ final class InfoPanel implements Listener {
 		rect(p, v, -hw, 0, hw, height, 0, def.getString("background", "black_concrete"));
 		rect(p, v, -hw, height - 0.05, 0, height, 0.01, "light_blue_concrete");
 		rect(p, v, 0, height - 0.05, hw, height, 0.01, "purple_concrete");
-		// header
-		text(p, v, -hw + 0.25, height - 0.5, def.getString("title", "<gradient:#38E0FF:#B040FF><bold>GETTING STARTED</bold></gradient>"), 1.0f, true);
-		text(p, v, hw - 0.3, height - 0.42, def.getString("subtitle", "<gray>Click a card"), 0.5f, false);
+		// header: everything centred (text displays always centre on their anchor)
+		text(p, v, 0, height - 0.62, def.getString("title", "<gradient:#38E0FF:#B040FF><bold>GETTING STARTED</bold></gradient>"), (float) def.getDouble("title-size", 1.1), false);
+		if (def.isString("footer")) text(p, v, 0, 0.1, def.getString("footer"), 0.45f, false);
 		// tabs
 		List<Map<?, ?>> tabs = def.getMapList("tabs");
 		double tw = (width - 0.3) / Math.max(1, tabs.size());
@@ -265,9 +265,10 @@ final class InfoPanel implements Listener {
 			String id = String.valueOf(tabs.get(i).get("id"));
 			boolean on = id.equals(v.tab);
 			double u1 = -hw + 0.15 + i * tw + 0.04, u2 = u1 + tw - 0.08;
-			BlockDisplay face = rect(p, v, u1, height - 0.95, u2, height - 0.68, 0.01, on ? "purple_concrete" : "gray_concrete");
-			text(p, v, (u1 + u2) / 2, height - 0.91, (on ? "<white><bold>" : "<gray>") + tabs.get(i).get("label"), 0.55f, false);
-			clickable(p, v, new Box(u1, height - 0.95, u2, height - 0.68), "tab:" + id, face);
+			double t1 = height - 1.12, t2 = height - 0.8;
+			BlockDisplay face = rect(p, v, u1, t1, u2, t2, 0.01, on ? "purple_concrete" : "gray_concrete");
+			text(p, v, (u1 + u2) / 2, t1 + 0.08, (on ? "<white><bold>" : "<gray>") + tabs.get(i).get("label"), 0.6f, false);
+			clickable(p, v, new Box(u1, t1, u2, t2), "tab:" + id, face);
 		}
 		// cards for the current tab
 		Map<?, ?> tab = tabs.stream().filter(t -> String.valueOf(t.get("id")).equals(v.tab)).findFirst().orElse(tabs.isEmpty() ? null : tabs.get(0));

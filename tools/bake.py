@@ -453,7 +453,7 @@ def main():
                         problems.append(f"[{name}]     {nxt.strip()[:300]}")
     # Make sure the important plugins actually ENABLED (not just loaded)
     must = {"hub": ["laGCore"], "factions": ["laGCore", "laGCannons", "Factions"], "smp": ["laGCore"],
-            "skyblock": ["laGCore", "BentoBox"], "cannons": ["laGCore", "laGCannons", "FastAsyncWorldEdit", "WorldGuard"]}
+            "skyblock": ["laGCore", "BentoBox", "laGSkyblock"], "cannons": ["laGCore", "laGCannons", "FastAsyncWorldEdit", "WorldGuard"]}
     for srv in SERVERS:
         enabled = sorted({m.group(1) for l in logs.get(srv, []) for m in [re.search(r"Enabling (\S+) v", l)] if m})
         log(f"  {srv:9} enabled: {', '.join(enabled)}")

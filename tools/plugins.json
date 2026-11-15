@@ -164,6 +164,9 @@
       "optional": true
     },
     {
+      "local": "laGSkyblock"
+    },
+    {
       "local": "laGCore"
     }
   ],

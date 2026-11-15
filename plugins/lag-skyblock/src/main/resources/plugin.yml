@@ -1,0 +1,21 @@
+name: laGSkyblock
+version: '${version}'
+main: net.lag.skyblock.LagSkyblock
+api-version: '1.21'
+softdepend: [Vault, Essentials, SmartSpawner, EconomyShopGUI, BentoBox]
+loadbefore: [SmartSpawner, EconomyShopGUI]
+description: RelapsedMC Skyblock - spawner tiers, mob heads
+commands:
+  spawners:
+    description: Spawner tiers - buy spawners, unlock the next tier with heads
+    aliases: [spawnershop, tiers]
+  sellheads:
+    description: Sell every mob head in your inventory
+    aliases: [sellhead]
+  lagskyblock:
+    description: laG Skyblock admin
+    aliases: [lsb]
+    permission: lag.skyblock.admin
+permissions:
+  lag.skyblock.admin:
+    default: op
