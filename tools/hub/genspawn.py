@@ -269,15 +269,15 @@ for realm, (px, pz) in PORTALS.items():
             else:
                 b = th["fill"]
             pave(x, z, b)
-        if k - last_lamp >= 18 and 0.12 < t < 0.92:
+        if k - last_lamp >= 50 and 0.2 < t < 0.85:
+            # a few slim lantern posts, alternating sides
             last_lamp = k
-            for side in (-4.5, 4.5):
-                x, z = round(cx + nx * side), round(cz + nz * side)
-                for y in range(FLOOR + 1, FLOOR + 4):
-                    put(x, y, z, WALL_POST)
-                put(x, FLOOR + 4, z, th["lamp"] if "lantern" not in th["lamp"] else "pearlescent_froglight")
-                put(x, FLOOR + 5, z, "end_rod[facing=up]")
-                reserved.add((x, z))
+            side = 4.5 if (k // 50) % 2 else -4.5
+            x, z = round(cx + nx * side), round(cz + nz * side)
+            for y in range(FLOOR + 1, FLOOR + 4):
+                put(x, y, z, WALL_POST)
+            put(x, FLOOR + 4, z, ("soul_lantern" if realm in ("factions", "cannons") else "lantern") + "[hanging=false,waterlogged=false]")
+            reserved.add((x, z))
 
 
 # --- round portals
