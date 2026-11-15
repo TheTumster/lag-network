@@ -45,7 +45,10 @@ final class Ranks implements Listener {
 	/** The rank tag (MiniMessage), empty for members. */
 	String tag(Player p) {
 		String r = rankOf(p);
-		return r == null ? "" : plugin.getConfig().getString("ranks." + r, r.toUpperCase(Locale.ROOT));
+		if (r == null) return "";
+		// getString(path) (no default argument) so the plugin's built-in config is used when the file has no ranks section
+		String t = plugin.getConfig().getString("ranks." + r);
+		return t != null ? t : "<bold>" + r.toUpperCase(Locale.ROOT) + "</bold>";
 	}
 
 	private int weight(String rank) {
