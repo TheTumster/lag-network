@@ -74,51 +74,51 @@ hub:
   time: 18000
   # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre.
   portals:
-    factions: [0, 4, -25]
-    smp: [0, 4, 25]
+    factions: [0, 5, -38]
+    smp: [0, 5, 38]
   # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts,
-  # {phase} = moving gradient (animates every 2 ticks).
+  # {phase} = moving gradient (animates every 2 ticks), {logo} = the pack logo.
   holograms:
-    - offset: [0.5, 16.5, 0.5]
+    - offset: [0.5, 11.5, 0.5]
       scale: 2.2
       text: "{logo}"
-    - offset: [0.5, 15.2, 0.5]
-      scale: 1.6
+    - offset: [0.5, 9.6, 0.5]
+      scale: 1.5
       text: "<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons    <white>{online} <gray>online"
-    - offset: [0.5, 14.5, -25]
-      scale: 2.4
+    - offset: [0.5, 16.5, -38]
+      scale: 2.6
       text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>\n<gray>Raid • Cannon • Conquer\n<white>{factions} <gray>playing"
-    - offset: [0.5, 14.5, 25]
-      scale: 2.4
+    - offset: [0.5, 16.5, 38]
+      scale: 2.6
       text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SMP</bold></gradient>\n<gray>Chill survival with claims\n<white>{smp} <gray>playing"
-    - offset: [-21.5, 8.5, 0.5]
-      scale: 1.4
+    - offset: [-31.5, 16.5, 0.5]
+      scale: 1.5
       text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>WELCOME</bold></gradient>\n<gray>Walk into a portal to play\n<gray>or right click your <white>compass\n<gray>Launch pads on every path\n<gray>Double jump with <white>SPACE"
-    - offset: [22.5, 8.5, 0.5]
-      scale: 1.4
+    - offset: [32.5, 16.5, 0.5]
+      scale: 1.5
       text: "<gradient:#B040FF:#38E0FF:#B040FF:{phase}><bold>DISCORD</bold></gradient>\n<gray>Coming soon"
   # Spinning, glowing 3D items. spin = speed (1 = a quarter turn every 2s), glow = outline colour.
   displays:
-    - offset: [0.5, 21.5, 0.5]
+    - offset: [0.5, 25.5, 0.5]
       item: NETHER_STAR
-      scale: 3.5
+      scale: 3
       spin: 1
       glow: "#B040FF"
-    - offset: [0.5, 19, -25]
+    - offset: [0.5, 22, -38]
       item: TNT
       scale: 2.4
       spin: 1
       glow: "#FF4D6D"
-    - offset: [0.5, 19, 25]
+    - offset: [0.5, 22, 38]
       item: GRASS_BLOCK
       scale: 2.4
       spin: 1
       glow: "#7CFF6B"
-    - offset: [-21.5, 12.5, 0.5]
+    - offset: [-31.5, 8.5, 0.5]
       item: AMETHYST_CLUSTER
       scale: 1.6
       spin: -1
-    - offset: [22.5, 12.5, 0.5]
+    - offset: [32.5, 8.5, 0.5]
       item: ECHO_SHARD
       scale: 1.6
       spin: -1

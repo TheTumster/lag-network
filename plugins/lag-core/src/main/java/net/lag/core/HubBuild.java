@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre ("hub.origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 2;
+	static final int BUILD_VERSION = 3;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -75,6 +75,23 @@ final class HubBuild implements Listener {
 	int build(World w, int ox, int oy, int oz) {
 		long t0 = System.currentTimeMillis();
 		int n = 0;
+		// a newer layout replaces the old one: clear the old build's area first
+		if (plugin.getConfig().getInt("hub.build-version", 0) > 0) {
+			BlockData air = Bukkit.createBlockData("minecraft:air");
+			int cleared = 0;
+			for (int x = ox - 110; x <= ox + 110; x++) {
+				for (int z = oz - 110; z <= oz + 110; z++) {
+					for (int y = oy - 60; y <= oy + 45; y++) {
+						var b = w.getBlockAt(x, y, z);
+						if (!b.getType().isAir()) {
+							b.setBlockData(air, false);
+							cleared++;
+						}
+					}
+				}
+			}
+			plugin.getLogger().info("Cleared the old hub spawn (" + cleared + " blocks)");
+		}
 		try (InputStream in = plugin.getResource("hub-spawn.txt.gz")) {
 			if (in == null) {
 				plugin.getLogger().warning("hub-spawn.txt.gz missing from the plugin jar");

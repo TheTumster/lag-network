@@ -366,7 +366,7 @@ final class HubFx implements Listener {
 				for (String realm : portals.getKeys(false)) {
 					List<?> off = portals.getList(realm);
 					if (off == null || off.size() < 3) continue;
-					Location c = o.clone().add(0.5, 4.5, ((Number) off.get(2)).doubleValue() + 0.5);
+					Location c = o.clone().add(0.5, ((Number) off.get(1)).doubleValue() + 0.5, ((Number) off.get(2)).doubleValue() + 0.5);
 					for (int k = 0; k < 3; k++) {
 						double a = tick * 0.12 + k * (Math.PI * 2 / 3);
 						Location l = c.clone().add(Math.cos(a) * 3.3, Math.sin(a) * 4.3, 0);
