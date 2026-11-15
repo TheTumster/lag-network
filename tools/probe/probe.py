@@ -1,30 +1,22 @@
-"""Print which plugin sources have a 1.21.11 build (run in CI, where Modrinth/Hangar/GitHub are reachable)."""
-import json, os, sys, urllib.parse
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-import bake
+"""Decompile SmartSpawner's give command to see how it validates the mob type."""
+import json, os, subprocess, urllib.request, zipfile
 
-CANDIDATES = [
-    ("modrinth", "bentobox", "paper"), ("modrinth", "bskyblock", "paper"), ("modrinth", "level", "paper"),
-    ("modrinth", "challenges", "paper"), ("modrinth", "warps", "paper"), ("modrinth", "upgrades", "paper"),
-    ("modrinth", "smartspawner", "paper"), ("modrinth", "rosestacker", "paper"), ("modrinth", "economyshopgui", "paper"),
-    ("modrinth", "decentholograms", "paper"), ("modrinth", "plotsquared", "paper"), ("modrinth", "worldguard", "paper"),
-    ("modrinth", "auctionhouse", "paper"), ("modrinth", "zauctionhouse", "paper"), ("modrinth", "shopkeepers", "paper"),
-    ("modrinth", "fancyholograms", "paper"), ("modrinth", "fancynpcs", "paper"), ("modrinth", "ultimateshop", "paper"),
-    ("hangar", "BentoBoxWorld/BentoBox", None), ("hangar", "IntellectualSites/PlotSquared", None),
-    ("hangar", "Rosewood/RoseStacker", None), ("hangar", "NighterDevelopment/SmartSpawner", None),
-    ("github", "BentoBoxWorld/BentoBox", None), ("github", "BentoBoxWorld/BSkyBlock", None), ("github", "BentoBoxWorld/Level", None),
-    ("github", "BentoBoxWorld/Challenges", None), ("github", "BentoBoxWorld/Warps", None), ("github", "BentoBoxWorld/Upgrades", None),
-    ("github", "IntellectualSites/PlotSquared", None), ("github", "NighterDevelopment/SmartSpawner", None),
-    ("github", "Rosewood-Development/RoseStacker", None),
-]
-for kind, ref, loader in CANDIDATES:
-    try:
-        if kind == "modrinth":
-            r = bake.modrinth(ref, loader)
-        elif kind == "hangar":
-            r = bake.hangar(ref)
-        else:
-            r = bake.github(ref)
-        print(f"PROBE {kind:8} {ref:40} -> {r[1] if r else 'NONE'}")
-    except Exception as e:
-        print(f"PROBE {kind:8} {ref:40} -> ERROR {str(e)[:120]}")
+UA = {"User-Agent": "lag-network-probe"}
+v = json.load(urllib.request.urlopen(urllib.request.Request(
+    'https://api.modrinth.com/v2/project/smartspawner/version?loaders=["paper"]', headers=UA)))[0]
+print("SmartSpawner", v["version_number"])
+urllib.request.urlretrieve(v["files"][0]["url"], "ss.jar")
+urllib.request.urlretrieve("https://repo1.maven.org/maven2/org/benf/cfr/0.152/cfr-0.152.jar", "cfr.jar")
+z = zipfile.ZipFile("ss.jar")
+names = [n for n in z.namelist() if n.endswith(".class") and "libs" not in n]
+hits = [n for n in names if "give" in n.lower() or "SpawnerSettings" in n or "EntityLoot" in n or "LootConfig" in n]
+print("\n".join(hits))
+os.makedirs("out", exist_ok=True)
+for n in hits:
+    z.extract(n, "cls")
+for n in hits:
+    if "$" in n:
+        continue
+    src = subprocess.run(["java", "-jar", "cfr.jar", os.path.join("cls", n)], capture_output=True, text=True).stdout
+    print("=" * 30, n)
+    print(src[:12000])
