@@ -232,7 +232,7 @@ def yaml_set(path, dotted, value):
 def toml_set(text, key, value_literal):
     pat = re.compile(rf"^{re.escape(key)}\s*=.*$", re.M)
     if pat.search(text):
-        return pat.sub(f"{key} = {value_literal}", text, count=1)
+        return pat.sub(lambda m: f"{key} = {value_literal}", text, count=1)  # lambda: keep backslashes (\\n) literal
     return text
 
 
