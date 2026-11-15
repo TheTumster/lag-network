@@ -2,6 +2,7 @@ name: laGCannons
 version: '${version}'
 main: net.lag.cannons.LagCannons
 api-version: '1.21'
+softdepend: [WorldGuard, FastAsyncWorldEdit, Factions, FactionsUUID]
 description: laG cannon physics - predictable TNT, raid-able obsidian, cannon tools
 commands:
   lagcannons:
@@ -28,7 +29,12 @@ commands:
   clearlag:
     description: Time until the next dropped-item clear (/clearlag now to clear)
     aliases: [lagg, cl]
+  plot:
+    description: Cannon test plots (/plot auto, home, add, remove, clear, info)
+    aliases: [p, plots]
 permissions:
+  lag.cannons.plot.admin:
+    default: op
   lag.cannons.clearlag.now:
     default: op
   lagcannons.tntfill.free:

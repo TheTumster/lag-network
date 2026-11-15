@@ -71,6 +71,7 @@ fresh-chat:
       - "{bar}"
       - "            {logo} <dark_gray>» <gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient>"
       - ""
+      - "  {arrow} <gray>Get a plot: <white>/plot auto <dark_gray>• <gray>go back: <white>/plot home"
       - "  {arrow} <gray>Same jar and cannon settings as Factions"
       - "  {arrow} <gray>Free fill: <white>/tntfill <dark_gray>• <gray>Diamond block under = unbreakable"
       - "  {arrow} <gray>Back to the hub: <white>/hub"
@@ -145,7 +146,7 @@ spawns:
         text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>"
       - offset: [0.5, 3.2, -7.5]
         scale: 1.1
-        text: "<gray>Same jar + settings as Factions. Build anywhere, fly in creative.\n<white>/tntfill <gray>free fill  <dark_gray>•  <gray>diamond block under it = can't be blown up  <dark_gray>•  <white>//schem <gray>to paste"
+        text: "<gray>Get your own plot: <white>/plot auto <dark_gray>• <white>/plot home <dark_gray>• <white>/plot add <player>\n<white>/tntfill <gray>free fill <dark_gray>• <white>//upload <link> <gray>then <white>//schem load <dark_gray>• <gray>same jar as Factions"
       - offset: [0.5, 10.6, -15]
         scale: 1.4
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
@@ -154,6 +155,10 @@ spawns:
 first-start-commands:
   skyblock:
     - "bsbadmin challenges import"
+  cannons:
+    # plot owners can //paste and //schem inside their own plot (FAWE limits edits to WorldGuard plot regions)
+    - "lp group default permission set worldedit.* true"
+    - "lp group default permission set lag.cannons.upload true"
 
 # Resource pack (logo, icons, menus). Built from resourcepack/ and published with every release.
 resource-pack:

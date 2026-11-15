@@ -291,7 +291,8 @@ def patch_backend(name):
             shutil.copy(os.path.join(ROOT, "plugins", "lag-cannons", "src", "main", "resources", "config.yml"), lc)
         yaml_set(lc, "cannon-protect.worlds", ["*"])
         yaml_set(lc, "tntfill.free-for-all", True)
-        log("  cannons: diamond protection everywhere, free /tntfill")
+        yaml_set(lc, "plots.enabled", True)
+        log("  cannons: plots world, diamond protection everywhere, free /tntfill")
     if name == "factions":
         tr = os.path.join(d, "plugins", "FactionsUUID", "config", "translations.conf")
         if os.path.exists(tr):
@@ -452,7 +453,7 @@ def main():
                         problems.append(f"[{name}]     {nxt.strip()[:300]}")
     # Make sure the important plugins actually ENABLED (not just loaded)
     must = {"hub": ["laGCore"], "factions": ["laGCore", "laGCannons", "Factions"], "smp": ["laGCore"],
-            "skyblock": ["laGCore", "BentoBox"], "cannons": ["laGCore", "laGCannons", "FastAsyncWorldEdit"]}
+            "skyblock": ["laGCore", "BentoBox"], "cannons": ["laGCore", "laGCannons", "FastAsyncWorldEdit", "WorldGuard"]}
     for srv in SERVERS:
         enabled = sorted({m.group(1) for l in logs.get(srv, []) for m in [re.search(r"Enabling (\S+) v", l)] if m})
         log(f"  {srv:9} enabled: {', '.join(enabled)}")

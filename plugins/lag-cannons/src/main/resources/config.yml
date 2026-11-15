@@ -113,3 +113,11 @@ clearlag:
 # Cannon test server: anyone in creative gets free /tntfill (no faction bank needed).
 tntfill:
   free-for-all: false
+
+# Cannon test plots: a separate "plots" world (only switch on for the cannon test server).
+plots:
+  enabled: false
+  world: plots
+  size: 128
+  road: 7
+  max-per-player: 1

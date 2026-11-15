@@ -185,6 +185,10 @@
       "loader": "paper"
     },
     {
+      "modrinth": "worldguard",
+      "loader": "paper"
+    },
+    {
       "local": "laGCore"
     },
     {

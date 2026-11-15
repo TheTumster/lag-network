@@ -1,0 +1,10 @@
+// WorldGuard API for plot regions (lets FAWE //paste only inside your own plot). Provided by the server at runtime.
+repositories {
+	maven { url = 'https://maven.enginehub.org/repo/' }
+}
+dependencies {
+	compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.13') { transitive = false }
+	compileOnly('com.sk89q.worldguard:worldguard-core:7.0.13') { transitive = false }
+	compileOnly('com.sk89q.worldedit:worldedit-core:7.3.9') { transitive = false }
+	compileOnly('com.sk89q.worldedit:worldedit-bukkit:7.3.9') { transitive = false }
+}
