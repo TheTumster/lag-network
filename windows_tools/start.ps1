@@ -97,8 +97,7 @@ if (Test-Path $pw) {
 }
 
 # ---- Cannons send a flood of client packets: raise ViaVersion's (proxy) and Paper's (factions) packet limits
-foreach ($pair in @(@("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(  max-per-second:) 800\b', '$1 5000'),
-                    @("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(  sustained-max-per-second:) 200\b', '$1 2000'),
+foreach ($pair in @(@("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(packet-limiter:\r?\n  enabled:) true', '$1 false'),
                     @("$Root\factions\config\paper-global.yml", '(?m)^(    max-packet-rate:) 500\.0\b', '$1 2000.0'))) {
     if (Test-Path $pair[0]) {
         $t = Get-Content $pair[0] -Raw
