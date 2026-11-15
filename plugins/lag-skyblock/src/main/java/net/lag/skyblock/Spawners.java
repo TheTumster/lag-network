@@ -292,6 +292,19 @@ final class Spawners implements Listener, CommandExecutor {
 		}
 	}
 
+	/** Our own short note when a spawner goes down (SmartSpawner's chat message is switched off). */
+	@EventHandler(priority = org.bukkit.event.EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlace(org.bukkit.event.block.BlockPlaceEvent e) {
+		if (e.getBlockPlaced().getType() != Material.SPAWNER) return;
+		Player p = e.getPlayer();
+		Bukkit.getScheduler().runTask(plugin, () -> {
+			// stacking onto an existing spawner cancels the place; SmartSpawner shows its own stack message then
+			if (e.getBlockPlaced().getType() == Material.SPAWNER) {
+				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>it fills with loot and heads while you're nearby"));
+			}
+		});
+	}
+
 	@EventHandler
 	public void onDrag(InventoryDragEvent e) {
 		if (e.getInventory().getHolder() instanceof Menu) e.setCancelled(true);

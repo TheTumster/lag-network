@@ -53,6 +53,54 @@ final class Islands {
 		}
 	}
 
+	static UUID owner(Object island) {
+		return (UUID) call(island, "getOwner");
+	}
+
+	/** The island's name, or null if it was never named. */
+	static String name(Object island) {
+		Object n = call(island, "getName");
+		return n == null || String.valueOf(n).isBlank() ? null : String.valueOf(n);
+	}
+
+	@SuppressWarnings("unchecked")
+	static Set<UUID> members(Object island) {
+		try {
+			return island == null || !init() ? Set.of() : (Set<UUID>) members.invoke(island);
+		} catch (Throwable t) {
+			return Set.of();
+		}
+	}
+
+	static Location center(Object island) {
+		Object o = call(island, "getProtectionCenter");
+		return o instanceof Location l ? l : (Location) call(island, "getCenter");
+	}
+
+	/** The island this player belongs to in the given world (BentoBox's primary island), or null. */
+	static Object of(org.bukkit.World world, UUID player) {
+		if (world == null || !init()) return null;
+		try {
+			return manager.getClass().getMethod("getIsland", org.bukkit.World.class, UUID.class).invoke(manager, world, player);
+		} catch (Throwable t) {
+			return null;
+		}
+	}
+
+	/** BSkyBlock's overworld (where islands live), or null. */
+	static org.bukkit.World islandWorld() {
+		return org.bukkit.Bukkit.getWorld("bskyblock_world");
+	}
+
+	private static Object call(Object o, String method) {
+		if (o == null) return null;
+		try {
+			return o.getClass().getMethod(method).invoke(o);
+		} catch (Throwable t) {
+			return null;
+		}
+	}
+
 	/** True if this player is a member (or owner) of the island. */
 	static boolean member(Object island, UUID player) {
 		try {

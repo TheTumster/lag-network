@@ -64,7 +64,8 @@ fresh-chat:
       - "            {logo} <dark_gray>» <gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
       - ""
       - "  {arrow} <gray>Start your island: <white>/is"
-      - "  {arrow} <gray>Island top: <white>/is top <dark_gray>• <gray>Shop: <white>/shop <dark_gray>• <gray>Challenges: <white>/challenges"
+      - "  {arrow} <gray>Island top: <white>/is top <dark_gray>• <gray>Season: <white>/season <dark_gray>• <gray>Shop: <white>/shop"
+      - "  {arrow} <gray>Spawners: <white>/spawners <dark_gray>• <gray>Ore gen: <white>/gen <dark_gray>• <gray>PvP: <white>/pit"
       - "  {arrow} <gray>Back to the hub: <white>/hub"
       - "{bar}"
     cannons:
@@ -95,7 +96,11 @@ ranks:
 rank-players:
   SonOfJesus420: owner
 
-# Chat format: "<rank> Name » message"
+# Season titles (e.g. S1 CHAMPION from Skyblock) shown before the rank in chat and tab. One file shared by every
+# server in the network (relative to the server's folder); Skyblock writes it when a season ends.
+titles-file: "../shared/titles.yml"
+
+# Chat format: "<title> <rank> Name » message"
 chat:
   enabled: true
 
@@ -131,6 +136,12 @@ spawns:
       - offset: [0.5, 3.5, -7.5]
         scale: 1
         text: "<gray>Turn left for the <white>Getting Started</white> board"
+      - offset: [0.5, 6.4, -7.5]
+        scale: 0.85
+        text: "<dark_gray><italic>When the Corrupted world collapsed, the pieces that didn't fall became islands.\n<dark_gray><italic>Every month the void takes them back."
+      - offset: [0.5, 3.4, 20.5]
+        scale: 1.4
+        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>THE PIT</bold></gradient>\n<gray>The only PvP on Skyblock <dark_gray>• <white>/pit"
       - offset: [0.5, 13.2, -20.5]
         scale: 1.4
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
