@@ -90,7 +90,7 @@ final class Board implements Listener {
 				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
 						+ "<gray>You're on <white>" + realm + "\n"),
 				LagCore.mm("\n<gray>Online <white>" + plugin.count("ALL") + " <dark_gray>• <gray>Ping <white>" + p.getPing() + "ms\n"
-						+ "<dark_gray>Factions • SMP • 1.8 Cannons\n"));
+						+ "<dark_gray>Skyblock • Factions • SMP • 1.8 Cannons\n"));
 	}
 
 	/** First matching LuckPerms group (group.<name> permission) from config "ranks"; ops count as the first rank. */
