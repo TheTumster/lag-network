@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 10; // v10: RELAPSED sky sign
+	static final int BUILD_VERSION = 11; // v11: sky sign closer + higher
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
@@ -147,7 +147,7 @@ final class HubBuild implements Listener {
 			int cleared = 0;
 			for (int x = ox - 120; x <= ox + 120; x++) {
 				for (int z = oz - 150; z <= oz + 110; z++) {
-					for (int y = oy - 60; y <= oy + 45; y++) {
+					for (int y = oy - 60; y <= oy + 80; y++) { // +80: the sky sign
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
 							b.setBlockData(air, false);

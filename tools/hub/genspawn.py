@@ -705,7 +705,7 @@ SIGN_GRAD = ["light_blue_concrete", "cyan_concrete", "blue_concrete", "purple_co
 
 
 def sky_sign(out):
-    sz = -130                       # face plane (north of everything else)
+    sz = -114                       # face plane: just past the north end of the island
     def word(text, scale, x0, ytop, face):
         cols = []
         x = x0
@@ -734,7 +734,7 @@ def sky_sign(out):
     big = 3
     width = 8 * 6 * big - big
     x0 = -width // 2
-    top = 44
+    top = 64
     cols, xend = word("RELAPSED", big, x0, top, "white_concrete")
     # gradient bar under the word
     bar_y = top - 7 * big - 2
