@@ -12,7 +12,7 @@ import org.bukkit.OfflinePlayer;
 final class Fuuid {
 	private static boolean ok;
 	private static Object fPlayers, factions;
-	private static Method fpGet, fpFaction, fpHasFaction, fpRole, facById, facByTag, facId, facTag, facNormal;
+	private static Method fpGet, fpFaction, fpHasFaction, fpRole, facById, facByTag, facId, facTag, facNormal, facAll, facClaims, facSize, facOnline;
 
 	private Fuuid() { }
 
@@ -34,6 +34,10 @@ final class Fuuid {
 			facId = f.getMethod("id");
 			facTag = f.getMethod("tag");
 			facNormal = f.getMethod("isNormal");
+			facAll = fs.getMethod("all");
+			facClaims = f.getMethod("claimCount");
+			facSize = f.getMethod("size");
+			facOnline = f.getMethod("membersOnlineAsPlayers");
 			ok = fPlayers != null && factions != null;
 		} catch (Throwable t) {
 			ok = false;
@@ -110,6 +114,42 @@ final class Fuuid {
 			return (String) facTag.invoke(faction);
 		} catch (Throwable t) {
 			return "?";
+		}
+	}
+
+	/** All player-made factions (no wilderness/safezone/warzone). */
+	static java.util.List<Object> all() {
+		java.util.List<Object> out = new java.util.ArrayList<>();
+		if (!present()) return out;
+		try {
+			for (Object f : (java.util.List<?>) facAll.invoke(factions)) {
+				if ((boolean) facNormal.invoke(f)) out.add(f);
+			}
+		} catch (Throwable ignored) { }
+		return out;
+	}
+
+	static int claims(Object faction) {
+		try {
+			return (int) facClaims.invoke(faction);
+		} catch (Throwable t) {
+			return 0;
+		}
+	}
+
+	static int size(Object faction) {
+		try {
+			return (int) facSize.invoke(faction);
+		} catch (Throwable t) {
+			return 0;
+		}
+	}
+
+	static int online(Object faction) {
+		try {
+			return ((java.util.List<?>) facOnline.invoke(faction)).size();
+		} catch (Throwable t) {
+			return 0;
 		}
 	}
 }

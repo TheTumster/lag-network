@@ -66,9 +66,29 @@ final class Board implements Listener {
 		lines.add(LagCore.mm(bullet + "<gray>Rank " + rank(p)));
 		lines.add(LagCore.mm(bullet + "<gray>Ping " + pingCol + ping + "ms"));
 		lines.add(Component.text(" "));
-		lines.add(LagCore.mm(ip + head + "NETWORK</bold></gradient>"));
-		lines.add(LagCore.mm(bullet + "<gray>Online <white>" + plugin.count("ALL")));
-		lines.add(LagCore.mm(bullet + "<gray>Realm <white>" + realm));
+		if ("factions".equalsIgnoreCase(role) && Papi.present()) {
+			// FACTION + current map instead of the network block
+			String f = Papi.apply(p, "%factionsuuid_faction_name%").trim();
+			lines.add(LagCore.mm(ip + "<gradient:#FF4D6D:#B040FF><bold>FACTION</bold></gradient>"));
+			if (f.isEmpty() || f.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) {
+				lines.add(LagCore.mm(bullet + "<gray>None <dark_gray>• <white>/f create"));
+				lines.add(LagCore.mm(bullet + "<gray>Power <white>" + Papi.apply(p, "%factionsuuid_player_power%")));
+			} else {
+				lines.add(LagCore.mm(bullet + "<white>" + LagCore.esc(f)));
+				lines.add(LagCore.mm(bullet + "<gray>Online <white>" + Papi.apply(p, "%factionsuuid_faction_online%")
+						+ "<dark_gray>/</dark_gray>" + Papi.apply(p, "%factionsuuid_faction_size%")
+						+ " <dark_gray>• <gray>Land <white>" + Papi.apply(p, "%factionsuuid_faction_claims%")));
+				lines.add(LagCore.mm(bullet + "<gray>Power <white>" + Papi.apply(p, "%factionsuuid_faction_power%")
+						+ " <dark_gray>• <gray>TNT <white>" + Papi.apply(p, "%factionsuuid_faction_tnt_balance%")));
+			}
+			lines.add(Component.text("  "));
+			lines.add(LagCore.mm(it + "<gradient:#FF4D6D:#B040FF><bold>" + LagCore.esc(plugin.getConfig().getString("map.name", "RELAPSE #1")) + "</bold></gradient>"));
+			lines.add(LagCore.mm(bullet + MapInfo.countdown(plugin)));
+		} else {
+			lines.add(LagCore.mm(ip + head + "NETWORK</bold></gradient>"));
+			lines.add(LagCore.mm(bullet + "<gray>Online <white>" + plugin.count("ALL")));
+			lines.add(LagCore.mm(bullet + "<gray>Realm <white>" + realm));
+		}
 		var realms = plugin.section("realms");
 		if ("hub".equalsIgnoreCase(role) && realms != null) {
 			lines.add(Component.text("  "));
@@ -79,7 +99,7 @@ final class Board implements Listener {
 			}
 		}
 		lines.add(Component.text("   "));
-		lines.add(LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>play.relapsedmc.net</gradient>")));
+		lines.add(LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>play.relapsedmc.com</gradient>")));
 		int score = lines.size();
 		for (int n = 1; n <= 15; n++) {
 			if (n > score) o.getScoreboard().resetScores("l" + n);
