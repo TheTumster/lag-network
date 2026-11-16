@@ -283,6 +283,14 @@ def patch_backend(name):
                      ("cannons.explosion.optimise-protected-regions", True), ("cannons.explosion.avoid-redundant-block-searches", True),
                      ("cannons.explosion.reuse-block-cache-across-explosions", True), ("technical.redstone.redstone-cache", True)):
             yaml_set(sw, k, v)
+        # Sakura /fps menu (hide TNT/sand/explosions client-side; laGCannons gives everyone access): RelapsedMC branding
+        sg = os.path.join(d, "config", "sakura-global.yml")
+        if not os.path.exists(sg):
+            open(sg, "w").write("_version: 3\n")
+        brand = "<gradient:#38E0FF:#B040FF>[RelapsedMC]</gradient> "
+        yaml_set(sg, "messages.fps-setting-change", brand + "<gray><state> <white><name></white> for you. <dark_gray>(/fps)")
+        yaml_set(sg, "messages.durable-block-interaction", brand + "<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left")
+        yaml_set(sg, "fps.material", "CYAN_STAINED_GLASS_PANE")
     if name == "cannons":
         # test server: diamond protection everywhere, free /tntfill in creative
         lc = os.path.join(d, "plugins", "laGCannons", "config.yml")

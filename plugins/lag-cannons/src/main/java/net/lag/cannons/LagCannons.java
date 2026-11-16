@@ -70,6 +70,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		getServer().getPluginManager().registerEvents(new NoSandDrops(this), this);
 		getServer().getPluginManager().registerEvents(new BannedItems(this), this);
+		// Sakura's /fps, /tnttoggle, /sandtoggle for everyone: hide cannon entities client-side, no FPS lag
+		getServer().getPluginManager().registerEvents(new FpsMenu(this), this);
 		var plots = new Plots(this);
 		getServer().getPluginManager().registerEvents(plots, this);
 		if (getCommand("plot") != null) {
