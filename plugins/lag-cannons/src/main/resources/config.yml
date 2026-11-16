@@ -123,3 +123,36 @@ plots:
   size: 128
   gap: 400
   max-per-player: 1
+
+# Relapse factions ruleset (Relapse #1 brief).
+relapse:
+  # /f ally and /f truce are refused (tools/bake.py also sets FactionsUUID maxRelations ally/truce to 0)
+  no-allies: true
+  # /f alt invite|accept|leave|kick|list. Alts are linked to a faction but aren't members, so they don't count toward
+  # the 8-man cap. They can stand in claim and AFK spawners/farms only: no damage, building, breaking, containers,
+  # item pickup/drop or block clicks (doors/trapdoors/gates excepted). Needs FactionsUUID (off automatically
+  # without it). Saved in plugins/laGCannons/alts.yml:
+  # delete that file on map reset.
+  alts:
+    enabled: true
+  # Enchant cap + KOTH-only items. KOTH rewards are tagged with /lc kothgear [protection level] and skip both rules.
+  gear-rules: true
+  enchant-cap:
+    protection: 4
+    unbreaking: 3
+  # Can't be smithed, are stripped from loot, and can't be worn/used unless tagged as KOTH gear (all netherite gear)
+  koth-only:
+    - NETHERITE_HELMET
+    - NETHERITE_CHESTPLATE
+    - NETHERITE_LEGGINGS
+    - NETHERITE_BOOTS
+    - NETHERITE_SWORD
+    - NETHERITE_AXE
+    - NETHERITE_PICKAXE
+    - NETHERITE_SHOVEL
+    - NETHERITE_HOE
+# Sakura's client-lag tools for every player (only on the Sakura servers: factions + cannons):
+# /fps opens a menu to hide TNT, sand, explosion particles, spawners and pistons; /tnttoggle and /sandtoggle are
+# quick toggles. Hidden stuff isn't sent to that player's client at all, the server still runs the cannon normally.
+fps-menu:
+  enabled: true

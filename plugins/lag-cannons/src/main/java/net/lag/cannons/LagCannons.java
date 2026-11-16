@@ -50,6 +50,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	private record Hit(String world, int hits, long last) { }
 
 	private Sandbots sandbots;
+	private GearCap gearCap;
 	private RedstoneFix redstoneFix;
 
 	@Override
@@ -60,6 +61,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		saveDefaultConfig();
+		mergeNewDefaults();
 		loadDurable();
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
@@ -70,6 +72,14 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		getServer().getPluginManager().registerEvents(new NoSandDrops(this), this);
 		getServer().getPluginManager().registerEvents(new BannedItems(this), this);
+		// Relapse ruleset: no allies/truces, alts (needs FactionsUUID), P4/U3 cap, KOTH-only netherite
+		getServer().getPluginManager().registerEvents(new Alts(this), this);
+		gearCap = new GearCap(this);
+		getServer().getPluginManager().registerEvents(gearCap, this);
+		// Sakura's /fps, /tnttoggle, /sandtoggle for everyone: hide cannon entities client-side, no FPS lag
+		getServer().getPluginManager().registerEvents(new FpsMenu(this), this);
+		// live Top Factions text for the factions spawn podium (laGCore {ftop})
+		if (Fuuid.present()) new FactionTop(this);
 		var plots = new Plots(this);
 		getServer().getPluginManager().registerEvents(plots, this);
 		if (getCommand("plot") != null) {
@@ -204,16 +214,20 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("fixredstone")) return redstoneFix.command(sender, args);
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
+			mergeNewDefaults();
 			loadDurable();
+			gearCap.reload();
 			sandbots.restartTask();
 			send(sender, "<#38E0FF>Cannons reloaded.");
+		} else if (args.length > 0 && args[0].equalsIgnoreCase("kothgear")) {
+			return gearCap.command(sender, args);
 		} else if (args.length > 0 && args[0].equalsIgnoreCase("clear")) {
 			damage.clear();
 			send(sender, "<#38E0FF>All block damage healed.");
 		} else {
 			send(sender, "<gray>random-kick: <white>" + getConfig().getBoolean("tnt.random-kick")
 					+ " <gray>| damaged blocks: <white>" + damage.size());
-			send(sender, "<gray>/lc reload  /lc clear");
+			send(sender, "<gray>/lc reload  /lc clear  /lc kothgear [protection level]");
 		}
 		return true;
 	}
@@ -262,5 +276,11 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		int n = 0;
 		for (ItemStack it : p.getInventory().getContents()) if (it != null && it.getType() == Material.TNT) n += it.getAmount();
 		return n;
+	}
+
+	/** Existing installs keep their config.yml; add any new keys from this jar's defaults (e.g. relapse.*, fps-menu). */
+	private void mergeNewDefaults() {
+		getConfig().options().copyDefaults(true);
+		saveConfig();
 	}
 }

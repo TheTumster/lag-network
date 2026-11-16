@@ -2,9 +2,9 @@ name: laGSkyblock
 version: '${version}'
 main: net.lag.skyblock.LagSkyblock
 api-version: '1.21'
-softdepend: [Vault, Essentials, SmartSpawner, EconomyShopGUI, BentoBox]
-loadbefore: [SmartSpawner, EconomyShopGUI]
-description: RelapsedMC Skyblock - spawner tiers, mob heads
+softdepend: [Vault, Essentials, RoseStacker, EconomyShopGUI, BentoBox]
+loadbefore: [EconomyShopGUI]
+description: RelapsedMC Skyblock - spawner tiers, mob heads, ore gens, island top, the Pit, seasons
 commands:
   spawners:
     description: Spawner tiers - buy spawners, unlock the next tier with heads
@@ -18,6 +18,15 @@ commands:
   islandfly:
     description: Fly on your own island (rank perk)
     aliases: [isfly]
+  istop:
+    description: Island top - islands ranked by spawner value (also /is top)
+    aliases: [islandtop, top]
+  season:
+    description: This Skyblock season - time left, top islands, prizes
+    aliases: [seasons]
+  pit:
+    description: The Pit - the PvP arena at spawn
+    aliases: [arena]
   lagskyblock:
     description: laG Skyblock admin
     aliases: [lsb]

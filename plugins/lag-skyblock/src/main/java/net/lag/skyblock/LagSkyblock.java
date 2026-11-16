@@ -16,7 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.economy.Economy;
 
-/** RelapsedMC Skyblock: the spawner tier ladder and mob heads (heads come from SmartSpawner loot). */
+/** RelapsedMC Skyblock: the spawner tier ladder and mob heads (heads drop from spawner mobs; RoseStacker stacks them). */
 public final class LagSkyblock extends JavaPlugin {
 	/** One rung of the ladder. index 0 = tier 1. */
 	record Tier(int index, String mob, String name, String color, double price, double headValue, int unlock, String texture) {
@@ -39,19 +39,28 @@ public final class LagSkyblock extends JavaPlugin {
 	}
 	Spawners spawners;
 	Generators generators;
+	IslandTop top;
+	Season season;
+	Pit pit;
 
 	@Override
 	public void onLoad() {
 		saveDefaultConfig();
 		reloadConfig();
 		loadTiers();
-		// before SmartSpawner / EconomyShopGUI read their files: heads in spawner loot, head selling off there, old spawner shop off
+		// a season was ended: wipe islands/spawners/money before anything loads them
 		try {
-			patchSmartSpawner();
+			Season.wipeIfPending(getDataFolder(), getConfig(), getLogger());
+		} catch (Exception e) {
+			getLogger().severe("Season wipe failed: " + e);
+		}
+		// before RoseStacker / EconomyShopGUI read their files: grinder rules + branding, old spawner shop off
+		try {
+			patchRoseStacker();
 			patchShop();
 			installIsland();
 		} catch (Exception e) {
-			getLogger().warning("Could not patch SmartSpawner / EconomyShopGUI files: " + e);
+			getLogger().warning("Could not patch RoseStacker / EconomyShopGUI files: " + e);
 		}
 	}
 
@@ -64,25 +73,54 @@ public final class LagSkyblock extends JavaPlugin {
 		generators = new Generators(this);
 		getServer().getPluginManager().registerEvents(generators, this);
 		getCommand("gen").setExecutor(generators);
+		new MobHeads(this);
 		IslandFly fly = new IslandFly(this);
 		getServer().getPluginManager().registerEvents(fly, this);
 		getCommand("islandfly").setExecutor(fly);
+		top = new IslandTop(this);
+		getServer().getPluginManager().registerEvents(top, this);
+		getCommand("istop").setExecutor(top);
+		season = new Season(this);
+		getCommand("season").setExecutor(season);
+		pit = new Pit(this);
+		getServer().getPluginManager().registerEvents(pit, this);
+		getCommand("pit").setExecutor(pit);
+		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		getCommand("lagskyblock").setExecutor((s, c, l, a) -> {
-			reloadConfig();
-			loadTiers();
-			spawners.load();
-			generators.load();
-			s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
+			String sub = a.length > 0 ? a[0].toLowerCase() : "reload";
+			switch (sub) {
+				case "season" -> season.admin(s, a);
+				case "pit" -> {
+					if (a.length > 1 && a[1].equalsIgnoreCase("build")) {
+						int n = pit.build();
+						pit.holograms();
+						s.sendMessage(Spawners.mm("<#7CFF6B>The Pit rebuilt <gray>(" + n + " blocks)"));
+					}
+					else s.sendMessage(Spawners.mm("<gray>/lsb pit build <dark_gray>- place the arena again (center/radius: pit in config.yml)"));
+				}
+				case "top" -> {
+					top.refresh();
+					s.sendMessage(Spawners.mm("<#7CFF6B>Island top recalculated <gray>(" + top.ranking().size() + " islands)"));
+				}
+				case "reload" -> {
+					reloadConfig();
+					loadTiers();
+					spawners.load();
+					generators.load();
+					top.refresh();
+					s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
+				}
+				default -> s.sendMessage(Spawners.mm("<gray>/lsb reload | top | pit build | season [ends <date> <time> | end]"));
+			}
 			return true;
 		});
 		getLogger().info(tiers.size() + " spawner tiers loaded");
-		// first run: SmartSpawner only writes its files when it starts, so patch again once it has, and reload it
+		// first run: RoseStacker only writes its files when it starts, so patch again once it has, and reload it
 		Bukkit.getScheduler().runTaskLater(this, () -> {
 			try {
-				loadTiers();
-				if (patchSmartSpawner()) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ss reload");
+				if (patchRoseStacker()) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rs reload");
 			} catch (Exception e) {
-				getLogger().warning("Could not patch SmartSpawner: " + e);
+				getLogger().warning("Could not patch RoseStacker: " + e);
 			}
 		}, 60L);
 	}
@@ -90,6 +128,7 @@ public final class LagSkyblock extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		if (spawners != null) spawners.save();
+		if (top != null) top.save();
 		if (generators != null) generators.save();
 	}
 
@@ -111,26 +150,33 @@ public final class LagSkyblock extends JavaPlugin {
 		return o instanceof Number n ? n.doubleValue() : o == null ? 0 : Double.parseDouble(String.valueOf(o));
 	}
 
-	private File ssFile(String name) {
-		return new File(getDataFolder().getParentFile(), "SmartSpawner" + File.separator + name);
+	private File rsFile(String name) {
+		return new File(getDataFolder().getParentFile(), "RoseStacker" + File.separator + name);
 	}
 
-	/** Mob head textures from SmartSpawner's own spawner_mobs.yml (mob_head.hash_texture). */
+	/** Mob head textures (Mojang texture hashes), bundled in heads.yml. */
 	private Map<String, String> readTextures() {
 		Map<String, String> out = new HashMap<>();
-		File f = ssFile("spawner_mobs.yml");
-		if (!f.exists()) return out;
-		YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
-		for (String k : y.getKeys(false)) {
-			String hash = y.getString(k + ".mob_head.hash_texture");
-			if (hash != null && !hash.isEmpty() && !"null".equals(hash)) out.put(k.toLowerCase(), hash);
-		}
+		try (var in = getResource("heads.yml")) {
+			if (in == null) return out;
+			YamlConfiguration y = YamlConfiguration.loadConfiguration(new java.io.InputStreamReader(in, StandardCharsets.UTF_8));
+			for (String k : y.getKeys(false)) out.put(k.toLowerCase(), y.getString(k));
+		} catch (Exception ignored) { }
 		return out;
 	}
 
-	/** The head item as an item string (same string goes into SmartSpawner's loot table and our menus). */
+	/** The head item as an item string (our menus and the heads mobs drop). */
 	String headSpec(Tier t, boolean tagged) {
-		StringBuilder sb = new StringBuilder("player_head[");
+		// mobs with a vanilla head use it; the rest are player heads with the mob's skin
+		String base = t.texture() != null ? "player_head" : switch (t.mob()) {
+			case "zombie" -> "zombie_head";
+			case "skeleton" -> "skeleton_skull";
+			case "creeper" -> "creeper_head";
+			case "wither_skeleton" -> "wither_skeleton_skull";
+			case "piglin" -> "piglin_head";
+			default -> "player_head";
+		};
+		StringBuilder sb = new StringBuilder(base + "[");
 		if (t.texture() != null) {
 			String json = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/" + t.texture() + "\"}}}";
 			String b64 = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
@@ -143,49 +189,48 @@ public final class LagSkyblock extends JavaPlugin {
 		return sb.append("]").toString();
 	}
 
-	private boolean patchSmartSpawner() throws Exception {
+	/**
+	 * RoseStacker: OG grinders. A stack dies all at once from the death causes in rosestacker.kill-entire-stack-on
+	 * (fall, lava, fire, magma, drowning, suffocation, cramming...), with loot for every mob in it, so drop chutes and
+	 * lava blades are AFK grinders. A player's sword still kills one at a time (for XP). Spawners can be picked up
+	 * without silk touch. Chat prefix is ours.
+	 */
+	private boolean patchRoseStacker() throws Exception {
 		boolean any = false;
-		File mobs = ssFile("spawner_mobs.yml");
-		if (mobs.exists()) {
-			YamlConfiguration y = YamlConfiguration.loadConfiguration(mobs);
-			double chance = getConfig().getDouble("head-chance", 4.0);
+		File cfg = rsFile("config.yml");
+		if (cfg.exists()) {
+			YamlConfiguration y = YamlConfiguration.loadConfiguration(cfg);
 			boolean changed = false;
-			for (Tier t : tiers) {
-				if (!y.isConfigurationSection(t.mob())) continue;
-				ConfigurationSection loot = y.getConfigurationSection(t.mob() + ".loot");
-				if (loot == null) loot = y.createSection(t.mob() + ".loot");
-				String key = null;
-				int max = 0;
-				for (String k : loot.getKeys(false)) {
-					String item = loot.getString(k + ".item", "");
-					if (item.contains(HEAD_KEY)) key = k;
-					try {
-						max = Math.max(max, Integer.parseInt(k));
-					} catch (NumberFormatException ignored) { }
-				}
-				if (key == null) key = String.valueOf(max + 1);
-				String spec = headSpec(t, true);
-				if (!spec.equals(loot.getString(key + ".item")) || loot.getDouble(key + ".chance") != chance) {
-					loot.set(key + ".item", spec);
-					loot.set(key + ".amount", "1-1");
-					loot.set(key + ".chance", chance);
+			Map<String, Object> want = new java.util.LinkedHashMap<>();
+			want.put("global-entity-settings.kill-entire-stack-on-death", false);
+			want.put("global-entity-settings.kill-entire-stack-on-death-conditions", getConfig().getStringList("rosestacker.kill-entire-stack-on"));
+			want.put("global-spawner-settings.silk-touch-required", false);
+			want.put("global-spawner-settings.spawn-player-activation-range", getConfig().getInt("rosestacker.player-activation-range", 24));
+			want.put("global-spawner-settings.disable-mob-ai", false);
+			ConfigurationSection extra = getConfig().getConfigurationSection("rosestacker.settings");
+			if (extra != null) for (String k : extra.getKeys(true)) if (!extra.isConfigurationSection(k)) want.put(k, extra.get(k));
+			for (var e : want.entrySet()) {
+				if (!java.util.Objects.equals(String.valueOf(y.get(e.getKey())), String.valueOf(e.getValue()))) {
+					y.set(e.getKey(), e.getValue());
 					changed = true;
 				}
 			}
 			if (changed) {
-				y.save(mobs);
+				y.save(cfg);
 				any = true;
-				getLogger().info("Added tier heads to SmartSpawner loot (" + chance + "% per mob)");
+				getLogger().info("RoseStacker set up for grinders (whole stack dies from " + getConfig().getStringList("rosestacker.kill-entire-stack-on") + ")");
 			}
 		}
-		// heads are sold through /spawners at tier prices, never by SmartSpawner's sell button
-		File sell = ssFile("sell_integration.yml");
-		if (sell.exists()) {
-			YamlConfiguration y = YamlConfiguration.loadConfiguration(sell);
-			if (y.getDouble("custom_prices.prices.PLAYER_HEAD", -1) != 0.0) {
-				y.set("custom_prices.prices.PLAYER_HEAD", 0.0);
-				y.save(sell);
-				any = true;
+		File[] locales = rsFile("locale").listFiles((d, n) -> n.endsWith(".yml"));
+		if (locales != null) {
+			String prefix = getConfig().getString("rosestacker.prefix", "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7");
+			for (File f : locales) {
+				YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
+				if (!prefix.equals(y.getString("prefix"))) {
+					y.set("prefix", prefix);
+					y.save(f);
+					any = true;
+				}
 			}
 		}
 		return any;
@@ -225,9 +270,13 @@ public final class LagSkyblock extends JavaPlugin {
 			int range = getConfig().getInt("island.protection-range", 75);
 			String t = java.nio.file.Files.readString(cfg.toPath());
 			String u = t.replaceFirst("(?m)^(\\s*protection-range:)\\s*\\d+", "$1 " + range);
+			// island teams: max-team-size members; coop/trusted would let extra players grind an island, so capped too
+			u = u.replaceFirst("(?m)^(\\s*max-team-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-team-size", 4));
+			u = u.replaceFirst("(?m)^(\\s*max-coop-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-coop-size", 0));
+			u = u.replaceFirst("(?m)^(\\s*max-trusted-size:)\\s*\\d+", "$1 " + getConfig().getInt("island.max-trusted-size", 0));
 			if (!u.equals(t)) {
 				java.nio.file.Files.writeString(cfg.toPath(), u);
-				getLogger().info("New islands get a " + (range * 2) + "x" + (range * 2) + " claim");
+				getLogger().info("BSkyBlock: " + (range * 2) + "x" + (range * 2) + " claims, teams of " + getConfig().getInt("island.max-team-size", 4));
 			}
 		}
 	}

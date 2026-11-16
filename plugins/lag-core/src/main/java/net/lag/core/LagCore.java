@@ -46,6 +46,11 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		return MiniMessage.miniMessage().deserialize(s);
 	}
 
+	/** Escape player/faction text before putting it into MiniMessage. */
+	static String esc(String s) {
+		return MiniMessage.miniMessage().escapeTags(s);
+	}
+
 	public String networkName() {
 		return getConfig().getString("network-name", "RelapsedMC");
 	}
@@ -87,6 +92,14 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	public void onEnable() {
 		instance = this;
 		saveDefaultConfig();
+		// new top-level sections reach existing installs (edit the dates there: map.starts / map.ends)
+		for (String k : new String[] {"map", "links"}) {
+			var d = getConfig().getDefaults() == null ? null : getConfig().getDefaults().getConfigurationSection(k);
+			if (d != null && !getConfig().isConfigurationSection(k)) {
+				getConfig().createSection(k, d.getValues(true));
+				saveConfig();
+			}
+		}
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
 

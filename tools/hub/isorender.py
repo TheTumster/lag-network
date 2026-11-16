@@ -3,6 +3,13 @@ import math
 from PIL import Image, ImageDraw
 
 COLORS = [
+    ("crying_obsidian", (70, 20, 120)), ("crimson_stem", (110, 30, 50)), ("nether_wart_block", (130, 15, 20)), ("crimson_nylium", (150, 30, 40)),
+    ("bone_block", (225, 220, 190)), ("stripped_dark_oak", (80, 60, 45)), ("dark_oak", (70, 45, 25)), ("weeping", (170, 20, 20)), ("red_nether", (90, 20, 25)), ("gilded_blackstone", (90, 70, 40)), ("blackstone", (42, 36, 44)),
+    ("sculk_catalyst", (30, 60, 70)), ("sculk", (12, 40, 52)), ("mud", (60, 55, 60)), ("gold_block", (240, 200, 60)),
+    ("iron_block", (215, 215, 215)), ("copper_block", (190, 105, 75)), ("magenta_", (190, 70, 180)), ("purple_", (120, 40, 170)),
+    ("blue_concrete", (50, 60, 160)), ("light_blue_", (60, 190, 230)), ("campfire", (255, 150, 40)), ("soul_", (90, 210, 220)),
+    ("obsidian", (25, 20, 40)), ("red_", (160, 40, 40)), ("black_concrete", (15, 15, 20)), ("tnt", (210, 50, 50)),
+    ("dead_bush", (140, 100, 50)), ("mushroom", (150, 110, 80)),
     ("nether_portal", (122, 42, 216)), ("water", (52, 98, 214)), ("lava", (240, 110, 20)), ("cherry_leaves", (240, 172, 206)),
     ("flowering_azalea_leaves", (110, 150, 60)), ("azalea_leaves", (90, 130, 45)), ("cherry_log", (60, 30, 40)), ("cherry_wood", (60, 30, 40)),
     ("pink_petals", (245, 160, 200)), ("grass_block", (98, 152, 60)), ("short_grass", (110, 170, 70)), ("tall_grass", (110, 170, 70)),
@@ -23,7 +30,7 @@ COLORS = [
     ("cave_vines", (90, 120, 40)), ("hanging_roots", (150, 110, 90)), ("spore_blossom", (230, 120, 190)), ("vine", (60, 110, 30)),
     ("clay", (160, 165, 180)), ("gravel", (130, 125, 125)), ("sand", (220, 210, 160)), ("dispenser", (110, 110, 110)),
 ]
-SMALL = ("short_grass", "tall_grass", "fern", "allium", "azure_bluet", "oxeye", "cornflower", "lily_of", "poppy", "pink_petals", "lantern",
+SMALL = ("dead_bush", "mushroom", "campfire", "shrieker", "crimson_fungus", "short_grass", "tall_grass", "fern", "allium", "azure_bluet", "oxeye", "cornflower", "lily_of", "poppy", "pink_petals", "lantern",
          "iron_chain", "fence", "_wall", "end_rod", "lily_pad", "seagrass", "cave_vines", "hanging_roots", "spore_blossom", "vine",
          "azalea[", "flowering_azalea[", "carpet", "pointed_dripstone", "amethyst_cluster", "trapdoor")
 

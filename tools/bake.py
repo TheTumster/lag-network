@@ -283,6 +283,14 @@ def patch_backend(name):
                      ("cannons.explosion.optimise-protected-regions", True), ("cannons.explosion.avoid-redundant-block-searches", True),
                      ("cannons.explosion.reuse-block-cache-across-explosions", True), ("technical.redstone.redstone-cache", True)):
             yaml_set(sw, k, v)
+        # Sakura /fps menu (hide TNT/sand/explosions client-side; laGCannons gives everyone access): RelapsedMC branding
+        sg = os.path.join(d, "config", "sakura-global.yml")
+        if not os.path.exists(sg):
+            open(sg, "w").write("_version: 3\n")
+        brand = "<gradient:#38E0FF:#B040FF>[RelapsedMC]</gradient> "
+        yaml_set(sg, "messages.fps-setting-change", brand + "<gray><state> <white><name></white> for you. <dark_gray>(/fps)")
+        yaml_set(sg, "messages.durable-block-interaction", brand + "<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left")
+        yaml_set(sg, "fps.material", "CYAN_STAINED_GLASS_PANE")
     if name == "cannons":
         # test server: diamond protection everywhere, free /tntfill in creative
         lc = os.path.join(d, "plugins", "laGCannons", "config.yml")
@@ -294,6 +302,18 @@ def patch_backend(name):
         yaml_set(lc, "plots.enabled", True)
         log("  cannons: plots world, diamond protection everywhere, free /tntfill")
     if name == "factions":
+        # CoreProtect: don't log dispenser/hopper item moves. Every cannon dispenser shot made a full block snapshot
+        # (5% of the tick while cannoning, spark profile Nov 2026) and hopper farms do the same. Raids are the game here.
+        cp = os.path.join(d, "plugins", "CoreProtect", "config.yml")
+        if os.path.exists(cp):
+            t = open(cp).read()
+            for key in ("item-transactions", "hopper-transactions"):
+                t = re.sub(rf"(?m)^{key}:\s*true\s*$", f"{key}: false", t)
+            open(cp, "w").write(t)
+            log("  factions: CoreProtect item/hopper logging off (cannon lag)"
+                if "item-transactions: false" in t else "  ! couldn't turn off CoreProtect item-transactions")
+        else:
+            log("  ! CoreProtect config.yml not found; dispenser logging still on")
         tr = os.path.join(d, "plugins", "FactionsUUID", "config", "translations.conf")
         if os.path.exists(tr):
             subprocess.run([sys.executable, os.path.join(ROOT, "tools", "fuuid_theme.py"), tr], check=False)
@@ -305,8 +325,25 @@ def patch_backend(name):
             t = open(fc).read()
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false", r"\1enable=true", t)
             t = re.sub(r"(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b", r"\1maxRadius=48", t)
+            # Relapse ruleset: 8-man factions, no allies or truces (alts are handled by laGCannons, not FUUID members)
+            t = re.sub(r"\bfactionMemberLimit\s*=\s*\d+", "factionMemberLimit=8", t)
+            def no_allies(m):
+                b = re.sub(r"\benabled\s*=\s*\w+", "enabled=true", m.group(0), count=1)
+                b = re.sub(r"\bally\s*=\s*-?\d+", "ally=0", b, count=1)
+                return re.sub(r"\btruce\s*=\s*-?\d+", "truce=0", b, count=1)
+            t = re.sub(r"(?s)\bmaxRelations\s*\{[^{}]*\}", no_allies, t, count=1)
+            # Everyone starts (and caps) at 200 power
+            def power200(m):
+                b = re.sub(r"\bplayerStarting\s*=\s*-?[\d.]+", "playerStarting=200.0", m.group(0), count=1)
+                return re.sub(r"\bplayerMax\s*=\s*-?[\d.]+", "playerMax=200.0", b, count=1)
+            t = re.sub(r"(?s)\bpower\s*\{[^{}]*?playerStarting[^{}]*\}", power200, t, count=1)
             open(fc, "w").write(t)
             log("  factions: TNT bank on, fill radius 48" if "maxRadius=48" in t else "  ! couldn't find FactionsUUID tnt settings")
+            log("  factions: 8-man cap" if "factionMemberLimit=8" in t else "  ! couldn't set FactionsUUID factionMemberLimit")
+            log("  factions: allies/truces off" if re.search(r"(?s)maxRelations\s*\{[^{}]*ally=0[^{}]*truce=0", t)
+                else "  ! couldn't turn off FactionsUUID allies/truces")
+            log("  factions: 200 starting power" if "playerStarting=200.0" in t and "playerMax=200.0" in t
+                else "  ! couldn't set FactionsUUID starting power")
     pg = os.path.join(d, "config", "paper-global.yml")
     yaml_set(pg, "proxies.velocity.enabled", True)
     yaml_set(pg, "proxies.velocity.online-mode", True)
@@ -332,7 +369,7 @@ def patch_proxy():
     path = os.path.join(d, "velocity.toml")
     t = open(path).read()
     t = toml_set(t, "bind", f'"0.0.0.0:{NET["public_port"]}"')
-    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient>\\n<gray>Factions • Skyblock • SMP • 1.8 Cannons"')
+    t = toml_set(t, "motd", '"                     <gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>•</dark_gray> <#7CFF6B>Skyblock S1"')
     t = toml_set(t, "player-info-forwarding-mode", '"modern"')
     t = toml_set(t, "online-mode", "true")
     t = toml_set(t, "bungee-plugin-message-channel", "true")
@@ -462,6 +499,9 @@ def main():
                 problems.append(f"[{srv}] {want} did not enable")
     report = {"manifest": manifest, "problems": problems}
     json.dump(report, open(os.path.join(ROOT, "dist", "bake-report.json"), "w"), indent=2)
+    for l in logs.get("skyblock", []):
+        if "[laGSkyblock]" in l:
+            log("  " + l.strip()[:200])
     for name, lines in logs.items():
         log(f"----- {name} (last 25 lines)")
         for l in lines[-25:]:

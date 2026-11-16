@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 9;
+	static final int BUILD_VERSION = 10; // v10: RELAPSED sky sign
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
@@ -70,7 +70,9 @@ final class HubBuild implements Listener {
 		World w = Bukkit.getWorlds().get(0);
 		if (plugin.getConfig().getInt(base + ".build-version", 0) < version() && plugin.optBool(base + ".auto-build", true)) {
 			String ys = String.valueOf(plugin.opt(base + ".y", 100));
-			int y = hub ? 100 : "ground".equalsIgnoreCase(ys) ? w.getHighestBlockYAt(0, 0) + 1 : Integer.parseInt(ys);
+			Location old = origin();
+			// a rebuild keeps the old floor height (on terrain, the highest block at 0,0 is the old build itself)
+			int y = hub ? 100 : old != null ? old.getBlockY() : "ground".equalsIgnoreCase(ys) ? w.getHighestBlockYAt(0, 0) + 1 : Integer.parseInt(ys);
 			build(w, 0, y, 0);
 		}
 		atmosphere(w);
@@ -80,6 +82,7 @@ final class HubBuild implements Listener {
 
 	private int version() {
 		if (hub) return BUILD_VERSION;
+		if ("spawns.factions".equals(base)) return 2; // factions v2: "the Fault" (tools/hub/genspawn_factions.py)
 		return "spawns.skyblock".equals(base) ? 2 : SPAWN_VERSION; // skyblock v2: full rebuild
 	}
 
@@ -115,9 +118,11 @@ final class HubBuild implements Listener {
 		if (!hub && plugin.getConfig().getInt(base + ".build-version", 0) > 0) {
 			BlockData air = Bukkit.createBlockData("minecraft:air");
 			int cleared = 0;
+			// on real terrain only clear above the floor (never dig a pit into the world); void spawns clear it all
+			boolean ground = "ground".equalsIgnoreCase(String.valueOf(plugin.opt(base + ".y", 100)));
 			for (int x = ox - 48; x <= ox + 48; x++) {
 				for (int z = oz - 48; z <= oz + 48; z++) {
-					for (int y = oy - 48; y <= oy + 32; y++) {
+					for (int y = ground ? oy + 1 : oy - 48; y <= oy + 32; y++) {
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
 							b.setBlockData(air, false);
@@ -130,7 +135,7 @@ final class HubBuild implements Listener {
 			// the new layout ships its own holograms / portal / protection settings: take them from the jar
 			var defs = plugin.getConfig().getDefaults();
 			if (defs != null) {
-				for (String k : new String[] {"holograms", "portals", "protect-radius", "catch-falls"}) {
+				for (String k : new String[] {"holograms", "displays", "portals", "protect-radius", "catch-falls"}) {
 					Object dv = defs.get(base + "." + k);
 					if (dv instanceof ConfigurationSection cs) plugin.getConfig().createSection(base + "." + k, cs.getValues(false));
 					else if (dv != null) plugin.getConfig().set(base + "." + k, dv);
@@ -299,6 +304,7 @@ final class HubBuild implements Listener {
 	private void animate() {
 		tick += 2;
 		refresh();
+		if ("spawns.factions".equals(base) && tick % 4 == 0) faultFx();
 		if (tick % 40 != 0) return;
 		boolean up = (tick / 40) % 2 == 0;
 		for (var en : liveScale.entrySet()) {
@@ -319,6 +325,23 @@ final class HubBuild implements Listener {
 			d.setInterpolationDuration(40);
 			d.setTransformation(new Transformation(new Vector3f(0, up ? 0.15f : -0.15f, 0), new AxisAngle4f(angle, 0, 1, 0),
 					new Vector3f(sc, sc, sc), new AxisAngle4f()));
+		}
+	}
+
+	/** Factions spawn: the fault line breathes purple, ash drifts over the corrupted half. Only near players. */
+	private void faultFx() {
+		Location o = origin();
+		if (o == null || o.getWorld().getPlayers().stream().noneMatch(p -> near(p.getLocation(), 60))) return;
+		var r = java.util.concurrent.ThreadLocalRandom.current();
+		for (int i = 0; i < 5; i++) {
+			o.getWorld().spawnParticle(org.bukkit.Particle.REVERSE_PORTAL,
+					o.clone().add(0.5 + r.nextDouble(-1.2, 1.2), 1.1, r.nextDouble(-36, 36)), 2, 0.1, 0.4, 0.1, 0.02);
+		}
+		for (int i = 0; i < 6; i++) {
+			o.getWorld().spawnParticle(org.bukkit.Particle.ASH, o.clone().add(r.nextDouble(3, 34), r.nextDouble(1, 9), r.nextDouble(-34, 34)), 3, 1, 1, 1, 0);
+		}
+		if (tick % 20 == 0) {
+			o.getWorld().spawnParticle(org.bukkit.Particle.SOUL, o.clone().add(r.nextDouble(4, 30), 1.2, r.nextDouble(-30, 30)), 1, 0.2, 0.3, 0.2, 0.01);
 		}
 	}
 
@@ -357,6 +380,7 @@ final class HubBuild implements Listener {
 				}
 			}
 			if (t.contains("{parkour_top}") && plugin.parkour != null) t = t.replace("{parkour_top}", plugin.parkour.top());
+			if (t.indexOf('{') >= 0) t = MapInfo.fill(plugin, t);
 			t = t.replace("{online}", String.valueOf(plugin.count("ALL"))).replace("{network}", plugin.networkName())
 					.replace("{logo}", Pack.glyph(Pack.LOGO_HOLO))
 					.replace("{phase}", String.format(java.util.Locale.ROOT, "%.2f", ((tick * 0.02) % 2.0) - 1.0));

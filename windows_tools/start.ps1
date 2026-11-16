@@ -181,6 +181,17 @@ foreach ($f in @("$Root\hub\plugins\laGCore\config.yml", "$Root\factions\plugins
 }
 if ($renamed) { Say "Network is now RelapsedMC." Green }
 
+# ---- Server-list MOTD (proxy): centered wordmark + current map. Re-applied until it has the Relapse line.
+$vt = "$Root\proxy\velocity.toml"
+if (Test-Path $vt) {
+    $t = [IO.File]::ReadAllText($vt, $utf8)
+    if ($t -notmatch 'RELAPSE #1') {
+        $motd = 'motd = ' + '"                     <gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>' + $dot + '</dark_gray> <#7CFF6B>Skyblock S1"'
+        $n = [regex]::Replace($t, '(?m)^motd\s*=.*$', { param($m) $motd })
+        if ($n -ne $t) { [IO.File]::WriteAllText($vt, $n, $utf8); Say "Updated the server-list MOTD." Green }
+    }
+}
+
 # ---- Sakura (factions jar): 1.8 cannon mechanics, no entity merging, cannon lag options (all parity-tested)
 $sw = "$Root\factions\config\sakura-world-defaults.yml"
 if (-not (Test-Path $sw)) {
@@ -206,6 +217,47 @@ if ($fc) {
     $n = [regex]::Replace($t, '(?s)(\btnt\s*\{[^{}]*?)\benable\s*=\s*false', '${1}enable=true')
     $n = [regex]::Replace($n, '(?s)(\btnt\s*\{[^{}]*?)\bmaxRadius\s*=\s*5\b', '${1}maxRadius=48')
     if ($n -ne $t) { Set-Content $fc $n -NoNewline; Say "Turned on faction TNT banks (/f tnt, /f tntfill)." Green }
+}
+
+# ---- Relapse ruleset: 8-man factions, no allies/truces, everyone starts (and caps) at 200 power
+if ($fc) {
+    $t = Get-Content $fc -Raw
+    $n = [regex]::Replace($t, '\bfactionMemberLimit\s*=\s*\d+', 'factionMemberLimit=8')
+    $n = [regex]::Replace($n, '(?s)\bmaxRelations\s*\{[^{}]*\}', {
+        param($m)
+        $b = [regex]::Replace($m.Value, '\benabled\s*=\s*\w+', 'enabled=true')
+        $b = [regex]::Replace($b, '\bally\s*=\s*-?\d+', 'ally=0')
+        [regex]::Replace($b, '\btruce\s*=\s*-?\d+', 'truce=0')
+    })
+    $n = [regex]::Replace($n, '(?s)\bpower\s*\{[^{}]*?playerStarting[^{}]*\}', {
+        param($m)
+        $b = [regex]::Replace($m.Value, '\bplayerStarting\s*=\s*-?[\d.]+', 'playerStarting=200.0')
+        [regex]::Replace($b, '\bplayerMax\s*=\s*-?[\d.]+', 'playerMax=200.0')
+    })
+    if ($n -ne $t) { Set-Content $fc $n -NoNewline; Say "Applied Relapse rules (8-man, no allies, 200 power)." Green }
+}
+
+# ---- Cannon lag: CoreProtect stops logging every dispenser shot / hopper move on factions (raids are the game)
+$cpc = "$Root\factions\plugins\CoreProtect\config.yml"
+if (Test-Path $cpc) {
+    $t = Get-Content $cpc -Raw
+    $n = $t -replace '(?m)^item-transactions:\s*true', 'item-transactions: false' `
+            -replace '(?m)^hopper-transactions:\s*true', 'hopper-transactions: false'
+    if ($n -ne $t) { Set-Content $cpc $n -NoNewline; Say "CoreProtect: stopped logging dispenser/hopper items (cannon lag)." Green }
+}
+
+# ---- /fps menu (everyone can hide TNT/sand/explosions on their own screen): RelapsedMC look
+# Sakura wraps long messages onto indented continuation lines, so each pattern replaces the whole value.
+foreach ($srv in @("factions", "cannons")) {
+    $sg = "$Root\$srv\config\sakura-global.yml"
+    if (Test-Path $sg) {
+        $t = [IO.File]::ReadAllText($sg, $utf8)
+        $brand = '<gradient:#38E0FF:#B040FF>[RelapsedMC]</gradient> '
+        $n = [regex]::Replace($t, '(?m)^(  fps-setting-change:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<gray><state> <white><name></white> for you. <dark_gray>(/fps)'''))
+        $n = [regex]::Replace($n, '(?m)^(  durable-block-interaction:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left'''))
+        $n = [regex]::Replace($n, '(?m)^(\s+material:)\s*PINK_STAINED_GLASS_PANE', '${1} CYAN_STAINED_GLASS_PANE')
+        if ($n -ne $t) { [IO.File]::WriteAllText($sg, $n, $utf8); Say "Styled the /fps menu ($srv)." Green }
+    }
 }
 
 # ---- First run: replace the placeholder secret so only YOUR proxy can talk to the servers

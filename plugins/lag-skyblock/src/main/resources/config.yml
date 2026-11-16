@@ -1,7 +1,8 @@
 # RelapsedMC Skyblock: spawner tiers.
 # Tiers go cheapest first. Tier 1 is unlocked for everyone; each next tier is unlocked by trading in
-# `unlock` heads of the tier before it (/spawners). Spawners drop their mob's head into spawner storage.
-# head-chance: chance (percent) that each generated mob drops its head.
+# `unlock` heads of the tier before it (/spawners). Spawner mobs drop their head when they die - in a grinder or
+# to a sword - so: grind a tier, collect its heads, unlock the next, build a grinder for it.
+# head-chance: chance (percent) that each spawner mob drops its head when it dies (whole stacks roll per mob).
 head-chance: 4.0
 tiers:
   - {mob: chicken,    name: Chicken,    color: "#F4E7C8", price: 25000,    head-value: 40,    unlock: 0}
@@ -18,6 +19,19 @@ tiers:
   - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
   - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}
 
+# RoseStacker (real mobs, stacked): written into its config on start.
+# kill-entire-stack-on: damage causes that kill a WHOLE stack at once with loot for every mob - these are the AFK
+#   grinders (drop chutes = FALL, lava blades = LAVA/FIRE, magma floors = HOT_FLOOR...). A player's sword kills
+#   one mob at a time (that's how you farm XP).
+# player-activation-range: how close someone has to be for spawners to run (blocks).
+# settings: any other RoseStacker config.yml key, e.g. global-spawner-settings.spawn-max-nearby-entities: 8
+# prefix: RoseStacker's chat prefix (its own colour format: & codes, <g:#from:#to> gradients).
+rosestacker:
+  kill-entire-stack-on: [FALL, LAVA, FIRE, FIRE_TICK, HOT_FLOOR, DROWNING, SUFFOCATION, CRAMMING, CONTACT, FREEZE, CAMPFIRE]
+  player-activation-range: 24
+  settings: {}
+  prefix: "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7"
+
 # Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
 # Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen.
 generator-tiers:
@@ -31,5 +45,43 @@ generator-tiers:
   - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 15000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
 
 # Starter island: the RelapsedMC blueprint (bigger island, tree, beach, starter chest) and a bigger claim.
+# Team sizes are written into BSkyBlock's config on start. Coop/trusted players can build and grind on an island,
+# so they're 0 to keep the 4-player cap real.
 island:
   protection-range: 75
+  max-team-size: 4
+  max-coop-size: 0
+  max-trusted-size: 0
+
+# Island top (/is top, /istop): islands ranked by placed spawner value only. A spawner is worth its tier price above,
+# times its stack size. Spawner types that aren't in the ladder are worth extra-values (mob: value) or nothing.
+island-top:
+  refresh-seconds: 60
+  extra-values: {}
+
+# The Pit: the only PvP on Skyblock, an arena south of spawn in the spawn world. Islands are always safe.
+# center: [x, y, z] of the arena floor in the spawn world. /lsb pit build places it again after you change it.
+pit:
+  enabled: true
+  center: [0, 100, 80]
+  radius: 16
+  tag-seconds: 15
+  keep-inventory: false
+  kill-reward: 0
+  # commands still allowed while in combat
+  allowed-commands: [msg, tell, w, r, reply, m, whisper]
+
+# Seasons (monthly). The number and end date live in plugins/laGSkyblock/season.yml (/lsb season ends <date> <time>).
+# /lsb season end confirm: saves the final top to seasons/season-N.yml, gives titles, stops the server; the next start
+# wipes islands, spawners, ore gen and spawner unlocks, money (back to Essentials' starting-balance) and inventories.
+season:
+  # titles per final island-top place, given to every member of that island. {n} = season number.
+  titles:
+    1: "<gradient:#FFD84D:#FF8A3D><bold>S{n} CHAMPION</bold></gradient>"
+  # store credit per place, only recorded in the season snapshot (pay it on the store). e.g. {1: 50, 2: 25, 3: 10}
+  store-credit: {}
+  keep-top: 25
+  # shared with every server (laGCore reads it for chat/tab), relative to this server's folder
+  titles-file: "../shared/titles.yml"
+  wipe-economy: true
+  wipe-inventories: true

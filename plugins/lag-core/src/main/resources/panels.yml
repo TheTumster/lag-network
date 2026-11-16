@@ -102,13 +102,13 @@ skyblock:
         - box: [0.05, 1.45, 3.65, 3.15]
           color: gray_concrete
           accent: light_blue_concrete
-          icon: EXPERIENCE_BOTTLE
+          icon: SPAWNER
           icon-size: 0.55
-          title: "<#38E0FF><bold>LEVEL UP"
+          title: "<#38E0FF><bold>ISLAND VALUE"
           title-size: 0.6
-          lines: ["<gray>Blocks you place", "<gray>raise your level"]
+          lines: ["<gray>Placed spawners", "<gray>rank your island"]
           line-size: 0.5
-          action: "cmd:is level"
+          action: "cmd:is top"
         - box: [-3.65, 0.45, -0.05, 1.3]
           color: gray_concrete
           icon: ANVIL
@@ -118,11 +118,11 @@ skyblock:
           action: "cmd:is upgrades"
         - box: [0.05, 0.45, 3.65, 1.3]
           color: gray_concrete
-          icon: ENDER_PEARL
+          icon: NETHERITE_SWORD
           icon-size: 0.32
-          title: "<white><bold>VISIT ISLANDS"
+          title: "<red><bold>THE PIT"
           title-size: 0.5
-          action: "cmd:is warps"
+          action: "cmd:pit"
     - id: gens
       label: GENERATORS
       cards:
@@ -157,8 +157,173 @@ skyblock:
           accent: yellow_concrete
           icon: NETHER_STAR
           icon-size: 0.7
-          title: "<gradient:#FFD84D:#FF8A3D><bold>SEASON 1"
+          title: "<gradient:#FFD84D:#FF8A3D><bold>THIS SEASON"
           title-size: 0.7
-          lines: ["<gray>The top islands at the end", "<gray>of the season win prizes.", "<white>/is top"]
+          lines: ["<gray>Every month the void takes the islands back.", "<gray>Top islands win <gold>store credit<gray>, #1 a", "<gradient:#FFD84D:#FF8A3D><bold>CHAMPION</bold></gradient> <gray>title forever.", "<white>/season"]
           line-size: 0.5
-          action: "cmd:is top"
+          action: "cmd:season"
+
+factions:
+  # fills the Classic-side kiosk on the factions spawn (back wall at x=-19, panel faces the plaza)
+  at: [-17.92, 1.3, 0.5]
+  facing: east
+  width: 7.6
+  height: 4.4
+  range: 28
+  frame: polished_blackstone
+  background: black_concrete
+  title: "<gradient:#FF4D6D:#B040FF><bold>RELAPSE #1</bold></gradient>"
+  title-size: 1.1
+  footer: "<dark_gray>Look at a card and click"
+  tabs:
+    - id: home
+      label: START
+      cards:
+        - box: [-3.65, 1.45, -1.9, 3.15]
+          color: gray_concrete
+          accent: red_concrete
+          icon: PLAYER_HEAD
+          icon-size: 0.6
+          title: "<white><bold>{player}"
+          title-size: 0.55
+          lines: ["<gray>Welcome to", "<gradient:#FF4D6D:#B040FF><bold>FACTIONS"]
+          line-size: 0.5
+        - box: [-1.8, 1.45, -0.05, 3.15]
+          color: gray_concrete
+          accent: red_concrete
+          icon: RED_BANNER
+          icon-size: 0.55
+          title: "<#FF4D6D><bold>1. FACTION"
+          title-size: 0.6
+          lines: ["<white>/f create <name>", "<gray>max 8 players"]
+          line-size: 0.5
+          action: "tab:rules"
+        - box: [0.05, 1.45, 1.8, 3.15]
+          color: gray_concrete
+          accent: purple_concrete
+          icon: GRASS_BLOCK
+          icon-size: 0.55
+          title: "<#B040FF><bold>2. CLAIM"
+          title-size: 0.6
+          lines: ["<white>/f claim", "<gray>pick a corner"]
+          line-size: 0.5
+          action: "cmd:f map"
+        - box: [1.9, 1.45, 3.65, 3.15]
+          color: gray_concrete
+          accent: orange_concrete
+          icon: TNT
+          icon-size: 0.55
+          title: "<#FF9F4D><bold>3. RAID"
+          title-size: 0.6
+          lines: ["<gray>Cannons, sand,", "<gray>1.8 physics"]
+          line-size: 0.5
+          action: "tab:raiding"
+        - box: [-3.65, 0.45, -1.9, 1.3]
+          color: gray_concrete
+          icon: SPYGLASS
+          icon-size: 0.32
+          title: "<white><bold>/F WHO"
+          title-size: 0.5
+          action: "cmd:f who"
+        - box: [-1.8, 0.45, -0.05, 1.3]
+          color: gray_concrete
+          icon: FILLED_MAP
+          icon-size: 0.32
+          title: "<white><bold>/F MAP"
+          title-size: 0.5
+          action: "cmd:f map"
+        - box: [0.05, 0.45, 1.8, 1.3]
+          color: gray_concrete
+          icon: DISPENSER
+          icon-size: 0.32
+          title: "<white><bold>/TNTFILL"
+          title-size: 0.5
+          action: "msg:<gray>Hold TNT and run <white>/tntfill <radius></white> to fill every dispenser around you. <white>/f tnt</white> is your faction's TNT bank."
+        - box: [1.9, 0.45, 3.65, 1.3]
+          color: gray_concrete
+          icon: ENDER_EYE
+          icon-size: 0.32
+          title: "<white><bold>/FPS"
+          title-size: 0.5
+          action: "cmd:fps"
+    - id: rules
+      label: RULES
+      cards:
+        - box: [-3.65, 1.45, -0.05, 3.15]
+          color: gray_concrete
+          accent: red_concrete
+          icon: IRON_SWORD
+          icon-size: 0.55
+          title: "<#FF4D6D><bold>8-MANS"
+          title-size: 0.6
+          lines: ["<gray>8 players per faction", "<gray>No allies. No truces.", "<white>Everyone starts at 200 power"]
+          line-size: 0.45
+        - box: [0.05, 1.45, 3.65, 3.15]
+          color: gray_concrete
+          accent: purple_concrete
+          icon: CLOCK
+          icon-size: 0.55
+          title: "<#B040FF><bold>3-WEEK MAPS"
+          title-size: 0.6
+          lines: ["<gray>Every map resets after", "<gray>3 weeks. Top factions", "<white>win store credit"]
+          line-size: 0.45
+        - box: [-3.65, 0.45, -0.05, 1.3]
+          color: gray_concrete
+          icon: ARMOR_STAND
+          icon-size: 0.32
+          title: "<white><bold>ALTS: AFK ONLY"
+          title-size: 0.45
+          action: "tab:alts"
+        - box: [0.05, 0.45, 3.65, 1.3]
+          color: gray_concrete
+          icon: NETHERITE_CHESTPLATE
+          icon-size: 0.32
+          title: "<white><bold>GEAR RULES"
+          title-size: 0.45
+          action: "tab:gear"
+    - id: raiding
+      label: RAIDING
+      cards:
+        - box: [-3.65, 0.45, 3.65, 3.15]
+          color: gray_concrete
+          accent: orange_concrete
+          icon: TNT
+          icon-size: 0.7
+          title: "<#FF9F4D><bold>SHIELDS & RAIDING"
+          title-size: 0.7
+          lines: ["<gray>Every faction is shielded 18h a day.", "<gray>You pick your own <white>6-hour raid window</white>.", "<gray>Cannons run real 1.8 physics.", "<gray>Test them first on the <white>Cannons</white> realm."]
+          line-size: 0.45
+    - id: gear
+      label: GEAR
+      cards:
+        - box: [-3.65, 0.45, -0.05, 3.15]
+          color: gray_concrete
+          accent: light_gray_concrete
+          icon: DIAMOND_CHESTPLATE
+          icon-size: 0.6
+          title: "<white><bold>STANDARD"
+          title-size: 0.6
+          lines: ["<gray>Protection 4", "<gray>Unbreaking 3", "<gray>No custom enchants", "<gray>Pots, tray + trench picks"]
+          line-size: 0.45
+        - box: [0.05, 0.45, 3.65, 3.15]
+          color: gray_concrete
+          accent: yellow_concrete
+          icon: NETHERITE_CHESTPLATE
+          icon-size: 0.6
+          title: "<#FFD24D><bold>KOTH ONLY"
+          title-size: 0.6
+          lines: ["<gray>Protection 5 armor", "<gray>All netherite gear", "<gray>Win it at a KOTH.", "<gray>Nowhere else."]
+          line-size: 0.45
+    - id: alts
+      label: ALTS
+      cards:
+        - box: [-3.65, 0.45, 3.65, 3.15]
+          color: gray_concrete
+          accent: cyan_concrete
+          icon: ARMOR_STAND
+          icon-size: 0.7
+          title: "<#38E0FF><bold>ALTS</bold> <gray>unlimited, AFK only"
+          title-size: 0.6
+          lines: ["<white>/f alt invite <player> <gray>(mods+)", "<gray>Alts stand in your claim and AFK", "<gray>spawners + farms. They can't fight, build,", "<gray>open chests or press buttons. Not part of your 8."]
+          line-size: 0.43
+          action: "cmd:f alt"

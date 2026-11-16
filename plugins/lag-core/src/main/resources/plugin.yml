@@ -2,6 +2,7 @@ name: laGCore
 version: '${version}'
 main: net.lag.core.LagCore
 api-version: '1.21'
+softdepend: [PlaceholderAPI]
 description: RelapsedMC core - hub, server selector, scoreboard, network glue
 commands:
   hub:

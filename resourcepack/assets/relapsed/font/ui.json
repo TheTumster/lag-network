@@ -75,6 +75,24 @@
   },
   {
    "type": "bitmap",
+   "file": "relapsed:font/logo_chat_0.png",
+   "height": 26,
+   "ascent": 24,
+   "chars": [
+    "\ue0a0"
+   ]
+  },
+  {
+   "type": "bitmap",
+   "file": "relapsed:font/logo_chat_1.png",
+   "height": 26,
+   "ascent": 24,
+   "chars": [
+    "\ue0a1"
+   ]
+  },
+  {
+   "type": "bitmap",
    "file": "relapsed:font/menu_selector.png",
    "height": 75,
    "ascent": 13,

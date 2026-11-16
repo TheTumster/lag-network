@@ -23,9 +23,46 @@ import net.kyori.adventure.text.format.NamedTextColor;
 final class Ranks implements Listener {
 	private final LagCore plugin;
 
+	// season titles (e.g. S1 CHAMPION), from a file every server shares: uuid -> newest title (MiniMessage)
+	private volatile java.util.Map<java.util.UUID, String> titles = java.util.Map.of();
+	private long titlesModified = -1;
+
 	Ranks(LagCore plugin) {
 		this.plugin = plugin;
 		Bukkit.getScheduler().runTaskTimer(plugin, this::applyAll, 40L, 40L);
+		Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::loadTitles, 20L, 600L);
+	}
+
+	/** titles-file: players.<uuid>.titles = [..]; the last one is shown. Re-read when the file changes. */
+	private void loadTitles() {
+		java.io.File f = new java.io.File(plugin.getConfig().getString("titles-file", "../shared/titles.yml"));
+		long m = f.exists() ? f.lastModified() : 0;
+		if (m == titlesModified) return;
+		titlesModified = m;
+		java.util.Map<java.util.UUID, String> out = new java.util.HashMap<>();
+		var y = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(f);
+		var players = y.getConfigurationSection("players");
+		if (players != null) {
+			for (String k : players.getKeys(false)) {
+				java.util.List<String> list = players.getStringList(k + ".titles");
+				if (list.isEmpty()) continue;
+				try {
+					out.put(java.util.UUID.fromString(k), list.get(list.size() - 1));
+				} catch (IllegalArgumentException ignored) { }
+			}
+		}
+		titles = out;
+	}
+
+	/** Season title (MiniMessage) or "" for none. */
+	String title(Player p) {
+		return titles.getOrDefault(p.getUniqueId(), "");
+	}
+
+	/** Title + rank tag, for chat and tab. */
+	private String badges(Player p) {
+		String t = title(p), r = tag(p);
+		return (t.isEmpty() ? "" : t + " ") + (r.isEmpty() ? "" : r + " ");
 	}
 
 	/** Rank key (owner, admin, ...) or null for members. */
@@ -70,8 +107,7 @@ final class Ranks implements Listener {
 	/** Tab names + nametag teams on every player's scoreboard (each player has their own sidebar board). */
 	void applyAll() {
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			String t = tag(p);
-			p.playerListName(LagCore.mm((t.isEmpty() ? "" : t + " ") + "<white>" + p.getName()));
+			p.playerListName(LagCore.mm(badges(p) + "<white>" + p.getName()));
 		}
 		for (Player viewer : Bukkit.getOnlinePlayers()) {
 			Scoreboard sb = viewer.getScoreboard();
@@ -95,8 +131,27 @@ final class Ranks implements Listener {
 	public void onChat(AsyncChatEvent e) {
 		if (!plugin.getConfig().getBoolean("chat.enabled", true)) return;
 		Player p = e.getPlayer();
-		String t = tag(p);
-		Component head = LagCore.mm((t.isEmpty() ? "" : t + " ") + (t.isEmpty() ? "<gray>" : "<white>") + p.getName() + " <dark_gray>» ");
+		String b = badges(p);
+		String role = plugin.getConfig().getString("role", "hub");
+		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
+		// factions: faction tag in front ([Name] in the faction colour); everyone: hover card + click to message
+		String tag = "";
+		String fac = "";
+		if ("factions".equalsIgnoreCase(role) && Papi.present()) {
+			fac = Papi.apply(p, "%factionsuuid_faction_name%").trim();
+			if (fac.isEmpty() || fac.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) fac = "";
+			else tag = "<dark_gray>[</dark_gray><#FF4D6D>" + LagCore.esc(fac) + "</#FF4D6D><dark_gray>]</dark_gray> ";
+		}
+		String rankLine = b.isEmpty() ? "<gray>Member" : b.trim();
+		String card = "<gradient:#38E0FF:#B040FF><bold>" + LagCore.esc(p.getName()) + "</bold></gradient>"
+				+ "<newline><gray>Rank " + rankLine
+				+ "<newline><gray>Realm <white>" + realm
+				+ (fac.isEmpty() ? "" : "<newline><gray>Faction <white>" + LagCore.esc(fac))
+				+ "<newline><newline><dark_gray>Click to message";
+		Component name = LagCore.mm((b.isEmpty() ? "<gray>" : "<white>") + LagCore.esc(p.getName()))
+				.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(LagCore.mm(card)))
+				.clickEvent(net.kyori.adventure.text.event.ClickEvent.suggestCommand("/msg " + p.getName() + " "));
+		Component head = LagCore.mm(tag + b).append(name).append(LagCore.mm(" <dark_gray>» "));
 		boolean staff = rankOf(p) != null;
 		e.renderer((source, displayName, message, viewer) -> head.append(message.color(staff ? NamedTextColor.WHITE : NamedTextColor.GRAY)));
 	}
