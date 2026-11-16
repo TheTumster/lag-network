@@ -86,7 +86,18 @@ final class Pack implements Listener {
 		});
 	}
 
+	/** The RelapsedMC Client has the pack built in and advertises this channel: never prompt it. */
+	static final String CLIENT_PACK_CHANNEL = "relapsed:pack";
+
+	static boolean builtIn(Player p) {
+		return p.getListeningPluginChannels().contains(CLIENT_PACK_CHANNEL);
+	}
+
 	void send(Player p) {
+		if (builtIn(p)) {
+			loaded.add(p.getUniqueId());
+			return;
+		}
 		if (!enabled() || !ready) return;
 		p.setResourcePack(ID, url(), hash, LagCore.mm("<gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient>\n<gray>Our pack adds the logo, icons and menus.\n<dark_gray>(about 1 MB, one time)"),
 				plugin.getConfig().getBoolean("resource-pack.required", false));
@@ -102,6 +113,11 @@ final class Pack implements Listener {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (p.isOnline()) send(p);
 		}, 2L);
+	}
+
+	@EventHandler
+	public void onChannel(org.bukkit.event.player.PlayerRegisterChannelEvent e) {
+		if (CLIENT_PACK_CHANNEL.equals(e.getChannel())) loaded.add(e.getPlayer().getUniqueId());
 	}
 
 	@EventHandler
