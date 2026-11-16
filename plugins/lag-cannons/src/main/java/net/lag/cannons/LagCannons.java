@@ -61,6 +61,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		saveDefaultConfig();
+		mergeNewDefaults();
 		loadDurable();
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new WaterProof(this), this);
@@ -209,6 +210,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("fixredstone")) return redstoneFix.command(sender, args);
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
+			mergeNewDefaults();
 			loadDurable();
 			gearCap.reload();
 			sandbots.restartTask();
@@ -270,5 +272,11 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		int n = 0;
 		for (ItemStack it : p.getInventory().getContents()) if (it != null && it.getType() == Material.TNT) n += it.getAmount();
 		return n;
+	}
+
+	/** Existing installs keep their config.yml; add any new keys from this jar's defaults (e.g. relapse.*, fps-menu). */
+	private void mergeNewDefaults() {
+		getConfig().options().copyDefaults(true);
+		saveConfig();
 	}
 }
