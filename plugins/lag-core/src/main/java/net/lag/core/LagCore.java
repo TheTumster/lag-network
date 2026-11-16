@@ -102,6 +102,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		}
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
+		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RelapsedMC Client: which realm is this
 
 		pack = new Pack(this);
 		getServer().getPluginManager().registerEvents(pack, this);
