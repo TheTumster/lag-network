@@ -132,7 +132,26 @@ final class Ranks implements Listener {
 		if (!plugin.getConfig().getBoolean("chat.enabled", true)) return;
 		Player p = e.getPlayer();
 		String b = badges(p);
-		Component head = LagCore.mm(b + (b.isEmpty() ? "<gray>" : "<white>") + p.getName() + " <dark_gray>» ");
+		String role = plugin.getConfig().getString("role", "hub");
+		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
+		// factions: faction tag in front ([Name] in the faction colour); everyone: hover card + click to message
+		String tag = "";
+		String fac = "";
+		if ("factions".equalsIgnoreCase(role) && Papi.present()) {
+			fac = Papi.apply(p, "%factionsuuid_faction_name%").trim();
+			if (fac.isEmpty() || fac.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) fac = "";
+			else tag = "<dark_gray>[</dark_gray><#FF4D6D>" + LagCore.esc(fac) + "</#FF4D6D><dark_gray>]</dark_gray> ";
+		}
+		String rankLine = b.isEmpty() ? "<gray>Member" : b.trim();
+		String card = "<gradient:#38E0FF:#B040FF><bold>" + LagCore.esc(p.getName()) + "</bold></gradient>"
+				+ "<newline><gray>Rank " + rankLine
+				+ "<newline><gray>Realm <white>" + realm
+				+ (fac.isEmpty() ? "" : "<newline><gray>Faction <white>" + LagCore.esc(fac))
+				+ "<newline><newline><dark_gray>Click to message";
+		Component name = LagCore.mm((b.isEmpty() ? "<gray>" : "<white>") + LagCore.esc(p.getName()))
+				.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(LagCore.mm(card)))
+				.clickEvent(net.kyori.adventure.text.event.ClickEvent.suggestCommand("/msg " + p.getName() + " "));
+		Component head = LagCore.mm(tag + b).append(name).append(LagCore.mm(" <dark_gray>» "));
 		boolean staff = rankOf(p) != null;
 		e.renderer((source, displayName, message, viewer) -> head.append(message.color(staff ? NamedTextColor.WHITE : NamedTextColor.GRAY)));
 	}

@@ -255,7 +255,7 @@ final class HubFx implements Listener {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
 			p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
-					LagCore.mm("<gray>Factions <dark_gray>• <gray>SMP <dark_gray>• <gray>1.8 Cannons"),
+					LagCore.mm("<gray>Welcome " + (p.hasPlayedBefore() ? "back, " : "") + "<white>" + LagCore.esc(p.getName())),
 					Title.Times.times(Duration.ZERO, Duration.ofSeconds(3), Duration.ofMillis(800))));
 			// chord
 			p.playSound(p.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.5f, 1.4f);
@@ -278,16 +278,12 @@ final class HubFx implements Listener {
 	}
 
 	private void banner(Player p) {
-		String line = "<gradient:#38E0FF:#B040FF><strikethrough>                                                  </strikethrough></gradient>";
-		p.sendMessage(LagCore.mm(line));
-		boolean art = plugin.pack != null && plugin.pack.has(p);
-		p.sendMessage(LagCore.mm("            <gray>Welcome to " + (art ? Pack.glyph(Pack.LOGO_LINE) : "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>")));
-		p.sendMessage(LagCore.mm("         <dark_gray>Factions  <gray>•  <dark_gray>SMP  <gray>•  <dark_gray>1.8 Cannons"));
-		p.sendMessage(Component.empty());
-		String arrow = art ? Pack.glyph(Pack.I_ARROW) : "<#38E0FF>▸";
-		p.sendMessage(LagCore.mm("  " + arrow + " <gray>Walk into a portal or use your <white>compass</white> to play"));
-		p.sendMessage(LagCore.mm("  " + arrow + " <gray>Grab a trail from <white>Cosmetics</white> on your hotbar"));
-		p.sendMessage(LagCore.mm(line));
+		Fresh.clear(p);
+		java.util.List<String> lines = plugin.getConfig().getStringList("fresh-chat.banner.hub");
+		if (lines.isEmpty()) lines = java.util.List.of("{logo}", "",
+				"{c}<gray>Welcome " + (p.hasPlayedBefore() ? "back, " : "") + "<white>{player}<gray>. <dark_gray>•</dark_gray> <white>{online}</white> <gray>online",
+				"", "{c}[[<#38E0FF><bold>▶ PLAY</bold>|/server|<gray>Pick a realm]]   [[<#B040FF><bold>✦ DISCORD</bold>|{discord}|<gray>Join the community]]   [[<#FFD24D><bold>⛃ STORE</bold>|{store}|<gray>Ranks and cosmetics]]", "");
+		Chat.banner(p, plugin, lines, "Hub");
 	}
 
 	// ---------------------------------------------------------------- launch pads

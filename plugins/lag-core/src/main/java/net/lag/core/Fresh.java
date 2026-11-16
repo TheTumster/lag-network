@@ -47,14 +47,10 @@ final class Fresh implements Listener {
 	private void banner(Player p) {
 		String role = plugin.getConfig().getString("role", "hub").toLowerCase();
 		List<String> lines = plugin.getConfig().getStringList("fresh-chat.banner." + role);
+		// configs from before the redesign still have the old {bar}/{arrow} banner: use the new one from the jar
+		if (lines.stream().anyMatch(l -> l.contains("{bar}") || l.contains("{arrow}")) && plugin.getConfig().getDefaults() != null)
+			lines = plugin.getConfig().getDefaults().getStringList("fresh-chat.banner." + role);
 		if (lines.isEmpty()) return;
-		boolean art = plugin.pack != null && plugin.pack.has(p);
-		String arrow = art ? Pack.glyph(Pack.I_ARROW) : "<#38E0FF>▸";
-		String logo = art ? Pack.glyph(Pack.LOGO_LINE) : "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>";
-		String bar = "<gradient:#38E0FF:#B040FF><strikethrough>                                                  </strikethrough></gradient>";
-		for (String l : lines) {
-			p.sendMessage(LagCore.mm(l.replace("{bar}", bar).replace("{logo}", logo).replace("{arrow}", arrow)
-					.replace("{player}", p.getName()).replace("{online}", String.valueOf(plugin.count("ALL")))));
-		}
+		Chat.banner(p, plugin, lines, role.substring(0, 1).toUpperCase() + role.substring(1));
 	}
 }

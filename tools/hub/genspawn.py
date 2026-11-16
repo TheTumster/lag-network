@@ -687,6 +687,74 @@ for i, (ang, dist, dy, r) in enumerate(((20, 70, 10, 7), (85, 78, -8, 6), (150, 
     put(cx + 2, dy + 1, cz + 1, "lantern[hanging=false,waterlogged=false]")
 
 # ======================================================================= write
+# ---- the sky sign: giant RELAPSED wordmark north of the island (white letters, purple drop shadow, gradient bar,
+#      small MC stacked under the bar on the right, per the logo). Placed relative to the final spawn, so it is added
+#      after the shift below. Lit by invisible light blocks so it reads at night.
+FONT = {
+    "R": ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+    "E": ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+    "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+    "A": ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+    "P": ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
+    "S": ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+    "D": ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
+    "M": ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
+    "C": ["01111", "10000", "10000", "10000", "10000", "10000", "01111"],
+}
+SIGN_GRAD = ["light_blue_concrete", "cyan_concrete", "blue_concrete", "purple_concrete", "purpur_block", "magenta_concrete"]
+
+
+def sky_sign(out):
+    sz = -130                       # face plane (north of everything else)
+    def word(text, scale, x0, ytop, face):
+        cols = []
+        x = x0
+        for ch in text:
+            g = FONT[ch]
+            for r, row in enumerate(g):
+                for c, bit in enumerate(row):
+                    if bit != "1":
+                        continue
+                    for dx in range(scale):
+                        for dy in range(scale):
+                            px, py = x + c * scale + dx, ytop - r * scale - dy
+                            cols.append((px, py))
+            x += 5 * scale + scale
+        for (px, py) in cols:
+            out[(px, py, sz)] = "minecraft:" + face
+            out[(px, py, sz - 1)] = "minecraft:" + face
+            # drop shadow one block down-right, behind: brand gradient left to right
+            t = (px + 75) / 150
+            sh = SIGN_GRAD[max(0, min(len(SIGN_GRAD) - 1, int(t * len(SIGN_GRAD))))]
+            k = (px + 1, py - 1, sz - 2)
+            if k not in out:
+                out[k] = "minecraft:" + sh
+            out[(px + 1, py - 1, sz - 3)] = "minecraft:" + sh
+        return cols, x - scale
+    big = 3
+    width = 8 * 6 * big - big
+    x0 = -width // 2
+    top = 44
+    cols, xend = word("RELAPSED", big, x0, top, "white_concrete")
+    # gradient bar under the word
+    bar_y = top - 7 * big - 2
+    for x in range(x0, xend + 1):
+        t = (x - x0) / max(1, xend - x0)
+        b = SIGN_GRAD[min(len(SIGN_GRAD) - 1, int(t * len(SIGN_GRAD)))]
+        for y in (bar_y, bar_y - 1):
+            out[(x, y, sz)] = "minecraft:" + b
+            out[(x, y, sz - 1)] = "minecraft:" + b
+    # MC, small, right-aligned under the bar
+    mc_scale = 2
+    mc_w = 2 * 6 * mc_scale - mc_scale
+    mcols, _ = word("MC", mc_scale, xend - mc_w + 1, bar_y - 3, "white_concrete")
+    # light it: a sparse grid of invisible lights just in front of the face
+    pts = cols + mcols + [(x, bar_y) for x in range(x0, xend + 1)]
+    for (px, py) in pts:
+        if px % 3 == 0 and py % 3 == 0:
+            out[(px, py, sz + 2)] = "minecraft:light[level=15,waterlogged=false]"
+
+
 shifted = {(x, y, z - SPAWN_Z): b for (x, y, z), b in blocks.items()}
 blocks.clear()
 blocks.update(shifted)
@@ -696,6 +764,7 @@ for k in ("start", "finish", "entrance"):
 for c in parkour["checkpoints"]:
     c[2] -= SPAWN_Z
 _json.dump(parkour, open(os.path.join(os.path.dirname(OUT), "parkour.json"), "w"))
+sky_sign(blocks)
 palette, idx, lines = [], {}, []
 for (x, y, z), b in sorted(blocks.items(), key=lambda kv: (kv[0][1], kv[0][0], kv[0][2])):
     if b not in idx:

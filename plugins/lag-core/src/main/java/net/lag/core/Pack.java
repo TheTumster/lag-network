@@ -30,7 +30,8 @@ final class Pack implements Listener {
 
 	// glyphs (font relapsed:ui)
 	// logo glyph strings (tiled, made by tools/pack/genpack.py -> resources/glyphs.json)
-	static final String LOGO_TAB, LOGO_LINE, LOGO_TITLE, LOGO_HOLO;
+	static final String LOGO_TAB, LOGO_LINE, LOGO_TITLE, LOGO_HOLO, LOGO_CHAT;
+	static final int LOGO_CHAT_WIDTH = 118; // px on screen (26px tall wordmark)
 	static {
 		java.util.Map<String, String> g = new java.util.HashMap<>();
 		try (var in = Pack.class.getResourceAsStream("/glyphs.json")) {
@@ -43,6 +44,7 @@ final class Pack implements Listener {
 		LOGO_LINE = g.getOrDefault("logo_line", "");
 		LOGO_TITLE = g.getOrDefault("logo_title", "");
 		LOGO_HOLO = g.getOrDefault("logo_holo", "");
+		LOGO_CHAT = g.getOrDefault("logo_chat", "");
 	}
 	static final String I_ARROW = "\uE010", I_PLAYERS = "\uE011", I_PING = "\uE012", I_TNT = "\uE013",
 			I_SWORD = "\uE014", I_STAR = "\uE015", I_DOT = "\uE016", I_BOLT = "\uE017";

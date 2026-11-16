@@ -174,7 +174,9 @@ def main():
         if f.startswith("logo_"):
             os.remove(os.path.join(TEX, f))
     # name -> (texture height px, shown height, ascent, first char)
-    sizes = {"tab": (64, 24, 8, 0xE020), "line": (32, 9, 8, 0xE040), "title": (48, 14, 11, 0xE060), "holo": (128, 32, 26, 0xE080)}
+    sizes = {"tab": (64, 24, 8, 0xE020), "line": (32, 9, 8, 0xE040), "title": (48, 14, 11, 0xE060), "holo": (128, 32, 26, 0xE080),
+             # big chat wordmark: 26px tall, drawn upward over the two blank lines sent before it
+             "chat": (104, 26, 24, 0xE0A0)}
     glyphs, logo_providers = {}, []
     for key, (tex_h, shown, ascent, first) in sizes.items():
         files = save_logo_tiles(logo, "logo_" + key, tex_h)

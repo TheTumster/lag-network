@@ -93,7 +93,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		instance = this;
 		saveDefaultConfig();
 		// new top-level sections reach existing installs (edit the dates there: map.starts / map.ends)
-		for (String k : new String[] {"map"}) {
+		for (String k : new String[] {"map", "links"}) {
 			var d = getConfig().getDefaults() == null ? null : getConfig().getDefaults().getConfigurationSection(k);
 			if (d != null && !getConfig().isConfigurationSection(k)) {
 				getConfig().createSection(k, d.getValues(true));

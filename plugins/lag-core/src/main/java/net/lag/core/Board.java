@@ -53,53 +53,58 @@ final class Board implements Listener {
 		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
-		String head = "<gradient:#38E0FF:#B040FF><bold>";
-		String bullet = "  <dark_gray>▸ ";
+		// premium layout: date + realm strip, small-caps section headers, gray labels / white values, gradient IP
+		String L = "<#8A8FA3>", V = "<white>", D = "<#4A4E5C>";
+		String pad = "  ";
 		int ping = p.getPing();
-		String pingCol = ping < 80 ? "<#7CFF6B>" : ping < 150 ? "<yellow>" : "<#FF4D6D>";
-		String ic = (art ? Pack.glyph(Pack.I_STAR) : "<#38E0FF>✦") + " ";
-		String ip = (art ? Pack.glyph(Pack.I_PLAYERS) : "<#B040FF>✦") + " ";
-		String it = (art ? Pack.glyph(Pack.I_BOLT) : "<#FF4DD2>✦") + " ";
+		String pingCol = ping < 80 ? "<#7CFF6B>" : ping < 150 ? "<#FFD24D>" : "<#FF4D6D>";
+		String sIcon = art ? Pack.glyph(Pack.I_STAR) + " " : "";
+		String pIcon = art ? Pack.glyph(Pack.I_PLAYERS) + " " : "";
+		String bIcon = art ? Pack.glyph(Pack.I_BOLT) + " " : "";
+		String tIcon = art ? Pack.glyph(Pack.I_TNT) + " " : "";
 		java.util.List<Component> lines = new java.util.ArrayList<>();
-		lines.add(LagCore.mm("<dark_gray><strikethrough>                      </strikethrough>"));
-		lines.add(LagCore.mm(ic + head + "YOU</bold></gradient>"));
-		lines.add(LagCore.mm(bullet + "<gray>Rank " + rank(p)));
-		lines.add(LagCore.mm(bullet + "<gray>Ping " + pingCol + ping + "ms"));
+		boolean hubRole = "hub".equalsIgnoreCase(role);
+		lines.add(LagCore.mm(D + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yy"))
+				+ " <dark_gray>• " + D + sc(realm) + (hubRole ? " <dark_gray>• " + V + plugin.count("ALL") + " " + D + sc("online") : "")));
+		lines.add(Component.empty());
+		lines.add(LagCore.mm(sIcon + "<#38E0FF><bold>" + sc("you")));
+		lines.add(LagCore.mm(pad + L + sc("rank") + " " + rank(p)));
+		lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms"));
 		lines.add(Component.text(" "));
 		if ("factions".equalsIgnoreCase(role) && Papi.present()) {
-			// FACTION + current map instead of the network block
 			String f = Papi.apply(p, "%factionsuuid_faction_name%").trim();
-			lines.add(LagCore.mm(ip + "<gradient:#FF4D6D:#B040FF><bold>FACTION</bold></gradient>"));
+			lines.add(LagCore.mm(tIcon + "<#FF4D6D><bold>" + sc("faction")));
 			if (f.isEmpty() || f.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) {
-				lines.add(LagCore.mm(bullet + "<gray>None <dark_gray>• <white>/f create"));
-				lines.add(LagCore.mm(bullet + "<gray>Power <white>" + Papi.apply(p, "%factionsuuid_player_power%")));
+				lines.add(LagCore.mm(pad + L + sc("none") + " " + D + "• " + V + "/f create"));
+				lines.add(LagCore.mm(pad + L + sc("power") + " " + V + Papi.apply(p, "%factionsuuid_player_power%")));
 			} else {
-				lines.add(LagCore.mm(bullet + "<white>" + LagCore.esc(f)));
-				lines.add(LagCore.mm(bullet + "<gray>Online <white>" + Papi.apply(p, "%factionsuuid_faction_online%")
-						+ "<dark_gray>/</dark_gray>" + Papi.apply(p, "%factionsuuid_faction_size%")
-						+ " <dark_gray>• <gray>Land <white>" + Papi.apply(p, "%factionsuuid_faction_claims%")));
-				lines.add(LagCore.mm(bullet + "<gray>Power <white>" + Papi.apply(p, "%factionsuuid_faction_power%")
-						+ " <dark_gray>• <gray>TNT <white>" + Papi.apply(p, "%factionsuuid_faction_tnt_balance%")));
+				lines.add(LagCore.mm(pad + V + "<bold>" + LagCore.esc(f)));
+				lines.add(LagCore.mm(pad + L + sc("online") + " " + V + Papi.apply(p, "%factionsuuid_faction_online%")
+						+ D + "/" + V + Papi.apply(p, "%factionsuuid_faction_size%")
+						+ " " + D + "• " + L + sc("land") + " " + V + Papi.apply(p, "%factionsuuid_faction_claims%")));
+				lines.add(LagCore.mm(pad + L + sc("power") + " " + V + Papi.apply(p, "%factionsuuid_faction_power%")
+						+ " " + D + "• " + L + sc("tnt") + " " + V + Papi.apply(p, "%factionsuuid_faction_tnt_balance%")));
 			}
 			lines.add(Component.text("  "));
-			lines.add(LagCore.mm(it + "<gradient:#FF4D6D:#B040FF><bold>" + LagCore.esc(plugin.getConfig().getString("map.name", "RELAPSE #1")) + "</bold></gradient>"));
-			lines.add(LagCore.mm(bullet + MapInfo.countdown(plugin)));
+			lines.add(LagCore.mm(bIcon + "<#B040FF><bold>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));
+			lines.add(LagCore.mm(pad + MapInfo.countdown(plugin)));
 		} else {
-			lines.add(LagCore.mm(ip + head + "NETWORK</bold></gradient>"));
-			lines.add(LagCore.mm(bullet + "<gray>Online <white>" + plugin.count("ALL")));
-			lines.add(LagCore.mm(bullet + "<gray>Realm <white>" + realm));
-		}
-		var realms = plugin.section("realms");
-		if ("hub".equalsIgnoreCase(role) && realms != null) {
-			lines.add(Component.text("  "));
-			lines.add(LagCore.mm(it + head + "REALMS</bold></gradient>"));
-			for (String k : realms.getKeys(false)) {
-				String server = realms.getString(k + ".server", k);
-				lines.add(LagCore.mm(bullet + "<gray>" + k.substring(0, 1).toUpperCase() + k.substring(1) + " <white>" + plugin.count(server)));
+			var realms = plugin.section("realms");
+			if (hubRole && realms != null) {
+				lines.add(LagCore.mm(bIcon + "<#B040FF><bold>" + sc("realms")));
+				for (String k : realms.getKeys(false)) {
+					String server = realms.getString(k + ".server", k);
+					lines.add(LagCore.mm(pad + L + sc(k) + " " + V + plugin.count(server)));
+				}
+			} else {
+				lines.add(LagCore.mm(pIcon + "<#B040FF><bold>" + sc("network")));
+				lines.add(LagCore.mm(pad + L + sc("online") + " " + V + plugin.count("ALL")));
+				lines.add(LagCore.mm(pad + L + sc("realm") + " " + V + realm));
 			}
 		}
 		lines.add(Component.text("   "));
-		lines.add(LagCore.mm(plugin.getConfig().getString("scoreboard.footer", "<gradient:#38E0FF:#B040FF>play.relapsedmc.com</gradient>")));
+		String foot = plugin.getConfig().getString("scoreboard.footer", "");
+		lines.add(LagCore.mm(foot.contains("play.") ? foot : grad + "play.relapsedmc.com</gradient>"));
 		int score = lines.size();
 		for (int n = 1; n <= 15; n++) {
 			if (n > score) o.getScoreboard().resetScores("l" + n);
@@ -117,6 +122,18 @@ final class Board implements Listener {
 	private String rank(Player p) {
 		String t = plugin.ranks == null ? "" : plugin.ranks.tag(p);
 		return t.isEmpty() ? "<gray>Member" : t;
+	}
+
+	private static final String SC_FROM = "abcdefghijklmnopqrstuvwxyz", SC_TO = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ";
+
+	/** Small caps: "Rank" -> "ʀᴀɴᴋ" (digits and symbols unchanged). */
+	static String sc(String s) {
+		StringBuilder b = new StringBuilder(s.length());
+		for (char c : s.toLowerCase(java.util.Locale.ROOT).toCharArray()) {
+			int i = SC_FROM.indexOf(c);
+			b.append(i < 0 ? c : SC_TO.charAt(i));
+		}
+		return b.toString();
 	}
 
 	private void line(Objective o, int score, Component text) {
