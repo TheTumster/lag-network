@@ -22,7 +22,7 @@ commands:
     aliases: [teams, crew]
   tc:
     description: Team chat
-    aliases: [teamchat]
+    aliases: [teamchat, teammsg, tm, tchat]
 permissions:
   lag.admin:
     default: op

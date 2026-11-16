@@ -31,7 +31,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
@@ -73,6 +77,11 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 	private final Map<UUID, byte[]> statePackets = new ConcurrentHashMap<>();
 	private volatile long lastChatId = 0;
 	private final Map<UUID, Upload> uploads = new HashMap<>();
+	/** Players in team chat mode (/team chat): everything they type goes to the team. */
+	private final Set<UUID> chatMode = ConcurrentHashMap.newKeySet();
+	/** Every name players might type. These beat vanilla's scoreboard /team, /teammsg and /tm. */
+	private static final Set<String> TEAM_LABELS = Set.of("team", "teams", "crew", "t");
+	private static final Set<String> CHAT_LABELS = Set.of("tc", "teamchat", "teammsg", "tm", "tchat", "teamc");
 	private int ticks = 0;
 
 	private static final class Upload {
@@ -233,6 +242,44 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 
 	// ================================================================ events
 
+	/**
+	 * Vanilla also has /team, /teammsg and /tm (scoreboard teams). Catch those names before any command map does,
+	 * so players always get RelapsedMC teams. Ops can still reach vanilla's with /minecraft:team.
+	 */
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void onCommand(PlayerCommandPreprocessEvent e) {
+		String raw = e.getMessage().substring(1).trim();
+		if (raw.isEmpty()) return;
+		String[] parts = raw.split("\\s+");
+		String label = parts[0].toLowerCase(Locale.ROOT);
+		String[] args = java.util.Arrays.copyOfRange(parts, 1, parts.length);
+		if (TEAM_LABELS.contains(label)) {
+			e.setCancelled(true);
+			team(e.getPlayer(), args);
+		} else if (CHAT_LABELS.contains(label)) {
+			e.setCancelled(true);
+			teamChat(e.getPlayer(), args);
+		}
+	}
+
+	/** /team chat on: what you type goes to your team, like /f chat faction. */
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void onChat(AsyncChatEvent e) {
+		Player p = e.getPlayer();
+		if (!chatMode.contains(p.getUniqueId())) return;
+		e.setCancelled(true);
+		String msg = PlainTextComponentSerializer.plainText().serialize(e.message());
+		async(p, () -> {
+			int t = teamIdOf(p.getUniqueId());
+			if (t == 0) {
+				chatMode.remove(p.getUniqueId());
+				return "<red>You're not in a team anymore, team chat is off.";
+			}
+			post(t, p.getName(), msg.length() > 256 ? msg.substring(0, 256) : msg);
+			return null;
+		});
+	}
+
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		refreshAsync(e.getPlayer());
@@ -249,6 +296,7 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 	public void onQuit(PlayerQuitEvent e) {
 		UUID id = e.getPlayer().getUniqueId();
 		teamOf.remove(id);
+		chatMode.remove(id);
 		uploads.remove(id);
 		// show as offline right away (unless they're just switching realms: the next server marks them online again)
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -270,21 +318,39 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 			sender.sendMessage("Players only.");
 			return true;
 		}
-		if (command.getName().equalsIgnoreCase("tc")) {
-			if (args.length == 0) {
-				say(p, "<gray>/tc <message> <dark_gray>- talk to your team on every realm");
-				return true;
-			}
-			String msg = String.join(" ", args);
-			async(p, () -> {
-				int t = teamIdOf(p.getUniqueId());
-				if (t == 0) return "<red>You're not in a team. <gray>/team create <name>";
-				post(t, p.getName(), msg.length() > 256 ? msg.substring(0, 256) : msg);
-				return null;
-			});
-			return true;
+		if (command.getName().equalsIgnoreCase("tc")) teamChat(p, args);
+		else team(p, args);
+		return true;
+	}
+
+	/** /tc, /teammsg, /tm: with a message, send it; on its own, toggle team chat mode. */
+	private void teamChat(Player p, String[] args) {
+		if (args.length == 0) {
+			toggleChat(p, null);
+			return;
 		}
-		String sub = args.length == 0 ? "info" : args[0].toLowerCase(Locale.ROOT);
+		String msg = String.join(" ", args);
+		async(p, () -> {
+			int t = teamIdOf(p.getUniqueId());
+			if (t == 0) return "<red>You're not in a team. <gray>/team create <name>";
+			post(t, p.getName(), msg.length() > 256 ? msg.substring(0, 256) : msg);
+			return null;
+		});
+	}
+
+	private void toggleChat(Player p, Boolean on) {
+		boolean want = on != null ? on : !chatMode.contains(p.getUniqueId());
+		async(p, () -> {
+			if (want && teamIdOf(p.getUniqueId()) == 0) return "<red>You're not in a team. <gray>/team create <name>";
+			if (want) chatMode.add(p.getUniqueId());
+			else chatMode.remove(p.getUniqueId());
+			return want ? "<green>Team chat ON <gray>- everything you type goes to your team. <white>/team chat</white> again to turn it off."
+					: "<gray>Team chat OFF - you're back in public chat.";
+		});
+	}
+
+	private void team(Player p, String[] args) {
+		String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
 		String arg = args.length > 1 ? args[1] : null;
 		switch (sub) {
 			case "create" -> async(p, () -> create(p, arg));
@@ -295,11 +361,36 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 			case "kick", "remove" -> async(p, () -> kick(p, arg));
 			case "disband", "delete" -> async(p, () -> disband(p));
 			case "ping" -> ping(p, args);
-			case "info", "list", "who" -> async(p, () -> info(p));
-			default -> say(p, "<gray>/team create <name> <dark_gray>| <gray>invite <player> <dark_gray>| <gray>accept <dark_gray>| "
-					+ "<gray>deny <dark_gray>| <gray>leave <dark_gray>| <gray>kick <player> <dark_gray>| <gray>disband <dark_gray>| <gray>/tc <msg>");
+			case "info", "list", "who", "show", "members" -> async(p, () -> info(p));
+			case "chat", "c", "msg", "message", "say" -> {
+				if (args.length > 1 && !Set.of("on", "off", "toggle").contains(args[1].toLowerCase(Locale.ROOT))) {
+					teamChat(p, java.util.Arrays.copyOfRange(args, 1, args.length));
+				} else {
+					toggleChat(p, args.length > 1 && !args[1].equalsIgnoreCase("toggle") ? args[1].equalsIgnoreCase("on") : null);
+				}
+			}
+			default -> help(p);
 		}
-		return true;
+	}
+
+	private void help(Player p) {
+		p.sendMessage(LagCore.mm("<#FF4DD2><bold>Team</bold></#FF4DD2> <dark_gray>- one team for every realm"));
+		String[][] rows = {
+				{"/team create <name>", "start a team"},
+				{"/team invite <player>", "invite someone (they can accept from any realm)"},
+				{"/team accept [team]", "join a team you were invited to"},
+				{"/team deny [team]", "turn an invite down"},
+				{"/team info", "members, who's online and where"},
+				{"/team chat", "toggle team chat (like /f chat)"},
+				{"/tc <message>", "one message to your team (/teamchat, /teammsg, /tm)"},
+				{"/team kick <player>", "remove someone (leader)"},
+				{"/team leave", "leave your team"},
+				{"/team disband", "delete the team (leader)"}};
+		for (String[] r : rows) {
+			p.sendMessage(LagCore.mm("<white><click:suggest_command:'" + r[0].replaceAll(" [<\\[].*", " ") + "'>" + LagCore.esc(r[0])
+					+ "</click></white> <dark_gray>- <gray>" + r[1]));
+		}
+		p.sendMessage(LagCore.mm("<dark_gray>RelapsedMC Client: everything is in Right Shift > Team, plus schem share and pings."));
 	}
 
 	@Override
@@ -307,7 +398,7 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 		if (command.getName().equalsIgnoreCase("tc")) return List.of();
 		if (args.length == 1) {
 			List<String> out = new ArrayList<>();
-			for (String s : List.of("create", "invite", "accept", "deny", "leave", "kick", "disband", "info")) {
+			for (String s : List.of("create", "invite", "accept", "deny", "info", "chat", "leave", "kick", "disband", "help")) {
 				if (s.startsWith(args[0].toLowerCase(Locale.ROOT))) out.add(s);
 			}
 			return out;
@@ -443,6 +534,7 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 			}
 		}
 		removeMember(p.getUniqueId());
+		chatMode.remove(p.getUniqueId());
 		post(t, "", p.getName() + " left the team.");
 		return "<gray>You left the team.";
 	}
