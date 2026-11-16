@@ -302,6 +302,18 @@ def patch_backend(name):
         yaml_set(lc, "plots.enabled", True)
         log("  cannons: plots world, diamond protection everywhere, free /tntfill")
     if name == "factions":
+        # CoreProtect: don't log dispenser/hopper item moves. Every cannon dispenser shot made a full block snapshot
+        # (5% of the tick while cannoning, spark profile Nov 2026) and hopper farms do the same. Raids are the game here.
+        cp = os.path.join(d, "plugins", "CoreProtect", "config.yml")
+        if os.path.exists(cp):
+            t = open(cp).read()
+            for key in ("item-transactions", "hopper-transactions"):
+                t = re.sub(rf"(?m)^{key}:\s*true\s*$", f"{key}: false", t)
+            open(cp, "w").write(t)
+            log("  factions: CoreProtect item/hopper logging off (cannon lag)"
+                if "item-transactions: false" in t else "  ! couldn't turn off CoreProtect item-transactions")
+        else:
+            log("  ! CoreProtect config.yml not found; dispenser logging still on")
         tr = os.path.join(d, "plugins", "FactionsUUID", "config", "translations.conf")
         if os.path.exists(tr):
             subprocess.run([sys.executable, os.path.join(ROOT, "tools", "fuuid_theme.py"), tr], check=False)
