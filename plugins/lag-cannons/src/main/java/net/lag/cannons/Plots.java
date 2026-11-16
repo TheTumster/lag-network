@@ -71,7 +71,8 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 
 	Plots(JavaPlugin plugin) {
 		this.plugin = plugin;
-		this.plot = plugin.getConfig().getInt("plots.size", 128);
+		// plots are sized in chunks (32 chunks = 512x512 blocks); walls are bedrock, full height
+		this.plot = 16 * Math.max(4, plugin.getConfig().getInt("plots.size-chunks", 32));
 		this.gap = plugin.getConfig().getInt("plots.gap", 400);   // void between plots: nobody can see another plot
 		this.cell = plot + gap;
 		this.file = new File(plugin.getDataFolder(), "plots.yml");
@@ -92,9 +93,11 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 					d.setBlock(x, min, z, Material.BEDROCK);
 					for (int y = min + 1; y < SURFACE - 3; y++) d.setBlock(x, y, z, Material.STONE);
 					for (int y = SURFACE - 3; y < SURFACE; y++) d.setBlock(x, y, z, Material.DIRT);
-					int lx = Math.floorMod(wx, cell), lz = Math.floorMod(wz, cell);
-					boolean edge = lx == 0 || lz == 0 || lx == plot - 1 || lz == plot - 1;
-					d.setBlock(x, SURFACE, z, edge ? Material.POLISHED_BLACKSTONE_BRICKS : Material.GRASS_BLOCK);
+					if (isWall(wx, wz)) {
+						for (int y = min; y < d.getMaxHeight(); y++) d.setBlock(x, y, z, Material.BEDROCK);
+						continue;
+					}
+					d.setBlock(x, SURFACE, z, Material.GRASS_BLOCK);
 				}
 			}
 		}
@@ -109,10 +112,30 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		return Math.floorMod(c, cell) >= plot;
 	}
 
+	/** The plot's outer ring: a bedrock wall from the bottom of the world to the top. */
+	boolean isWall(int x, int z) {
+		if (isGap(x) || isGap(z)) return false;
+		int lx = Math.floorMod(x, cell), lz = Math.floorMod(z, cell);
+		return lx == 0 || lz == 0 || lx == plot - 1 || lz == plot - 1;
+	}
+
 	void start() {
 		if (!plugin.getConfig().getBoolean("plots.enabled", false)) return;
 		String name = plugin.getConfig().getString("plots.world", "plots");
 		world = Bukkit.getWorld(name);
+		// plot size or gap changed: the old world's plots don't line up any more, so start the plot world fresh
+		String layout = plot + "/" + gap + "/bedrock";
+		if (world == null && !layout.equals(data.getString("layout"))) {
+			File dir = new File(Bukkit.getWorldContainer(), name);
+			if (dir.exists() || data.isConfigurationSection("plots")) {
+				deleteTree(dir);
+				deleteTree(new File(plugin.getDataFolder().getParentFile(), "WorldGuard" + File.separator + "worlds" + File.separator + name));
+				data.set("plots", null);
+				plugin.getLogger().info("Plot layout changed to " + plot + "x" + plot + " with bedrock walls - made a fresh plot world");
+			}
+			data.set("layout", layout);
+			save();
+		}
 		if (world == null) {
 			world = new WorldCreator(name).generator(new Gen()).generateStructures(false).createWorld();
 		}
@@ -136,6 +159,13 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		}
 		Bukkit.getScheduler().runTaskTimer(plugin, this::sweep, 1L, 1L);
 		plugin.getLogger().info("Plot world '" + name + "' ready (" + plot + "x" + plot + " plots, " + ids().size() + " claimed)");
+	}
+
+	private static void deleteTree(File f) {
+		if (!f.exists()) return;
+		File[] kids = f.listFiles();
+		if (kids != null) for (File k : kids) deleteTree(k);
+		f.delete();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -230,23 +260,14 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 				return;
 			}
 			int[] b = bounds(id);
-			PlotRegions.set(world, id, b[0], b[1], b[2], b[3], o, trusted(id));
+			PlotRegions.set(world, id, b[0] + 1, b[1] + 1, b[2] - 1, b[3] - 1, o, trusted(id)); // inside the walls
 		} catch (Throwable t) {
 			plugin.getLogger().warning("Plot region " + id + ": " + t);
 		}
 	}
 
 	private void border(String id, boolean claimed) {
-		int[] b = bounds(id);
-		BlockData edge = Bukkit.createBlockData(claimed ? Material.PURPUR_BLOCK : Material.POLISHED_BLACKSTONE_BRICKS);
-		for (int x = b[0]; x <= b[2]; x++) {
-			world.getBlockAt(x, SURFACE, b[1]).setBlockData(edge, false);
-			world.getBlockAt(x, SURFACE, b[3]).setBlockData(edge, false);
-		}
-		for (int z = b[1]; z <= b[3]; z++) {
-			world.getBlockAt(b[0], SURFACE, z).setBlockData(edge, false);
-			world.getBlockAt(b[2], SURFACE, z).setBlockData(edge, false);
-		}
+		// plot walls are full-height bedrock (world generator); nothing to recolour on claim/unclaim
 	}
 
 	// ---------------------------------------------------------------- commands
@@ -419,7 +440,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		int min = world.getMinHeight() + 1, max = world.getMaxHeight();
 		BlockData air = Bukkit.createBlockData(Material.AIR), stone = Bukkit.createBlockData(Material.STONE),
 				dirt = Bukkit.createBlockData(Material.DIRT), grass = Bukkit.createBlockData(Material.GRASS_BLOCK);
-		BlockData edgeData = Bukkit.createBlockData(owner(id) != null ? Material.PURPUR_BLOCK : Material.POLISHED_BLACKSTONE_BRICKS);
+		BlockData bedrock = Bukkit.createBlockData(Material.BEDROCK);
 		for (Entity e : world.getEntities()) {
 			if (!(e instanceof Player) && id.equals(idAt(e.getLocation()))) e.remove();
 		}
@@ -427,12 +448,12 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		final int total = plot * plot;
 		Bukkit.getScheduler().runTaskTimer(plugin, task -> {
 			int done = 0;
-			while (col[0] < total && done < 48) {
+			while (col[0] < total && done < 64) {
 				int x = b[0] + col[0] % plot, z = b[1] + col[0] / plot;
 				for (int y = min; y < max; y++) {
 					Block bl = world.getBlockAt(x, y, z);
 					boolean rim = x == b[0] || x == b[2] || z == b[1] || z == b[3];
-					BlockData want = y == min - 1 ? stone : y < SURFACE - 3 ? stone : y < SURFACE ? dirt : y == SURFACE ? (rim ? edgeData : grass) : air;
+					BlockData want = rim ? bedrock : y < SURFACE - 3 ? stone : y < SURFACE ? dirt : y == SURFACE ? grass : air;
 					if (bl.getType() != want.getMaterial()) bl.setBlockData(want, false);
 				}
 				col[0]++;
@@ -503,7 +524,8 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBreak(BlockBreakEvent e) {
-		if (inWorld(e.getBlock().getLocation()) && !canBuild(e.getPlayer(), e.getBlock().getLocation())) e.setCancelled(true);
+		Block b = e.getBlock();
+		if (inWorld(b.getLocation()) && (isWall(b.getX(), b.getZ()) || !canBuild(e.getPlayer(), b.getLocation()))) e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

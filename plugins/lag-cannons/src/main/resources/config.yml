@@ -120,7 +120,8 @@ tntfill:
 plots:
   enabled: false
   world: plots
-  size: 128
+  # plot size in chunks (32 = 512x512 blocks). Walls are full-height bedrock. Changing size or gap resets the plot world.
+  size-chunks: 32
   gap: 400
   max-per-player: 1
 
