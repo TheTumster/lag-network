@@ -304,6 +304,9 @@ function Enable-Rcon {
         $sp = "$Root\$s\server.properties"
         if (-not (Test-Path $sp)) { continue }
         $want = [ordered]@{ "enable-rcon" = "true"; "rcon.port" = "$([int]$net.servers.$s.port + 10000)"; "rcon.password" = $pw; "broadcast-rcon-to-ops" = "false" }
+        # View distance: the void hub can show far (so the RELAPSED sign is visible from spawn); skyblock a bit further too
+        if ($s -eq "hub") { $want["view-distance"] = "16" }
+        if ($s -eq "skyblock") { $want["view-distance"] = "12" }
         $lines = [Collections.Generic.List[string]]([IO.File]::ReadAllLines($sp, $utf8))
         foreach ($k in $want.Keys) {
             $i = -1

@@ -243,7 +243,7 @@ SERVER_PROPS = {
                      **{"level-name": "hub_void",
                         "generator-settings": '{"layers"\\:[{"block"\\:"minecraft\\:air","height"\\:1}],"biome"\\:"minecraft\\:the_void"}'},
                      **{"generate-structures": "false", "spawn-monsters": "false", "allow-nether": "false",
-                        "view-distance": "8", "simulation-distance": "4"}),
+                        "view-distance": "16", "simulation-distance": "4"}),  # void hub: cheap, and the RELAPSED sign is far
     "factions": dict(difficulty="normal", gamemode="survival", pvp="true",
                      **{"view-distance": "10", "simulation-distance": "8"}),
     "smp":      dict(difficulty="normal", gamemode="survival", pvp="false",
@@ -252,7 +252,7 @@ SERVER_PROPS = {
     "skyblock": dict(difficulty="normal", gamemode="survival", pvp="false", **{"level-type": "minecraft\\:flat"},
                      **{"generator-settings": '{"layers"\\:[{"block"\\:"minecraft\\:air","height"\\:1}],"biome"\\:"minecraft\\:the_void"}',
                         "generate-structures": "false", "spawn-monsters": "true", "allow-nether": "true",
-                        "view-distance": "8", "simulation-distance": "6"}),
+                        "view-distance": "12", "simulation-distance": "6"}),
     # cannons: flat creative test world on the exact factions jar and settings
     "cannons":  dict(difficulty="peaceful", gamemode="creative", pvp="false", **{"level-type": "minecraft\\:flat"},
                      **{"force-gamemode": "true", "generate-structures": "false", "spawn-monsters": "false", "allow-nether": "false",
