@@ -497,6 +497,10 @@ def main():
         for want in must.get(srv, []):
             if not any(e.lower().startswith(want.lower()) for e in enabled):
                 problems.append(f"[{srv}] {want} did not enable")
+        # RelapsedMC Teams: every server must open the shared teams database
+        if not any("Teams on" in l for l in logs.get(srv, [])):
+            bad = [l for l in logs.get(srv, []) if "Teams off" in l]
+            problems.append(f"[{srv}] Teams did not start" + (f": {bad[0].strip()}" if bad else ""))
     report = {"manifest": manifest, "problems": problems}
     json.dump(report, open(os.path.join(ROOT, "dist", "bake-report.json"), "w"), indent=2)
     for l in logs.get("skyblock", []):
