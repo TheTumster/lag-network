@@ -59,7 +59,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  * pistons and water can't affect another plot (TNT and sand are traced back to the plot they came from).
  */
 final class Plots implements Listener, CommandExecutor, TabCompleter {
-	static final int SURFACE = 60;
+	// floor: bedrock at the bottom of the world, one layer of chunk checkerboard on top (cannoners count chunks by eye)
+	private final Material[] floor = new Material[2];
 
 	private final JavaPlugin plugin;
 	private final File file;
@@ -73,6 +74,11 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		this.plugin = plugin;
 		// plots are sized in chunks (32 chunks = 512x512 blocks); walls are bedrock, full height
 		this.plot = 16 * Math.max(4, plugin.getConfig().getInt("plots.size-chunks", 32));
+		java.util.List<String> fl = plugin.getConfig().getStringList("plots.floor");
+		for (int i = 0; i < 2; i++) {
+			Material m = fl.size() > i ? Material.matchMaterial(fl.get(i)) : null;
+			floor[i] = m != null && m.isBlock() ? m : (i == 0 ? Material.RED_WOOL : Material.PURPLE_WOOL);
+		}
 		this.gap = plugin.getConfig().getInt("plots.gap", 400);   // void between plots: nobody can see another plot
 		this.cell = plot + gap;
 		this.file = new File(plugin.getDataFolder(), "plots.yml");
@@ -90,22 +96,25 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 				for (int z = 0; z < 16; z++) {
 					int wx = chunkX * 16 + x, wz = chunkZ * 16 + z;
 					if (isGap(wx) || isGap(wz)) continue; // void between plots
-					d.setBlock(x, min, z, Material.BEDROCK);
-					for (int y = min + 1; y < SURFACE - 3; y++) d.setBlock(x, y, z, Material.STONE);
-					for (int y = SURFACE - 3; y < SURFACE; y++) d.setBlock(x, y, z, Material.DIRT);
 					if (isWall(wx, wz)) {
 						for (int y = min; y < d.getMaxHeight(); y++) d.setBlock(x, y, z, Material.BEDROCK);
 						continue;
 					}
-					d.setBlock(x, SURFACE, z, Material.GRASS_BLOCK);
+					d.setBlock(x, min, z, Material.BEDROCK);
+					d.setBlock(x, min + 1, z, checker(wx, wz));
 				}
 			}
 		}
 
 		@Override
 		public Location getFixedSpawnLocation(World w, Random r) {
-			return new Location(w, plot / 2.0, SURFACE + 1, 2.5);
+			return new Location(w, plot / 2.0, w.getMinHeight() + 2, 2.5);
 		}
+	}
+
+	/** Floor block for this column: alternates every chunk. */
+	Material checker(int x, int z) {
+		return floor[((x >> 4) + (z >> 4)) & 1];
 	}
 
 	boolean isGap(int c) {
@@ -124,14 +133,14 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		String name = plugin.getConfig().getString("plots.world", "plots");
 		world = Bukkit.getWorld(name);
 		// plot size or gap changed: the old world's plots don't line up any more, so start the plot world fresh
-		String layout = plot + "/" + gap + "/bedrock";
+		String layout = plot + "/" + gap + "/bedrock/checker:" + floor[0] + "," + floor[1];
 		if (world == null && !layout.equals(data.getString("layout"))) {
 			File dir = new File(Bukkit.getWorldContainer(), name);
 			if (dir.exists() || data.isConfigurationSection("plots")) {
 				deleteTree(dir);
 				deleteTree(new File(plugin.getDataFolder().getParentFile(), "WorldGuard" + File.separator + "worlds" + File.separator + name));
 				data.set("plots", null);
-				plugin.getLogger().info("Plot layout changed to " + plot + "x" + plot + " with bedrock walls - made a fresh plot world");
+				plugin.getLogger().info("Plot layout changed (" + plot + "x" + plot + ", bedrock walls, " + floor[0] + "/" + floor[1] + " chunk floor) - made a fresh plot world");
 			}
 			data.set("layout", layout);
 			save();
@@ -201,7 +210,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 
 	Location home(String id) {
 		int[] b = bounds(id);
-		Location l = new Location(world, (b[0] + b[2]) / 2.0 + 0.5, SURFACE + 1, b[1] + 2.5);
+		Location l = new Location(world, (b[0] + b[2]) / 2.0 + 0.5, world.getMinHeight() + 2, b[1] + 2.5);
 		l.setYaw(0); // facing +z, into the plot
 		return l;
 	}
@@ -438,9 +447,9 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 		if (!clearing.add(id)) return;
 		int[] b = bounds(id);
 		int min = world.getMinHeight() + 1, max = world.getMaxHeight();
-		BlockData air = Bukkit.createBlockData(Material.AIR), stone = Bukkit.createBlockData(Material.STONE),
-				dirt = Bukkit.createBlockData(Material.DIRT), grass = Bukkit.createBlockData(Material.GRASS_BLOCK);
+		BlockData air = Bukkit.createBlockData(Material.AIR);
 		BlockData bedrock = Bukkit.createBlockData(Material.BEDROCK);
+		BlockData[] floorData = {Bukkit.createBlockData(floor[0]), Bukkit.createBlockData(floor[1])};
 		for (Entity e : world.getEntities()) {
 			if (!(e instanceof Player) && id.equals(idAt(e.getLocation()))) e.remove();
 		}
@@ -453,7 +462,7 @@ final class Plots implements Listener, CommandExecutor, TabCompleter {
 				for (int y = min; y < max; y++) {
 					Block bl = world.getBlockAt(x, y, z);
 					boolean rim = x == b[0] || x == b[2] || z == b[1] || z == b[3];
-					BlockData want = rim ? bedrock : y < SURFACE - 3 ? stone : y < SURFACE ? dirt : y == SURFACE ? grass : air;
+					BlockData want = rim ? bedrock : y == min ? floorData[((x >> 4) + (z >> 4)) & 1] : air;
 					if (bl.getType() != want.getMaterial()) bl.setBlockData(want, false);
 				}
 				col[0]++;

@@ -122,6 +122,8 @@ plots:
   world: plots
   # plot size in chunks (32 = 512x512 blocks). Walls are full-height bedrock. Changing size or gap resets the plot world.
   size-chunks: 32
+  # floor: bedrock at the bottom, then one layer that alternates every chunk (a checkerboard to count chunks by)
+  floor: [RED_WOOL, PURPLE_WOOL]
   gap: 400
   max-per-player: 1
 
