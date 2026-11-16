@@ -236,13 +236,14 @@ if (Test-Path $cpc) {
 }
 
 # ---- /fps menu (everyone can hide TNT/sand/explosions on their own screen): RelapsedMC look
+# Sakura wraps long messages onto indented continuation lines, so each pattern replaces the whole value.
 foreach ($srv in @("factions", "cannons")) {
     $sg = "$Root\$srv\config\sakura-global.yml"
     if (Test-Path $sg) {
         $t = [IO.File]::ReadAllText($sg, $utf8)
         $brand = '<gradient:#38E0FF:#B040FF>[RelapsedMC]</gradient> '
-        $n = [regex]::Replace($t, '(?m)^(\s+fps-setting-change:).*$', ('${1} ''' + $brand + '<gray><state> <white><name></white> for you. <dark_gray>(/fps)'''))
-        $n = [regex]::Replace($n, '(?m)^(\s+durable-block-interaction:).*$', ('${1} ''' + $brand + '<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left'''))
+        $n = [regex]::Replace($t, '(?m)^(  fps-setting-change:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<gray><state> <white><name></white> for you. <dark_gray>(/fps)'''))
+        $n = [regex]::Replace($n, '(?m)^(  durable-block-interaction:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left'''))
         $n = [regex]::Replace($n, '(?m)^(\s+material:)\s*PINK_STAINED_GLASS_PANE', '${1} CYAN_STAINED_GLASS_PANE')
         if ($n -ne $t) { [IO.File]::WriteAllText($sg, $n, $utf8); Say "Styled the /fps menu ($srv)." Green }
     }
