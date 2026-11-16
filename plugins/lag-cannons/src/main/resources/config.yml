@@ -151,3 +151,8 @@ relapse:
     - NETHERITE_PICKAXE
     - NETHERITE_SHOVEL
     - NETHERITE_HOE
+# Sakura's client-lag tools for every player (only on the Sakura servers: factions + cannons):
+# /fps opens a menu to hide TNT, sand, explosion particles, spawners and pistons; /tnttoggle and /sandtoggle are
+# quick toggles. Hidden stuff isn't sent to that player's client at all, the server still runs the cannon normally.
+fps-menu:
+  enabled: true
