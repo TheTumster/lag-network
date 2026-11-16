@@ -100,6 +100,15 @@ rank-players:
 # server in the network (relative to the server's folder); Skyblock writes it when a season ends.
 titles-file: "../shared/titles.yml"
 
+# Current factions map (holograms: {map}, {reset}). Dates are local to "timezone", format 2026-12-12T18:00.
+# Before "starts": "Launches in 3d 4h". Before "ends": "Resets in 12d 4h". No dates: shows "status".
+map:
+  name: "RELAPSE #1"
+  starts: ""
+  ends: ""
+  timezone: America/New_York
+  status: "<gray>Launching <white>December"
+
 # Chat format: "<title> <rank> Name » message"
 chat:
   enabled: true
@@ -108,21 +117,72 @@ chat:
 # y: a height, or "ground" to sit on the terrain at 0,0. protect-radius: no building/PvP/explosions that close.
 spawns:
   factions:
+    # v2 "the Fault" (tools/hub/genspawn_factions.py): Classic half west, Corrupted half east, hub portal north,
+    # Fractured Obelisk south, Getting Started kiosk west (panels.yml), Top Factions podium east.
     y: ground
-    protect-radius: 30
+    protect-radius: 40
     catch-falls: false
     portals:
-      hub: [0, 5, -15]
+      hub: [0, 8, -22]
     holograms:
-      - offset: [0.5, 4.6, -7.5]
-        scale: 3
-        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>"
-      - offset: [0.5, 3.2, -7.5]
-        scale: 1.1
-        text: "<gray>Make a faction <white>/f create <name>   <gray>Fill dispensers <white>/tntfill\n<gray>Faction info <white>/f who   <gray>Back to the hub: walk into the ring"
-      - offset: [0.5, 10.6, -15]
-        scale: 1.4
+      - offset: [0.5, 6.2, -9.5]
+        scale: 3.4
+        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>{map}</bold></gradient>"
+      - offset: [0.5, 5.0, -9.5]
+        scale: 1.25
+        text: "<white><bold>FACTIONS</bold> <dark_gray>• {reset}"
+      - offset: [0.5, 3.9, -9.5]
+        scale: 0.9
+        text: "<gray>8-mans <dark_gray>• <gray>no allies <dark_gray>• <gray>18h shields <dark_gray>• <gray>KOTH-only netherite\n<dark_gray>Turn around for the Obelisk <dark_gray>• <gray>left: <white>Getting Started <dark_gray>• <gray>right: <white>Top Factions"
+      - offset: [0.5, 15.6, -22]
+        scale: 1.6
         text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+      - offset: [-17.5, 8.8, 0.5]
+        scale: 1.5
+        text: "<gradient:#FF4D6D:#FFD24D:#FF4D6D:{phase}><bold>NEW HERE?</bold></gradient>"
+      - offset: [20.5, 4.6, 0.5]
+        scale: 1.25
+        text: "<gradient:#FFD24D:#FF9F4D:#FFD24D:{phase}><bold>TOP FACTIONS</bold></gradient>\n{ftop}"
+      - offset: [20.5, 11.0, 0.5]
+        scale: 0.95
+        text: "<gray>KOTH gear <dark_gray>• <white>Protection 5 <dark_gray>• <white>Netherite\n<dark_gray>Only from KOTHs"
+      - offset: [0.5, 3.2, 12.5]
+        scale: 0.9
+        text: "<gradient:#FF4D6D:#B040FF><bold>THE FAULT</bold></gradient>\n<dark_gray><italic>Two worlds. One map. Three weeks.\n<dark_gray><italic>Classic holds. Corrupted rots. Both burn."
+      - offset: [-33.5, 17.0, 0.5]
+        scale: 2.2
+        text: "<gradient:#FF4D6D:#FFD24D><bold>CLASSIC</bold></gradient>"
+      - offset: [34.5, 13.5, 0.5]
+        scale: 2.2
+        text: "<gradient:#B040FF:#38E0FF><bold>CORRUPTED</bold></gradient>"
+      - offset: [24.5, 7.2, 24.5]
+        scale: 1
+        text: "<gray>Wilderness <dark_gray>↘"
+      - offset: [-23.5, 7.2, 24.5]
+        scale: 1
+        text: "<gray>Wilderness <dark_gray>↙"
+      - offset: [-23.5, 7.2, -23.5]
+        scale: 1
+        text: "<gray>Wilderness <dark_gray>↖"
+      - offset: [24.5, 7.2, -23.5]
+        scale: 1
+        text: "<gray>Wilderness <dark_gray>↗"
+    displays:
+      - offset: [0.5, 28.5, 17.5]
+        item: TNT
+        scale: 4
+        spin: 1
+        glow: "#B040FF"
+      - offset: [20.5, 12.6, 0.5]
+        item: NETHERITE_CHESTPLATE
+        scale: 2.4
+        spin: 1
+        glow: "#FFD24D"
+      - offset: [0.5, 17.6, -22]
+        item: NETHER_STAR
+        scale: 1.4
+        spin: -1
+        glow: "#38E0FF"
   skyblock:
     y: 100
     protect-radius: 46

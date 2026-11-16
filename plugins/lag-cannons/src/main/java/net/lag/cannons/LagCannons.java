@@ -78,6 +78,8 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(gearCap, this);
 		// Sakura's /fps, /tnttoggle, /sandtoggle for everyone: hide cannon entities client-side, no FPS lag
 		getServer().getPluginManager().registerEvents(new FpsMenu(this), this);
+		// live Top Factions text for the factions spawn podium (laGCore {ftop})
+		if (Fuuid.present()) new FactionTop(this);
 		var plots = new Plots(this);
 		getServer().getPluginManager().registerEvents(plots, this);
 		if (getCommand("plot") != null) {
