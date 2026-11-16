@@ -369,7 +369,7 @@ def patch_proxy():
     path = os.path.join(d, "velocity.toml")
     t = open(path).read()
     t = toml_set(t, "bind", f'"0.0.0.0:{NET["public_port"]}"')
-    t = toml_set(t, "motd", '"<gradient:#38E0FF:#B040FF><bold>' + NET["name"] + '</bold></gradient>\\n<gray>Factions • Skyblock • SMP • 1.8 Cannons"')
+    t = toml_set(t, "motd", '"                     <gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>•</dark_gray> <#7CFF6B>Skyblock S1"')
     t = toml_set(t, "player-info-forwarding-mode", '"modern"')
     t = toml_set(t, "online-mode", "true")
     t = toml_set(t, "bungee-plugin-message-channel", "true")

@@ -110,12 +110,16 @@ final class Board implements Listener {
 			if (n > score) o.getScoreboard().resetScores("l" + n);
 		}
 		for (Component c : lines) line(o, score--, c);
-		// tab list
+		// tab list: logo, realm strip; footer with live stats, IP and links
+		String bar = grad + "<strikethrough>                                        </strikethrough></gradient>";
 		p.sendPlayerListHeaderAndFooter(
 				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
-						+ "<gray>You're on <white>" + realm + "\n"),
-				LagCore.mm("\n<gray>Online <white>" + plugin.count("ALL") + " <dark_gray>• <gray>Ping <white>" + p.getPing() + "ms\n"
-						+ "<dark_gray>Skyblock • Factions • SMP • 1.8 Cannons\n"));
+						+ "<#8A8FA3>" + sc("you're on") + " <white><bold>" + sc(realm) + "</bold>\n" + bar),
+				LagCore.mm(bar + "\n<#8A8FA3>" + sc("online") + " <white>" + plugin.count("ALL")
+						+ "   <#4A4E5C>|   <#8A8FA3>" + sc("ping") + " " + pingCol + ping + "ms"
+						+ "   <#4A4E5C>|   <#8A8FA3>" + sc("realm") + " <white>" + realm
+						+ "\n\n" + grad + "<bold>play.relapsedmc.com</bold></gradient>"
+						+ "\n<#4A4E5C>" + sc("skyblock") + " • " + sc("factions") + " • " + sc("smp") + " • " + sc("1.8 cannons") + "\n"));
 	}
 
 	/** First matching LuckPerms group (group.<name> permission) from config "ranks"; ops count as the first rank. */

@@ -181,6 +181,17 @@ foreach ($f in @("$Root\hub\plugins\laGCore\config.yml", "$Root\factions\plugins
 }
 if ($renamed) { Say "Network is now RelapsedMC." Green }
 
+# ---- Server-list MOTD (proxy): centered wordmark + current map. Re-applied until it has the Relapse line.
+$vt = "$Root\proxy\velocity.toml"
+if (Test-Path $vt) {
+    $t = [IO.File]::ReadAllText($vt, $utf8)
+    if ($t -notmatch 'RELAPSE #1') {
+        $motd = 'motd = ' + '"                     <gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>' + $dot + '</dark_gray> <#7CFF6B>Skyblock S1"'
+        $n = [regex]::Replace($t, '(?m)^motd\s*=.*$', { param($m) $motd })
+        if ($n -ne $t) { [IO.File]::WriteAllText($vt, $n, $utf8); Say "Updated the server-list MOTD." Green }
+    }
+}
+
 # ---- Sakura (factions jar): 1.8 cannon mechanics, no entity merging, cannon lag options (all parity-tested)
 $sw = "$Root\factions\config\sakura-world-defaults.yml"
 if (-not (Test-Path $sw)) {
