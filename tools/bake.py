@@ -552,6 +552,7 @@ def main():
     manage(".", os.path.join("tools", "start.ps1"), RELEASE_DL + "start.ps1")
     manage(".", os.path.join("tools", "start-lab.ps1"), RELEASE_DL + "start-lab.ps1")
     manage(".", os.path.join("tools", "stop.ps1"), RELEASE_DL + "stop.ps1")
+    manage(".", os.path.join("tools", "tunnel.ps1"), RELEASE_DL + "tunnel.ps1")
     build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
     json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
     for srv, files in MANAGED.items():
