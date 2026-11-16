@@ -332,3 +332,7 @@ hub:
 scoreboard:
   enabled: true
   footer: "<gradient:#38E0FF:#B040FF>play.relapsedmc.com</gradient>"
+
+# RelapsedMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
+teams:
+  max-size: 8

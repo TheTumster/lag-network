@@ -37,6 +37,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	Ranks ranks;
 	HubFx hubFx;
 	Parkour parkour;
+	Teams teams;
 
 	public static LagCore get() {
 		return instance;
@@ -89,6 +90,11 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	}
 
 	@Override
+	public void onDisable() {
+		if (teams != null) teams.stop();
+	}
+
+	@Override
 	public void onEnable() {
 		instance = this;
 		saveDefaultConfig();
@@ -103,6 +109,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
 		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RelapsedMC Client: which realm is this
+		teams = new Teams(this); // RelapsedMC Teams: network-wide crews (/team, /tc, schem share, pings)
+		if (!teams.start()) teams = null;
 
 		pack = new Pack(this);
 		getServer().getPluginManager().registerEvents(pack, this);

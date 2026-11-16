@@ -17,6 +17,12 @@ commands:
   lagcore:
     description: laG Core admin
     permission: lag.admin
+  team:
+    description: Your RelapsedMC team (works on every realm)
+    aliases: [teams, crew]
+  tc:
+    description: Team chat
+    aliases: [teamchat]
 permissions:
   lag.admin:
     default: op
