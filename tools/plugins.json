@@ -73,6 +73,9 @@
     },
     {
       "local": "laGCannons"
+    },
+    {
+      "local": "laGFactions"
     }
   ],
   "smp": [

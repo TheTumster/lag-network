@@ -69,9 +69,10 @@ final class Board implements Listener {
 		lines.add(Component.empty());
 		lines.add(LagCore.mm(sIcon + "<#38E0FF><bold>" + sc("you")));
 		lines.add(LagCore.mm(pad + L + sc("rank") + " " + rank(p)));
-		lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms"));
+		boolean facBoard = "factions".equalsIgnoreCase(role) && Papi.present();
+		if (!facBoard) lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms")); // factions: room for the shield line
 		lines.add(Component.text(" "));
-		if ("factions".equalsIgnoreCase(role) && Papi.present()) {
+		if (facBoard) {
 			String f = Papi.apply(p, "%factionsuuid_faction_name%").trim();
 			lines.add(LagCore.mm(tIcon + "<#FF4D6D><bold>" + sc("faction")));
 			if (f.isEmpty() || f.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) {
@@ -84,6 +85,8 @@ final class Board implements Listener {
 						+ " " + D + "• " + L + sc("land") + " " + V + Papi.apply(p, "%factionsuuid_faction_claims%")));
 				lines.add(LagCore.mm(pad + L + sc("power") + " " + V + Papi.apply(p, "%factionsuuid_faction_power%")
 						+ " " + D + "• " + L + sc("tnt") + " " + V + Papi.apply(p, "%factionsuuid_faction_tnt_balance%")));
+				String shield = MapInfo.shield(p);
+				if (!shield.isEmpty()) lines.add(LagCore.mm(pad + shield));
 			}
 			lines.add(Component.text("  "));
 			lines.add(LagCore.mm(bIcon + "<#B040FF><bold>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));

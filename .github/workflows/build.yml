@@ -1,6 +1,7 @@
 name: build
 on:
   push:
+    branches-ignore: ['wip/**']   # wip/* branches only compile (compile.yml)
   workflow_dispatch:
 
 concurrency:
@@ -24,16 +25,6 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Build laG plugins
-        run: |
-          chmod +x ./gradlew
-          ./gradlew build -Pversion=0.1.${{ github.run_number }} --stacktrace
-          mkdir -p localjars
-          cp plugins/lag-core/build/libs/lag-core-*.jar localjars/laGCore.jar
-          cp plugins/lag-cannons/build/libs/lag-cannons-*.jar localjars/laGCannons.jar
-          cp plugins/lag-skyblock/build/libs/lag-skyblock-*.jar localjars/laGSkyblock.jar
-          cp plugins/lab18-tools/build/libs/lab18-tools-*.jar localjars/laGLab.jar
-
       - name: Build FactionsUUID 4.4.3 from source (GPLv3; buy it on SpigotMC once the server goes public)
         run: |
           git clone -q --depth 1 -b 4.4.3 https://github.com/FactionsU/UID fuuid
@@ -41,7 +32,17 @@ jobs:
           ls -la */build/libs build/libs 2>/dev/null || true
           JAR=$(ls -S */build/libs/*.jar build/libs/*.jar 2>/dev/null | grep -viE "sources|javadoc|api|example" | head -1)
           echo "Using $JAR"
-          cp "$JAR" ../localjars/FactionsUUID.jar
+          mkdir -p ../localjars && cp "$JAR" ../localjars/FactionsUUID.jar
+
+      - name: Build laG plugins
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build -Pversion=0.1.${{ github.run_number }} --stacktrace
+          cp plugins/lag-core/build/libs/lag-core-*.jar localjars/laGCore.jar
+          cp plugins/lag-cannons/build/libs/lag-cannons-*.jar localjars/laGCannons.jar
+          cp plugins/lag-skyblock/build/libs/lag-skyblock-*.jar localjars/laGSkyblock.jar
+          cp plugins/lag-factions/build/libs/lag-factions-*.jar localjars/laGFactions.jar
+          cp plugins/lab18-tools/build/libs/lab18-tools-*.jar localjars/laGLab.jar
 
       - name: Assemble + boot-test the whole network
         env:
@@ -67,6 +68,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest laG-Network.zip RelapsedMC-pack.zip network/network.json dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGSkyblock.jar localjars/laGCore.jar localjars/FactionsUUID.jar localjars/laGLab.jar build/laG-255-datapack.zip windows/START.bat windows/STOP.bat windows/TUNNEL.bat windows/README.txt windows/START-1.8-LAB.bat windows_tools/start.ps1 windows_tools/start-lab.ps1 windows_tools/stop.ps1 windows_tools/tunnel.ps1 \
+          gh release create latest laG-Network.zip RelapsedMC-pack.zip network/network.json dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGSkyblock.jar localjars/laGFactions.jar localjars/laGCore.jar localjars/FactionsUUID.jar localjars/laGLab.jar build/laG-255-datapack.zip windows/START.bat windows/STOP.bat windows/TUNNEL.bat windows/README.txt windows/START-1.8-LAB.bat windows_tools/start.ps1 windows_tools/start-lab.ps1 windows_tools/stop.ps1 windows_tools/tunnel.ps1 \
             --title "RelapsedMC (build ${{ github.run_number }})" \
             --notes "Download laG-Network.zip, extract it anywhere, double-click START.bat." --latest

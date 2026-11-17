@@ -1,0 +1,10 @@
+# laGFactions (RelapsedMC factions layer). /lf reload after editing.
+
+shield:
+  enabled: true
+  # factions that never picked a window start raidable at this hour (Eastern, 0-23): 20 = 8 PM to 2 AM EST
+  default-start: 20
+  # moving the window only takes effect this many hours later
+  change-delay-hours: 24
+  # broadcast to the whole server when a faction with land goes raidable
+  announce: true

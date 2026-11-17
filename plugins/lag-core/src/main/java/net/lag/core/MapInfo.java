@@ -69,4 +69,16 @@ final class MapInfo {
 		}
 		return "<dark_gray>No factions yet";
 	}
+
+	/** Shield status line from laGFactions (a Function<Player,String> service), "" if absent. */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	static String shield(org.bukkit.entity.Player p) {
+		for (RegisteredServiceProvider<java.util.function.Function> r : Bukkit.getServicesManager().getRegistrations(java.util.function.Function.class)) {
+			if (r.getPlugin().getName().equals("laGFactions")) {
+				Object v = r.getProvider().apply(p);
+				return v == null ? "" : String.valueOf(v);
+			}
+		}
+		return "";
+	}
 }

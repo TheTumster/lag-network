@@ -1,2 +1,2 @@
 rootProject.name = 'lag-network'
-include 'plugins:lag-core', 'plugins:lag-cannons', 'plugins:lag-skyblock', 'plugins:lab18-tools'
+include 'plugins:lag-core', 'plugins:lag-cannons', 'plugins:lag-skyblock', 'plugins:lag-factions', 'plugins:lab18-tools'

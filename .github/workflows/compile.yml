@@ -1,0 +1,35 @@
+name: compile
+# Fast check for work-in-progress branches (wip/*): build FactionsUUID + compile every laG plugin. No network boot.
+on:
+  push:
+    branches: ['wip/**']
+  workflow_dispatch:
+
+concurrency:
+  group: compile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: |
+            21
+            25
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build FactionsUUID 4.4.3
+        run: |
+          git clone -q --depth 1 -b 4.4.3 https://github.com/FactionsU/UID fuuid
+          cd fuuid && bash ../tools/patches/fuuid-no-graves.sh && chmod +x gradlew && ./gradlew build -x test -q
+          JAR=$(ls -S */build/libs/*.jar build/libs/*.jar 2>/dev/null | grep -viE "sources|javadoc|api|example" | head -1)
+          mkdir -p ../localjars && cp "$JAR" ../localjars/FactionsUUID.jar
+      - name: Compile laG plugins
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build --stacktrace 2>&1 | tail -80
+          test ${PIPESTATUS[0]} -eq 0

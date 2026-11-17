@@ -1,0 +1,15 @@
+name: laGFactions
+version: '${version}'
+main: net.lag.factions.LagFactions
+api-version: '1.21'
+depend: [FactionsUUID]
+softdepend: [Vault, PlaceholderAPI, laGCannons]
+description: RelapsedMC factions - shields, menus, map, upgrades, shop, outpost (on top of FactionsUUID)
+commands:
+  lagfactions:
+    description: laGFactions admin
+    aliases: [lf]
+    permission: lag.factions.admin
+permissions:
+  lag.factions.admin:
+    default: op
