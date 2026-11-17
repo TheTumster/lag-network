@@ -61,10 +61,13 @@ final class MapInfo {
 	/** laGCannons registers a Supplier<String> service with the current top-factions text. */
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	static String ftop() {
-		for (RegisteredServiceProvider<Supplier> r : Bukkit.getServicesManager().getRegistrations(Supplier.class)) {
-			if (r.getPlugin().getName().equals("laGCannons")) {
-				Object v = r.getProvider().get();
-				return v == null ? "" : String.valueOf(v);
+		// laGFactions (F-top by spawner value) wins over laGCannons (by land claimed)
+		for (String owner : new String[] {"laGFactions", "laGCannons"}) {
+			for (RegisteredServiceProvider<Supplier> r : Bukkit.getServicesManager().getRegistrations(Supplier.class)) {
+				if (r.getPlugin().getName().equals(owner)) {
+					Object v = r.getProvider().get();
+					return v == null ? "" : String.valueOf(v);
+				}
 			}
 		}
 		return "<dark_gray>No factions yet";

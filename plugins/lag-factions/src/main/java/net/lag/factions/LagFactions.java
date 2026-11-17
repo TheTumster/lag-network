@@ -32,6 +32,17 @@ public final class LagFactions extends JavaPlugin implements Listener {
 	Menu menu;
 	Who who;
 	FMap map;
+	Upgrades upgrades;
+	FChest chest;
+	Shop shop;
+	FTop top;
+	Perms perms;
+	Outpost outpost;
+
+	@Override
+	public void onDisable() {
+		if (chest != null) chest.saveAll();
+	}
 
 	@Override
 	public void onEnable() {
@@ -42,9 +53,19 @@ public final class LagFactions extends JavaPlugin implements Listener {
 		menu = new Menu(this);
 		who = new Who(this);
 		map = new FMap(this);
+		upgrades = new Upgrades(this);
+		chest = new FChest(this);
+		shop = new Shop(this);
+		top = new FTop(this);
+		perms = new Perms(this);
+		outpost = new Outpost(this);
 		var pm = getServer().getPluginManager();
 		pm.registerEvents(this, this);
 		pm.registerEvents(shields, this);
+		pm.registerEvents(upgrades, this);
+		pm.registerEvents(chest, this);
+		pm.registerEvents(shop, this);
+		pm.registerEvents(top, this);
 		pm.registerEvents(new Gui.Events(), this);
 		// scoreboard line for laGCore ("shield" service: player -> MiniMessage status, "" if factionless)
 		Function<Player, String> shieldLine = p -> {
@@ -77,6 +98,15 @@ public final class LagFactions extends JavaPlugin implements Listener {
 				e.setCancelled(true);
 				map.show(p);
 			}
+			case "upgrades", "upgrade", "u" -> { e.setCancelled(true); upgrades.open(p); }
+			case "shop", "store" -> { e.setCancelled(true); shop.open(p); }
+			case "chest", "pv" -> { e.setCancelled(true); chest.open(p); }
+			case "top", "ftop" -> { if (a.length > 2) return; e.setCancelled(true); top.open(p); }
+			case "perms", "perm", "permissions" -> { e.setCancelled(true); perms.open(p); }
+			case "set" -> {
+				// ClassicFactions turns /f perms into /f set perm; with no further arguments that's our menu
+				if (a.length == 3 && (a[2].equalsIgnoreCase("perm") || a[2].equalsIgnoreCase("perms"))) { e.setCancelled(true); perms.open(p); }
+			}
 			case "mapclaim" -> {
 				e.setCancelled(true);
 				try {
@@ -105,7 +135,24 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			Ui.msg(sender, "Reloaded.");
 			return true;
 		}
-		Ui.msg(sender, "<gray>/lf reload");
+		// /lf give <player> spawner <type> [amount] | /lf give <player> pick <trench3|trench5|tray3|tray5>
+		if (args.length >= 4 && args[0].equalsIgnoreCase("give")) {
+			Player t = Bukkit.getPlayerExact(args[1]);
+			if (t == null) { Ui.msg(sender, "<red>Player not online."); return true; }
+			org.bukkit.inventory.ItemStack it;
+			try {
+				it = args[2].equalsIgnoreCase("spawner")
+						? shop.spawner(org.bukkit.entity.EntityType.valueOf(args[3].toUpperCase(Locale.ROOT)), args.length > 4 ? Integer.parseInt(args[4]) : 1)
+						: shop.pick(args[3].toLowerCase(Locale.ROOT));
+			} catch (Exception ex) {
+				Ui.msg(sender, "<red>Unknown item: " + args[3]);
+				return true;
+			}
+			t.getInventory().addItem(it).values().forEach(l -> t.getWorld().dropItemNaturally(t.getLocation(), l));
+			Ui.msg(sender, "Given.");
+			return true;
+		}
+		Ui.msg(sender, "<gray>/lf reload <dark_gray>• <gray>/lf give <player> spawner <type> [amount] <dark_gray>• <gray>/lf give <player> pick <trench3|trench5|tray3|tray5>");
 		return true;
 	}
 }

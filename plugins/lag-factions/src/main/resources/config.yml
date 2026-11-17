@@ -8,3 +8,49 @@ shield:
   change-delay-hours: 24
   # broadcast to the whole server when a faction with land goes raidable
   announce: true
+
+# /f upgrades. cost = price per level (list length = max level). value = what each level gives (index 0 = no upgrade).
+upgrades:
+  spawner:
+    cost: [250000, 750000, 2000000, 5000000, 12000000]
+    value: [0, 10, 20, 35, 50, 75]          # % faster spawners in your claims
+  farm:
+    cost: [100000, 300000, 900000, 2500000, 6000000]
+    value: [0, 10, 20, 35, 50, 75]          # % chance of an extra cane/cactus/bamboo block per growth
+  chest:
+    cost: [100000, 400000, 1000000]
+    value: [3, 4, 5, 6]                     # rows in /f chest
+  tnt:
+    cost: [100000, 300000, 750000, 2000000]
+    value: [25000, 50000, 100000, 250000, 1000000]   # TNT bank cap
+  warps:
+    cost: [150000, 400000, 1000000]
+    value: [2, 3, 4, 5]                     # /f warps (FactionsUUID allows up to 5)
+
+# /f shop. Spawner prices also set their F-top value (ftop.spawner-values overrides).
+shop:
+  spawners:
+    pig: 25000
+    cow: 30000
+    chicken: 25000
+    zombie: 50000
+    skeleton: 60000
+    spider: 60000
+    cave_spider: 75000
+    blaze: 200000
+    enderman: 250000
+    creeper: 300000
+    iron_golem: 500000
+  picks:
+    trench3: 150000
+    trench5: 500000
+    tray3: 75000
+    tray5: 250000
+
+spawners:
+  # chance a spawner drops as an item when it's blown up (raid loot)
+  explosion-drop-chance: 1.0
+
+ftop:
+  default-spawner-value: 10000
+  spawner-values: {}

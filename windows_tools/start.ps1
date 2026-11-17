@@ -234,7 +234,8 @@ if ($fc) {
         $b = [regex]::Replace($m.Value, '\bplayerStarting\s*=\s*-?[\d.]+', 'playerStarting=200.0')
         [regex]::Replace($b, '\bplayerMax\s*=\s*-?[\d.]+', 'playerMax=200.0')
     })
-    if ($n -ne $t) { Set-Content $fc $n -NoNewline; Say "Applied Relapse rules (8-man, no allies, 200 power)." Green }
+    $n = [regex]::Replace($n, '(?s)(\beconomy\s*\{[^{}]*?)\benabled\s*=\s*false', '${1}enabled=true')
+    if ($n -ne $t) { Set-Content $fc $n -NoNewline; Say "Applied Relapse rules (8-man, no allies, 200 power, faction banks)." Green }
 }
 
 # ---- Cannon lag: CoreProtect stops logging every dispenser shot / hopper move on factions (raids are the game)
