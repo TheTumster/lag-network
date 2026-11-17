@@ -108,7 +108,31 @@ final class HubFx implements Listener {
 	void giveHotbar(Player p) {
 		p.getInventory().setItem(0, hubItem("cosmetics", Material.NETHER_STAR,
 				"<gradient:#B040FF:#38E0FF><bold>Cosmetics</bold></gradient> <gray>(Right Click)", "<gray>Particle trails and more"));
+		p.getInventory().setItem(2, hubItem("codex", Material.WRITTEN_BOOK,
+				"<gradient:#B040FF:#38E0FF><bold>The Relapse Codex</bold></gradient> <gray>(Right Click)",
+				"<gray>The story, and every realm explained"));
 		p.getInventory().setItem(8, visibilityItem(hidden.contains(p.getUniqueId())));
+	}
+
+	private net.kyori.adventure.inventory.Book codex;
+
+	/** The lore book (resources/codex.yml, always read from the jar so updates ship with the plugin). */
+	void openCodex(Player p) {
+		if (codex == null) {
+			try (var in = plugin.getResource("codex.yml")) {
+				var y = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(
+						new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+				List<Component> pages = new ArrayList<>();
+				for (String pg : y.getStringList("pages")) pages.add(LagCore.mm(MapInfo.fill(plugin, pg)));
+				codex = net.kyori.adventure.inventory.Book.book(LagCore.mm(y.getString("title", "Codex")),
+						LagCore.mm(y.getString("author", "RelapsedMC")), pages);
+			} catch (Exception ex) {
+				plugin.getLogger().warning("Codex failed to load: " + ex);
+				return;
+			}
+		}
+		p.openBook(codex);
+		p.playSound(p.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 0.8f, 1f);
 	}
 
 	private ItemStack visibilityItem(boolean hiding) {
@@ -136,6 +160,7 @@ final class HubFx implements Listener {
 		switch (id) {
 			case "cosmetics" -> openCosmetics(p);
 			case "visibility" -> toggleVisibility(p);
+			case "codex" -> openCodex(p);
 			default -> { }
 		}
 	}

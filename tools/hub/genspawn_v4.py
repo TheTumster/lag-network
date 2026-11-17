@@ -252,41 +252,33 @@ for i in range(16):
     lamp(x, FLOOR + 1, z)
 
 # ======================================================================= the Crystal (floating over the Well)
-CR_Y = 12
-CR_H, CR_MID, CR_W = 30, 11, 7.2
+CR_Y = 13
+CR_H, CR_MID, CR_W = 27, 9, 5.6
 for y in range(0, CR_H):
-    # double cone: widest at CR_MID, points at top and bottom; chunky faceted body
-    rr = (y / CR_MID) * CR_W if y <= CR_MID else max(0, (CR_H - 1 - y) / (CR_H - 1 - CR_MID) * CR_W)
-    for x in range(-9, 10):
-        for z in range(-9, 10):
-            d = max(abs(x), abs(z)) * 0.55 + (abs(x) + abs(z)) * 0.5   # octagonal facets
-            if d > rr + 0.3:
+    rr = (y / CR_MID) * CR_W if y <= CR_MID else (CR_H - 1 - y) / (CR_H - 1 - CR_MID) * CR_W
+    R_ = round(rr)
+    for x in range(-R_, R_ + 1):
+        for z in range(-R_, R_ + 1):
+            d = abs(x) + abs(z)
+            if d > R_:
                 continue
-            on_axis = x == 0 and z == 0
-            shell = d > rr - 1.4
-            if on_axis:
-                b = "magenta_stained_glass"     # the beacon beam passes here and turns pink
-            elif shell:
-                # facet bands: alternating amethyst / glass stripes read as cut faces from far away
-                band = (y + (0 if abs(x) > abs(z) else 2)) % 5
-                b = "amethyst_block" if band < 2 else ("purple_stained_glass" if band < 4 else "magenta_stained_glass")
-            else:
-                b = "purple_stained_glass" if (x + y + z) % 3 else "magenta_stained_glass"
-            put(CX + x, CR_Y + y, CZ + z, b)
-# light inside so it glows from within (froglights off-axis)
-for (x, y, z) in ((2, 10, 2), (-2, 11, -2), (2, 12, -2), (-2, 9, 2), (0, 16, 2), (0, 6, -2), (3, 11, 0), (-3, 12, 0), (0, 20, -1)):
-    put(CX + x, CR_Y + y, CZ + z, "pearlescent_froglight")
-# orbiting shards on two tilted rings
-for ring, (rad, tilt, n, y0) in enumerate(((13, 0.18, 16, CR_Y + 10), (18, -0.12, 22, CR_Y + 13))):
-    for i in range(n):
-        a = i / n * math.pi * 2
-        x = round(CX + rad * math.cos(a))
-        z = round(CZ + rad * math.sin(a))
-        y = round(y0 + rad * tilt * math.sin(a))
-        put(x, y, z, "amethyst_block" if i % 2 else ("purple_stained_glass" if ring else "magenta_stained_glass"))
-        put(x, y - 1, z, "amethyst_cluster[facing=down,waterlogged=false]")
-        if i % 2 == 0:
-            put(x, y + 1, z, "amethyst_cluster[facing=up,waterlogged=false]")
+            if d < R_ - 1 and 0 < y < CR_H - 1:
+                continue                      # hollow: only the skin is built
+            ridge = x == 0 or z == 0          # the four ridge lines of the gem glow
+            put(CX + x, CR_Y + y, CZ + z, "pearlescent_froglight" if ridge else "amethyst_block")
+put(CX, CR_Y - 1, CZ, "amethyst_cluster[facing=down,waterlogged=false]")
+put(CX, CR_Y + CR_H, CZ, "amethyst_cluster[facing=up,waterlogged=false]")
+# halo: one clean white ring around the gem's widest point, with four light nodes
+HALO_R = 10.5
+for i in range(240):
+    a_ = i / 240 * math.pi * 2
+    x, z = round(CX + HALO_R * math.cos(a_)), round(CZ + HALO_R * math.sin(a_))
+    put(x, CR_Y + CR_MID, z, "smooth_quartz_slab[type=bottom,waterlogged=false]")
+for k in range(4):
+    a_ = k * math.pi / 2 + math.pi / 4
+    x, z = round(CX + HALO_R * math.cos(a_)), round(CZ + HALO_R * math.sin(a_))
+    put(x, CR_Y + CR_MID, z, "sea_lantern")
+    put(x, CR_Y + CR_MID - 1, z, "end_rod[facing=down]")
 # ======================================================================= the Gallery terrace + realm portals
 for x in range(-41, 42):
     for z in range(TERRACE_Z1, TERRACE_Z0 + 1):
@@ -328,65 +320,111 @@ for x in range(-40, 41):
         put(x, TERRACE_Y, TERRACE_Z0 - 1, glow_at((x + 40) / 80))
         put(x, TERRACE_Y - 1, TERRACE_Z0 - 1, "sea_lantern")
 
-THEME = {
-    "skyblock": dict(frame="calcite", trim="moss_block", accent="verdant_froglight", glass="light_blue_stained_glass",
-                     pad="moss_block", corner="flowering_azalea_leaves" + LEAF, post="birch_log[axis=y]", deco="flowering_azalea"),
-    "factions": dict(frame="polished_blackstone_bricks", trim="red_nether_bricks", accent="shroomlight", glass="red_stained_glass",
-                     pad="crimson_nylium", corner="nether_wart_block", post="crimson_stem[axis=y]", deco="tnt[unstable=false]"),
-    "cannons": dict(frame="deepslate_bricks", trim="waxed_cut_copper", accent="ochre_froglight", glass="orange_stained_glass",
-                    pad="waxed_copper_block", corner="redstone_block", post="waxed_copper_block", deco="dispenser[facing=up,triggered=false]"),
-    "smp": dict(frame="mossy_stone_bricks", trim="stripped_spruce_log[axis=y]", accent="lantern[hanging=false,waterlogged=false]",
-                glass="lime_stained_glass", pad="podzol[snowy=false]", corner="spruce_leaves" + LEAF, post="spruce_log[axis=y]", deco="flowering_azalea"),
-}
+COLOR = {"skyblock": "lime", "factions": "red", "cannons": "orange", "smp": "light_blue"}
 
 
-def portal(px, realm):
-    t = THEME[realm]
+def gate(px, realm):
+    """A grand dark-stone gate: quartz columns, a pointed arch with a glowing realm-coloured outline,
+    a cornice, a stepped gable with a rose window (the realm icon floats in it), banners, and a carpet runner."""
+    c = COLOR[realm]
     y0 = TERRACE_Y + 1
-    W, H = 3, 7                      # inner half-width (portal is 5 wide: -2..2) / height
-    # themed pad in front of the portal
-    for x in range(px - 4, px + 5):
-        for z in range(PORTAL_Z + 1, PORTAL_Z + 5):
-            put(x, TERRACE_Y, z, t["pad"] if abs(x - px) <= 3 else t["frame"])
-    # frame: pillars + arch
-    for y in range(y0, y0 + H + 1):
-        for s in (-W, W):
-            put(px + s, y, PORTAL_Z, t["frame"] if y % 3 else t["trim"])
-            put(px + s * 1 + (1 if s > 0 else -1), y, PORTAL_Z, t["frame"] if y < y0 + H - 1 else t["trim"])
-    for x in range(px - W - 1, px + W + 2):
-        put(x, y0 + H, PORTAL_Z, t["trim"])
-        put(x, y0 + H + 1, PORTAL_Z, t["frame"])
-    for x in range(px - W + 1, px + W):
-        put(x, y0 + H + 2, PORTAL_Z, t["frame"])
-    for x in range(px - 1, px + 2):
-        put(x, y0 + H + 3, PORTAL_Z, t["trim"])
-    put(px, y0 + H + 4, PORTAL_Z, t["accent"])
-    put(px, y0 + H + 5, PORTAL_Z, "end_rod[facing=up]")
-    # the portal itself
-    for x in range(px - W + 1, px + W):
-        for y in range(y0, y0 + H):
-            put(x, y, PORTAL_Z, "nether_portal[axis=x]")
-        put(x, TERRACE_Y, PORTAL_Z, t["trim"])
-    # stained-glass halo behind (colours the light around the arch)
-    for x in range(px - W - 1, px + W + 2):
-        for y in range(y0, y0 + H + 3):
-            if get(x, y, PORTAL_Z - 1) is None and (abs(x - px) >= W or y >= y0 + H):
-                put(x, y, PORTAL_Z - 1, t["glass"])
-    # lamps either side of the pad + theme deco
-    for s in (-1, 1):
-        x = px + s * 5
-        put(x, TERRACE_Y + 1, PORTAL_Z + 2, t["post"])
-        put(x, TERRACE_Y + 2, PORTAL_Z + 2, t["post"])
-        put(x, TERRACE_Y + 3, PORTAL_Z + 2, t["accent"])
-        put(x, TERRACE_Y + 4, PORTAL_Z + 2, t["corner"])
-        put(px + s * 4, TERRACE_Y + 1, PORTAL_Z + 4, t["deco"])
-    # light under the pad edges
-    for x in (px - 4, px + 4):
-        put(x, TERRACE_Y - 1, PORTAL_Z + 4, "sea_lantern")
+    PZ = PORTAL_Z
+    stairs = lambda m, f, half="bottom": f"{m}_stairs[facing={f},half={half},shape=straight,waterlogged=false]"
+    # pointed opening: half-width 2, sides rise to y0+6, then narrow to a point at y0+9
+    def opening(dx, y):
+        top = {0: 9, 1: 8, 2: 6}.get(abs(dx), -1)
+        return abs(dx) <= 2 and y0 <= y <= y0 + top
+    near = lambda dx, y: (not opening(dx, y)) and any(opening(dx + a, y + b) for a in (-1, 0, 1) for b in (-1, 0, 1))
+    # wall body (two deep: PZ and PZ-1), dx -4..4, up to the cornice
+    for dx in range(-4, 5):
+        for y in range(y0, y0 + 12):
+            for z in (PZ, PZ - 1):
+                if opening(dx, y):
+                    continue
+                put(px + dx, y, z, "deepslate_tiles" if (y + dx) % 7 else "cracked_deepslate_tiles")
+    # glowing outline: sea lanterns in the wall, realm glass in front
+    for dx in range(-3, 4):
+        for y in range(y0, y0 + 11):
+            if near(dx, y):
+                put(px + dx, y, PZ, "sea_lantern")
+                put(px + dx, y, PZ + 1, f"{c}_stained_glass")
+    # white archivolt one step further out (front face)
+    for dx in range(-4, 5):
+        for y in range(y0, y0 + 12):
+            if opening(dx, y) or near(dx, y):
+                continue
+            if any(near(dx + a, y + b) for a in (-1, 0, 1) for b in (-1, 0, 1)):
+                put(px + dx, y, PZ + 1, "smooth_quartz")
+    # the portal
+    for dx in range(-2, 3):
+        for y in range(y0, y0 + 10):
+            if opening(dx, y):
+                put(px + dx, y, PZ, "nether_portal[axis=x]")
+                put(px + dx, y, PZ - 1, "obsidian")
+    # columns: 2x2 quartz shafts on deepslate bases with chiseled capitals, either side
+    for s_ in (-1, 1):
+        for cx in (px + s_ * 5, px + s_ * 6):
+            for z in (PZ, PZ + 1):
+                put(cx, y0, z, "polished_deepslate")
+                put(cx, y0 + 1, z, stairs("polished_deepslate", "south" if z > PZ else "north"))
+                for y in range(y0 + 2, y0 + 10):
+                    put(cx, y, z, "quartz_pillar[axis=y]")
+                put(cx, y0 + 10, z, "chiseled_quartz_block")
+                put(cx, y0 + 11, z, "polished_deepslate")
+        # banner on the outer face of each column pair
+        put(px + s_ * 5, y0 + 8, PZ + 2, f"{c}_wall_banner[facing=south]")
+        put(px + s_ * 6, y0 + 8, PZ + 2, f"{c}_wall_banner[facing=south]")
+        # finial on the column
+        put(px + s_ * 5 + (s_ > 0), y0 + 12, PZ, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
+        put(px + s_ * 5 + (s_ > 0), y0 + 13, PZ, "lantern[hanging=false,waterlogged=false]")
+    # cornice across the top
+    for dx in range(-7, 8):
+        put(px + dx, y0 + 12, PZ, "polished_deepslate")
+        put(px + dx, y0 + 12, PZ - 1, "polished_deepslate")
+        put(px + dx, y0 + 12, PZ + 1, stairs("smooth_quartz", "south", "top"))
+        put(px + dx, y0 + 12, PZ + 2, "smooth_quartz_slab[type=top,waterlogged=false]") if abs(dx) <= 6 else None
+    # stepped gable: tiles inside, deepslate-tile stairs on the slopes, quartz edge
+    for k in range(0, 7):
+        y = y0 + 13 + k
+        w = 6 - k
+        for dx in range(-w, w + 1):
+            for z in (PZ, PZ - 1):
+                put(px + dx, y, z, "deepslate_tiles")
+        if w >= 0:
+            put(px - w - 1, y, PZ, stairs("polished_deepslate", "east"))
+            put(px + w + 1, y, PZ, stairs("polished_deepslate", "west"))
+            put(px - w - 1, y, PZ - 1, stairs("polished_deepslate", "east"))
+            put(px + w + 1, y, PZ - 1, stairs("polished_deepslate", "west"))
+            put(px - w - 1, y, PZ + 1, stairs("smooth_quartz", "east"))
+            put(px + w + 1, y, PZ + 1, stairs("smooth_quartz", "west"))
+    put(px, y0 + 20, PZ, "chiseled_quartz_block")
+    put(px, y0 + 21, PZ, "end_rod[facing=up]")
+    # rose window in the gable (radius ~2), lit from behind
+    for dx in range(-2, 3):
+        for dy in range(-2, 3):
+            if dx * dx + dy * dy <= 5:
+                y = y0 + 15 + dy
+                put(px + dx, y, PZ, f"{c}_stained_glass")
+                put(px + dx, y, PZ - 1, "sea_lantern")
+            elif dx * dx + dy * dy <= 8:
+                put(px + dx, y0 + 15 + dy, PZ, "smooth_quartz")
+    # carpet runner + low steps in front
+    for z in range(PZ + 1, PZ + 7):
+        for dx in range(-2, 3):
+            put(px + dx, TERRACE_Y, z, "polished_deepslate")
+            put(px + dx, TERRACE_Y + 1, z, f"{c}_carpet" if abs(dx) <= 1 else "smooth_quartz_slab[type=bottom,waterlogged=false]")
+    # lamp posts flanking the runner
+    for s_ in (-1, 1):
+        x = px + s_ * 4
+        put(x, TERRACE_Y + 1, PZ + 5, "polished_deepslate")
+        put(x, TERRACE_Y + 2, PZ + 5, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
+        put(x, TERRACE_Y + 3, PZ + 5, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
+        put(x, TERRACE_Y + 4, PZ + 5, "lantern[hanging=false,waterlogged=false]")
+        put(x, TERRACE_Y - 1, PZ + 5, "sea_lantern")
 
 
 for realm, px in PORTALS:
-    portal(px, realm)
+    gate(px, realm)
 
 # realm spotlights: a coloured beacon beam straight up behind every portal (seen from anywhere on the island)
 BEAM = {"skyblock": "lime_stained_glass", "factions": "red_stained_glass", "cannons": "orange_stained_glass", "smp": "light_blue_stained_glass"}
@@ -586,20 +624,6 @@ def grove(cx, cz, side, seed):
 
 
 grove(31, -25, 1, 501)
-# crystal planters between the portals on the Gallery
-for i, gx in enumerate((-18, 0, 18)):
-    gz = PORTAL_Z - 2
-    for dx in range(-2, 3):
-        for dz in range(-2, 3):
-            edge = abs(dx) == 2 or abs(dz) == 2
-            put(gx + dx, TERRACE_Y + 1, gz + dz, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]" if edge else "amethyst_block")
-    for dx, dz in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
-        put(gx + dx, TERRACE_Y + 2, gz + dz, "amethyst_cluster[facing=up,waterlogged=false]")
-    _floor = FLOOR
-    FLOOR = TERRACE_Y + 1
-    spire(gx, gz, 9 if gx == 0 else 7, 1.4, 600 + i)
-    FLOOR = _floor
-    put(gx, TERRACE_Y, gz, "sea_lantern")
 grove(-31, -25, -1, 503)
 
 # small planters with azaleas between the plaza and the side beds (south-east / south-west lawns)
@@ -657,8 +681,7 @@ for a_deg in (0, 180, 60, 120, 225, 315):
 
 # ======================================================================= parkour (helix around the island, starts at the east arch)
 PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 58, 0, -300, 80, 30
-PK_MATS = ["purpur_block", "amethyst_block", "light_blue_stained_glass", "sea_lantern", "purple_stained_glass",
-           "polished_blackstone_bricks", "pearlescent_froglight", "cyan_concrete", "magenta_stained_glass"]
+PK_MATS = ["polished_deepslate", "smooth_quartz", "polished_deepslate", "amethyst_block"]
 parkour = {"start": None, "checkpoints": [], "finish": None, "entrance": None}
 
 
@@ -846,7 +869,7 @@ def sky_sign(out):
             out[(px, py, sz + 2)] = "minecraft:light[level=15,waterlogged=false]"
 
 
-sky_sign(blocks)
+# (sky sign removed in v14: the floating logo hologram is the brand now)
 
 # ======================================================================= write
 blocks = {k: v for k, v in blocks.items() if v != "minecraft:air"}

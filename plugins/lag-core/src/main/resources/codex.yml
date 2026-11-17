@@ -1,0 +1,158 @@
+# The Relapse Codex: the book in every player's hub hotbar (slot 3). MiniMessage, one entry per page.
+# Book pages are parchment: use dark colours. About 19 characters per line, 14 lines per page.
+title: "The Relapse Codex"
+author: "RelapsedMC"
+pages:
+  - |-
+
+
+    <#5B1FA0><bold>   THE RELAPSE</bold>
+    <#7A6A90>      ─ codex ─
+
+
+
+    <#2B2238>The story of the
+    network, and of the
+    world that keeps on
+    breaking.
+
+
+    <#7A6A90><italic>       turn the page
+  - |-
+    <#5B1FA0><bold>CONTENTS</bold>
+
+    <click:change_page:3><#2B2238>I.   The Relapse</click>
+    <click:change_page:5><#2E7D32>II.  Skyblock</click>
+    <click:change_page:6><#B71C1C>III. Factions</click>
+    <click:change_page:7><#C25E00>IV.  Cannons</click>
+    <click:change_page:8><#0B6E8C>V.   SMP</click>
+    <click:change_page:9><#5B1FA0>VI.  One Network</click>
+    <click:change_page:10><#2B2238>VII. Our Word</click>
+
+
+    <#7A6A90><italic>Click a chapter.
+  - |-
+    <#5B1FA0><bold>I. THE RELAPSE</bold>
+
+    <#2B2238>The old world did
+    not end all at once.
+
+    It cracked. A little
+    more every season,
+    until the ground
+    itself gave way.
+
+    What was left split
+    in two: the world
+    that held, and the
+    world that rotted.
+  - |-
+    <#2B2238>The ones who stayed
+    learned the only
+    rule here:
+
+    <#5B1FA0><bold>nothing lasts.</bold>
+
+    <#2B2238>Maps burn. Islands
+    sink. Empires are
+    raided into dust.
+
+    And every time, they
+    come back for one
+    more run.
+
+    <#5B1FA0><italic>Nobody quits.
+    Everybody relapses.
+  - |-
+    <#2E7D32><bold>II. SKYBLOCK</bold>
+    <#7A6A90><italic>The Void</italic>
+
+    <#2B2238>When the rotten
+    world collapsed, the
+    pieces that didn't
+    fall became islands.
+    Every month the void
+    takes them back.
+
+    <#2E7D32>■ <#2B2238>4-player islands
+    <#2E7D32>■ <#2B2238>13 spawner tiers
+    <#2E7D32>■ <#2B2238>8 ore generators
+    <#2E7D32>■ <#2B2238>The Pit, at spawn
+    <#2E7D32>■ <#2B2238>Season prizes
+  - |-
+    <#B71C1C><bold>III. FACTIONS</bold>
+    <#7A6A90><italic>{map}</italic>
+
+    <#2B2238>Two worlds to fight
+    over: Classic, and
+    the Corrupted half.
+    Shields hold for 18
+    hours. Then the
+    walls come down.
+
+    <#B71C1C>■ <#2B2238>8-man factions
+    <#B71C1C>■ <#2B2238>No allies
+    <#B71C1C>■ <#2B2238>KOTH netherite
+    <#B71C1C>■ <#2B2238>F-top pays out
+  - |-
+    <#C25E00><bold>IV. CANNONS</bold>
+    <#7A6A90><italic>The Range</italic>
+
+    <#2B2238>Every raid starts
+    here. Same cannon
+    mechanics as the
+    Factions server, so
+    what works here works
+    there.
+
+    <#C25E00>■ <#2B2238>512×512 plots
+    <#C25E00>■ <#2B2238>Free /tntfill
+    <#C25E00>■ <#2B2238>Upload your schems
+
+    <#7A6A90><italic>Build it here.
+    Raid with it there.
+  - |-
+    <#0B6E8C><bold>V. SMP</bold>
+    <#7A6A90><italic>The Haven</italic>
+
+    <#2B2238>The one place the
+    Relapse never
+    touches. This world
+    never resets.
+
+    <#0B6E8C>■ <#2B2238>Claim your land
+    <#0B6E8C>■ <#2B2238>Trust your people
+    <#0B6E8C>■ <#2B2238>No griefing
+    <#0B6E8C>■ <#2B2238>Homes, tpa, rtp
+
+    <#7A6A90><italic>Build something
+    that lasts.
+  - |-
+    <#5B1FA0><bold>VI. ONE NETWORK</bold>
+
+    <#2B2238>Your crew follows
+    you everywhere.
+
+    <#5B1FA0>/team create
+    <#2B2238> start a crew
+    <#5B1FA0>/team invite
+    <#2B2238> bring them in
+    <#5B1FA0>/team chat
+    <#2B2238> talk, any server
+    <#5B1FA0>/hub
+    <#2B2238> back here
+  - |-
+    <#5B1FA0><bold>VII. OUR WORD</bold>
+
+    <#2B2238>No pay-to-win.
+    <bold>Ever.</bold>
+
+    Ranks are cosmetic
+    and convenience.
+    Prizes are earned,
+    never bought.
+
+    The RelapsedMC
+    Client is free.
+
+    <#7A6A90><italic>See you in there.
