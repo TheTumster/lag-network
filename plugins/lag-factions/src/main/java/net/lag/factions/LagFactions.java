@@ -41,6 +41,12 @@ public final class LagFactions extends JavaPlugin implements Listener {
 	Outpost outpost;
 
 	@Override
+	public void onLoad() {
+		// before FactionsUUID enables and reads its message files
+		if (getConfig().getBoolean("theme-messages", true)) Theme.apply(getDataFolder().getParentFile(), getLogger());
+	}
+
+	@Override
 	public void onDisable() {
 		if (chest != null) chest.saveAll();
 	}

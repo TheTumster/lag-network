@@ -61,3 +61,6 @@ outpost:
   enabled: true
   boost: 25
   rebuild-minutes: 30
+
+# Recolour FactionsUUID's own messages to the RelapsedMC palette on every start.
+theme-messages: true
