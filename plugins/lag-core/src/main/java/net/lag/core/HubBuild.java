@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 12; // v12: hub v4 "the Gallery" (portal row, the Well + Crystal, groves)
+	static final int BUILD_VERSION = 13; // v13: realm info boards, lore panels, realm spotlights, higher sky sign
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
@@ -147,7 +147,7 @@ final class HubBuild implements Listener {
 			int cleared = 0;
 			for (int x = ox - 120; x <= ox + 120; x++) {
 				for (int z = oz - 150; z <= oz + 110; z++) {
-					for (int y = oy - 60; y <= oy + 100; y++) { // +100: the sky sign (top at +86)
+					for (int y = oy - 60; y <= oy + 120; y++) { // +120: the sky sign (top at +104)
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
 							b.setBlockData(air, false);
@@ -263,7 +263,9 @@ final class HubBuild implements Listener {
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
 			String text = String.valueOf(m.get("text"));
 			float scale = m.containsKey("scale") ? (float) num(m.get("scale")) : 1.5f;
-			text(at, text, scale);
+			// optional: yaw (fixed boards face this way; 180 = faces south toward spawn), billboard, background, width
+			if (m.containsKey("yaw")) at.setYaw((float) num(m.get("yaw")));
+			text(at, text, scale, m);
 		}
 		// parkour start (leaderboard) + finish
 		if (plugin.parkour != null) {
@@ -346,21 +348,47 @@ final class HubBuild implements Listener {
 	}
 
 	private void text(Location at, String text, float scale) {
+		text(at, text, scale, java.util.Map.of());
+	}
+
+	/** Hologram options: billboard center|fixed|vertical|horizontal, background "#AARRGGBB" / "#RRGGBB" (a panel behind
+	 *  the text for contrast), width (line width in px), bob false (fixed boards shouldn't float), see-through. */
+	private void text(Location at, String text, float scale, Map<?, ?> opt) {
 		at.getChunk().load();
+		Display.Billboard bb = Display.Billboard.CENTER;
+		if (opt.containsKey("billboard")) {
+			try {
+				bb = Display.Billboard.valueOf(String.valueOf(opt.get("billboard")).toUpperCase(java.util.Locale.ROOT));
+			} catch (IllegalArgumentException ignored) { }
+		}
+		final Display.Billboard billboard = bb;
+		org.bukkit.Color bg = org.bukkit.Color.fromARGB(0, 0, 0, 0);
+		if (opt.containsKey("background")) {
+			String h = String.valueOf(opt.get("background")).replace("#", "");
+			long v = Long.parseLong(h, 16);
+			bg = h.length() <= 6 ? org.bukkit.Color.fromARGB(0xB0, (int) (v >> 16) & 255, (int) (v >> 8) & 255, (int) v & 255)
+					: org.bukkit.Color.fromARGB((int) (v >> 24) & 255, (int) (v >> 16) & 255, (int) (v >> 8) & 255, (int) v & 255);
+		}
+		final org.bukkit.Color background = bg;
+		final int width = opt.containsKey("width") ? (int) num(opt.get("width")) : 400;
+		final boolean seeThrough = Boolean.TRUE.equals(opt.get("see-through"));
 		TextDisplay d = at.getWorld().spawn(at, TextDisplay.class, t -> {
 			t.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
 			t.setPersistent(false);
-			t.setBillboard(Display.Billboard.CENTER);
+			t.setBillboard(billboard);
 			t.setShadowed(true);
-			t.setSeeThrough(false);
+			t.setSeeThrough(seeThrough);
 			t.setDefaultBackground(false);
-			t.setBackgroundColor(org.bukkit.Color.fromARGB(0, 0, 0, 0));
-			t.setLineWidth(400);
+			t.setBackgroundColor(background);
+			t.setLineWidth(width);
+			t.setAlignment(TextDisplay.TextAlignment.CENTER);
+			if (background.getAlpha() > 0) t.setBrightness(new Display.Brightness(15, 15)); // panels stay readable at night
 			t.setViewRange(4f);
 			t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
 		});
 		live.put(d, text);
-		liveScale.put(d, scale);
+		if (!Boolean.FALSE.equals(opt.get("bob"))) liveScale.put(d, scale);
+		else d.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
 	}
 
 	private static double num(Object o) {
