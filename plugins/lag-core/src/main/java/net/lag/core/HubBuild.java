@@ -147,7 +147,7 @@ final class HubBuild implements Listener {
 			int cleared = 0;
 			for (int x = ox - 120; x <= ox + 120; x++) {
 				for (int z = oz - 150; z <= oz + 110; z++) {
-					for (int y = oy - 60; y <= oy + 80; y++) { // +80: the sky sign
+					for (int y = oy - 60; y <= oy + 100; y++) { // +100: the sky sign (top at +86)
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
 							b.setBlockData(air, false);
