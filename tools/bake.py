@@ -532,6 +532,9 @@ def main():
                      os.path.join("plugins", ".paper-remapped"), "hub_void", "hub_void_nether", "hub_void_the_end",
                      "bskyblock_world", "bskyblock_world_nether", "bskyblock_world_the_end",
                      os.path.join("plugins", "BentoBox", "database"), "plots", os.path.join("plugins", "laGCannons", "plots.yml"),
+                     "outpost", os.path.join("plugins", "laGFactions", "outpost.yml"), os.path.join("plugins", "laGFactions", "ftop.yml"),
+                     os.path.join("plugins", "laGFactions", "shields.yml"), os.path.join("plugins", "laGFactions", "upgrades.yml"),
+                     os.path.join("plugins", "laGFactions", "chests"),
                      os.path.join("plugins", "WorldGuard", "worlds")):
             pth = os.path.join(DIST, s, junk)
             if os.path.isdir(pth):
