@@ -388,6 +388,18 @@ def portal(px, realm):
 for realm, px in PORTALS:
     portal(px, realm)
 
+# realm spotlights: a coloured beacon beam straight up behind every portal (seen from anywhere on the island)
+BEAM = {"skyblock": "lime_stained_glass", "factions": "red_stained_glass", "cannons": "orange_stained_glass", "smp": "light_blue_stained_glass"}
+for realm, px in PORTALS:
+    bz = PORTAL_Z - 3
+    for dx in range(-1, 2):
+        for dz in range(-1, 2):
+            put(px + dx, TERRACE_Y - 1, bz + dz, "iron_block")
+    put(px, TERRACE_Y, bz, "beacon")
+    put(px, TERRACE_Y + 1, bz, BEAM[realm])
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        put(px + dx, TERRACE_Y + 1, bz + dz, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+
 # back wall of the Gallery: low colonnade with hanging lanterns between the portals
 for x in range(-41, 42):
     z = TERRACE_Z1 + 1
@@ -817,7 +829,7 @@ def sky_sign(out):
     big = 3
     width = 8 * 6 * big - big
     x0 = -width // 2
-    top = 86
+    top = 104
     cols, xend = word("RELAPSED", big, x0, top, "white_concrete")
     bar_y = top - 7 * big - 2
     for x in range(x0, xend + 1):
