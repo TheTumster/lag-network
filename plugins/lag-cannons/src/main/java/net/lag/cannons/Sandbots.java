@@ -66,6 +66,19 @@ final class Sandbots implements Listener {
 		UUID entity;
 		int every = 0;    // ticks between refills; 0 = server default
 		int counter = 0;
+		int[][] coords;   // parsed spots (rebuilt when spots change)
+
+		int[][] coords() {
+			if (coords == null || coords.length != spots.size()) {
+				coords = new int[spots.size()][];
+				int i = 0;
+				for (String s : spots) {
+					String[] p = s.split(",");
+					coords[i++] = new int[] {Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2])};
+				}
+			}
+			return coords;
+		}
 
 		Location loc() {
 			World w = Bukkit.getWorld(world);
@@ -116,21 +129,47 @@ final class Sandbots implements Listener {
 		return m != null && m.hasGravity() ? m : Material.SAND;
 	}
 
+	private int rotate = 0;
+
+	/**
+	 * Refill bots. Lag guards: a bot only runs while a player is within sandbots.active-range blocks (idle bots cost
+	 * nothing), bots start on different ticks, and at most sandbots.max-sand-per-tick blocks are placed per tick across
+	 * the server, taking turns so one huge bot can't spike a tick.
+	 */
 	private void refill() {
 		Material mat = material();
 		int def = Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 2));
-		for (Bot b : bots.values()) {
+		double range = plugin.getConfig().getDouble("sandbots.active-range", 96);
+		int budget = plugin.getConfig().getInt("sandbots.max-sand-per-tick", 512);
+		java.util.List<Bot> list = new java.util.ArrayList<>(bots.values());
+		if (list.isEmpty()) return;
+		rotate = (rotate + 1) % list.size();
+		for (int n = 0; n < list.size() && budget > 0; n++) {
+			Bot b = list.get((n + rotate) % list.size());
 			if (!b.active) continue;
 			if (++b.counter < (b.every > 0 ? b.every : def)) continue;
 			b.counter = 0;
 			World w = Bukkit.getWorld(b.world);
 			if (w == null || !w.isChunkLoaded((int) Math.floor(b.x) >> 4, (int) Math.floor(b.z) >> 4)) continue;
-			for (String s : b.spots) {
-				String[] p = s.split(",");
-				Block blk = w.getBlockAt(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
-				if (blk.getType().isAir()) blk.setType(mat, true);
+			if (!someoneNear(w, b, range)) continue;
+			for (int[] c : b.coords()) {
+				Block blk = w.getBlockAt(c[0], c[1], c[2]);
+				if (blk.getType().isAir()) {
+					blk.setType(mat, true);
+					if (--budget <= 0) break;
+				}
 			}
 		}
+	}
+
+	private static boolean someoneNear(World w, Bot b, double range) {
+		double r2 = range * range;
+		for (Player p : w.getPlayers()) {
+			Location l = p.getLocation();
+			double dx = l.getX() - b.x, dz = l.getZ() - b.z;
+			if (dx * dx + dz * dz <= r2) return true;
+		}
+		return false;
 	}
 
 	private void showSpots() {
@@ -254,6 +293,7 @@ final class Sandbots implements Listener {
 		Block spot = e.getClickedBlock().getRelative(e.getBlockFace());
 		String key = spot.getX() + "," + spot.getY() + "," + spot.getZ();
 		if (b.spots.remove(key)) {
+			b.coords = null;
 			say(p, "<gray>Spot removed <dark_gray>(" + b.spots.size() + ")");
 		} else {
 			Location bl = b.loc();
@@ -271,6 +311,7 @@ final class Sandbots implements Listener {
 				return;
 			}
 			b.spots.add(key);
+			b.coords = null;
 			p.playSound(p.getLocation(), Sound.BLOCK_SAND_PLACE, 0.8f, 1.4f);
 			say(p, "<#38E0FF>Spot added <dark_gray>(" + b.spots.size() + ")");
 		}
@@ -359,6 +400,7 @@ final class Sandbots implements Listener {
 				if (b == null) say(p, "<red>No sandbot of yours within 8 blocks.");
 				else {
 					b.spots.clear();
+					b.coords = null;
 					spawnEntity(b);
 					save();
 					say(p, "<gray>All spots cleared.");

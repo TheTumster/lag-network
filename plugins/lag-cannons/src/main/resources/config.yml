@@ -64,6 +64,10 @@ sandbots:
   # Max spots one bot can manage, and max bots per player.
   max-spots: 64
   max-bots-per-player: 5
+  # Lag guards: bots only run while a player is within this many blocks, and the whole server places at most
+  # this many blocks per tick (bots take turns).
+  active-range: 96
+  max-sand-per-tick: 512
   # Spots must be within this many blocks of the bot.
   range: 16
   # What they place. SAND, RED_SAND, GRAVEL, or any *_CONCRETE_POWDER.
@@ -159,3 +163,8 @@ relapse:
 # quick toggles. Hidden stuff isn't sent to that player's client at all, the server still runs the cannon normally.
 fps-menu:
   enabled: true
+
+# Lit TNT / falling sand is removed as soon as its chunk stops ticking (player flew away), so a frozen shot can't
+# finish its fuse inside a cannon when someone comes back.
+cannons:
+  remove-frozen-tnt: true
