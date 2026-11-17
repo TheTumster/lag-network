@@ -164,7 +164,12 @@ relapse:
 fps-menu:
   enabled: true
 
-# Lit TNT / falling sand is removed as soon as its chunk stops ticking (player flew away), so a frozen shot can't
-# finish its fuse inside a cannon when someone comes back.
+# TNT loads the cannon: lit TNT / falling sand keep their chunk and the chunks around it (radius) loaded and running,
+# so a cannon keeps working when its owner flies away and no shot is left frozen to go off inside it later.
+# max-seconds: a chunk is held at most this long with nobody around (stops clock cannons being free chunk loaders).
 cannons:
-  remove-frozen-tnt: true
+  tnt-chunk-loading:
+    enabled: true
+    radius: 1
+    max-seconds: 30
+    release-ticks: 100

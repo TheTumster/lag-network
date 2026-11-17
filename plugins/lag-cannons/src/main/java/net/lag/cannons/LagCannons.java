@@ -71,7 +71,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(protect, this);
 		getServer().getPluginManager().registerEvents(new PistonOrder(this), this);
 		getServer().getPluginManager().registerEvents(new NoSandDrops(this), this);
-		getServer().getPluginManager().registerEvents(new FrozenTnt(this), this);
+		new TntChunkLoader(this); // TNT keeps its cannon loaded
 		getServer().getPluginManager().registerEvents(new BannedItems(this), this);
 		// Relapse ruleset: no allies/truces, alts (needs FactionsUUID), P4/U3 cap, KOTH-only netherite
 		getServer().getPluginManager().registerEvents(new Alts(this), this);
