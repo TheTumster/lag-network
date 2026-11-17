@@ -115,6 +115,18 @@ final class FTop implements Listener, Supplier<String> {
 		} catch (IOException ignored) { }
 	}
 
+	/** 1-based F-top place (0 = not ranked yet). */
+	int rank(Faction f) {
+		List<Object[]> r = ranking;
+		for (int i = 0; i < r.size(); i++) if (((Faction) r.get(i)[0]).id() == f.id()) return i + 1;
+		return 0;
+	}
+
+	double value(Faction f) {
+		for (Object[] o : ranking) if (((Faction) o[0]).id() == f.id()) return (double) o[1];
+		return 0;
+	}
+
 	@Override
 	public String get() {
 		return hologram;

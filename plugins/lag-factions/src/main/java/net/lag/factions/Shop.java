@@ -44,6 +44,8 @@ final class Shop implements Listener {
 			Material.NETHERRACK, Material.SOUL_SAND, Material.SOUL_SOIL, Material.CLAY, Material.MYCELIUM, Material.COARSE_DIRT, Material.PODZOL,
 			Material.ROOTED_DIRT, Material.MUD, Material.SNOW_BLOCK, Material.END_STONE, Material.DIRT_PATH);
 
+	private static final java.util.Map<String, Double> DEFAULT_PICKS = java.util.Map.of("trench3", 150000.0, "trench5", 500000.0, "tray3", 75000.0, "tray5", 250000.0);
+
 	Shop(LagFactions plugin) {
 		this.plugin = plugin;
 		this.spawnerKey = new NamespacedKey(plugin, "spawner");
@@ -122,9 +124,15 @@ final class Shop implements Listener {
 		int[] pslots = {38, 39, 41, 42};
 		for (int k = 0; k < picks.length; k++) {
 			String kind = picks[k];
-			double price = plugin.getConfig().getDouble("shop.picks." + kind, 0);
-			if (price <= 0) continue;
-			ItemStack icon = pick(kind);
+			double cfg = plugin.getConfig().getDouble("shop.picks." + kind, DEFAULT_PICKS.getOrDefault(kind, 0.0));
+			final double price = cfg > 0 ? cfg : DEFAULT_PICKS.getOrDefault(kind, 0.0);
+			ItemStack icon;
+			try {
+				icon = pick(kind);
+			} catch (Exception ex) {
+				plugin.getLogger().warning("Shop: couldn't make " + kind + ": " + ex);
+				continue;
+			}
 			ItemMeta m = icon.getItemMeta();
 			List<net.kyori.adventure.text.Component> lore = new ArrayList<>(m.lore());
 			lore.add(net.kyori.adventure.text.Component.empty());
@@ -137,6 +145,8 @@ final class Shop implements Listener {
 					() -> open(c.player()), payer -> give(payer, pick(kind))));
 		}
 		g.set(4, Ui.item(Material.EMERALD, true, "<white><bold>SHOP", Ui.LABEL + "Pay with your money or the", Ui.LABEL + "faction bank (mods and up)."));
+		g.set(9, Ui.item(Material.SPAWNER, Ui.GOLD + "<bold>SPAWNERS", Ui.LABEL + "Keep their mob when placed.", Ui.LABEL + "Silk touch picks them up."));
+		g.set(36, Ui.item(Material.DIAMOND_PICKAXE, Ui.PURPLE + "<bold>TOOLS", Ui.LABEL + "Tray + trench pickaxes.", Ui.LABEL + "Sneak to break one block."));
 		g.set(49, Ui.item(Material.ARROW, Ui.LABEL + "Back to /f menu"), c -> plugin.menu.open(c.player()));
 		g.open(p);
 	}
