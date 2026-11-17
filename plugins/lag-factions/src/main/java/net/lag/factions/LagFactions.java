@@ -25,6 +25,7 @@ import dev.kitteh.factions.Faction;
  *   /f shield        raid window picker (EST), shield status
  *   /f who [name]    clean faction card (FactionsUUID's /f show)
  *   /f map           clickable chunk map, click to claim
+ *   /f upgrades /f shop /f chest /f top /f perms /f outpost
  */
 public final class LagFactions extends JavaPlugin implements Listener {
 	private static final Set<String> ROOTS = Set.of("f", "fac", "faction", "factions");
@@ -66,6 +67,7 @@ public final class LagFactions extends JavaPlugin implements Listener {
 		pm.registerEvents(chest, this);
 		pm.registerEvents(shop, this);
 		pm.registerEvents(top, this);
+		pm.registerEvents(outpost, this);
 		pm.registerEvents(new Gui.Events(), this);
 		// scoreboard line for laGCore ("shield" service: player -> MiniMessage status, "" if factionless)
 		Function<Player, String> shieldLine = p -> {
@@ -103,6 +105,7 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			case "chest", "pv" -> { e.setCancelled(true); chest.open(p); }
 			case "top", "ftop" -> { if (a.length > 2) return; e.setCancelled(true); top.open(p); }
 			case "perms", "perm", "permissions" -> { e.setCancelled(true); perms.open(p); }
+			case "outpost", "op" -> { e.setCancelled(true); outpost.open(p); }
 			case "set" -> {
 				// ClassicFactions turns /f perms into /f set perm; with no further arguments that's our menu
 				if (a.length == 3 && (a[2].equalsIgnoreCase("perm") || a[2].equalsIgnoreCase("perms"))) { e.setCancelled(true); perms.open(p); }
@@ -130,6 +133,11 @@ public final class LagFactions extends JavaPlugin implements Listener {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (args.length > 1 && args[0].equalsIgnoreCase("outpost") && args[1].equalsIgnoreCase("rebuild")) {
+			outpost.startRebuild();
+			Ui.msg(sender, "Outpost rebuilding.");
+			return true;
+		}
 		if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
 			reloadConfig();
 			Ui.msg(sender, "Reloaded.");

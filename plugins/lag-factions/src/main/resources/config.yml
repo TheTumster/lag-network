@@ -54,3 +54,10 @@ spawners:
 ftop:
   default-spawner-value: 10000
   spawner-values: {}
+
+# Raiding outpost (its own world "outpost"): break the core (beacon) to capture; owners get this % faster spawners
+# and farms. After a capture the fortress rebuilds over rebuild-minutes. /lf outpost rebuild forces a rebuild.
+outpost:
+  enabled: true
+  boost: 25
+  rebuild-minutes: 30
