@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 11; // v11: sky sign closer + higher
+	static final int BUILD_VERSION = 12; // v12: hub v4 "the Gallery" (portal row, the Well + Crystal, groves)
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
