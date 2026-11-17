@@ -211,13 +211,10 @@ for x in range(CX - 7, CX + 8):
         elif d <= 3.5:
             put(x, FLOOR, z, "polished_deepslate" if d > 1.5 else "deepslate_tiles")
 # beacon at the centre, flush with the floor, iron pyramid below, beam goes up through the crystal glass
-put(CX, FLOOR, CZ, "beacon")
-for dx in range(-1, 2):
-    for dz in range(-1, 2):
-        put(CX + dx, FLOOR - 1, CZ + dz, "iron_block")
-for dx in range(-2, 3):
-    for dz in range(-2, 3):
-        put(CX + dx, FLOOR - 2, CZ + dz, "iron_block")
+# (no beacon block: its beam stood like a pole right in front of spawn. The plugin's particle helix still runs here.)
+put(CX, FLOOR, CZ, "pearlescent_froglight")
+for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+    put(CX + dx, FLOOR, CZ + dz, "amethyst_block")
 
 # ---- the spawn dais (0,0): top at y=0, stairs all round
 for x in range(-4, 5):
@@ -290,21 +287,6 @@ for ring, (rad, tilt, n, y0) in enumerate(((13, 0.18, 16, CR_Y + 10), (18, -0.12
         put(x, y - 1, z, "amethyst_cluster[facing=down,waterlogged=false]")
         if i % 2 == 0:
             put(x, y + 1, z, "amethyst_cluster[facing=up,waterlogged=false]")
-# chains from the crystal's lower tip to the well rim (it's "held" over the pool)
-for k in range(4):
-    a = k / 4 * math.pi * 2 + math.pi / 4
-    for t in range(0, 12):
-        f = t / 11
-        x = round(CX + 6.5 * math.cos(a) * (1 - f) + 1.5 * math.cos(a) * f)
-        z = round(CZ + 6.5 * math.sin(a) * (1 - f) + 1.5 * math.sin(a) * f)
-        y = round(FLOOR + 2 + (CR_Y + 2 - FLOOR - 2) * f)
-        if get(x, y, z) is None:
-            put(x, y, z, "iron_chain[axis=y,waterlogged=false]")
-    # anchor post where each chain meets the rim
-    ax, az = round(CX + 7 * math.cos(a)), round(CZ + 7 * math.sin(a))
-    put(ax, FLOOR + 1, az, "chiseled_polished_blackstone")
-    put(ax, FLOOR + 2, az, "amethyst_block")
-
 # ======================================================================= the Gallery terrace + realm portals
 for x in range(-41, 42):
     for z in range(TERRACE_Z1, TERRACE_Z0 + 1):
@@ -312,7 +294,15 @@ for x in range(-41, 42):
             continue
         for y in range(FLOOR, TERRACE_Y):
             put(x, y, z, "polished_deepslate")
-        b = "deepslate_tiles" if (x // 3 + z // 3) % 2 else "polished_deepslate"
+        # mosaic: tiles with a diamond lattice of blackstone, glowing glass studs where the lattice crosses
+        u, v = (x + z) % 8, (x - z) % 8
+        if u == 0 and v == 0:
+            b = "purple_stained_glass"
+            put(x, TERRACE_Y - 1, z, "sea_lantern")
+        elif u == 0 or v == 0:
+            b = "polished_blackstone"
+        else:
+            b = "deepslate_tiles"
         put(x, TERRACE_Y, z, b)
 # retaining wall face + wide stairs up in the middle and at each portal
 for x in range(-41, 42):
@@ -584,6 +574,20 @@ def grove(cx, cz, side, seed):
 
 
 grove(31, -25, 1, 501)
+# crystal planters between the portals on the Gallery
+for i, gx in enumerate((-18, 0, 18)):
+    gz = PORTAL_Z - 2
+    for dx in range(-2, 3):
+        for dz in range(-2, 3):
+            edge = abs(dx) == 2 or abs(dz) == 2
+            put(gx + dx, TERRACE_Y + 1, gz + dz, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]" if edge else "amethyst_block")
+    for dx, dz in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+        put(gx + dx, TERRACE_Y + 2, gz + dz, "amethyst_cluster[facing=up,waterlogged=false]")
+    _floor = FLOOR
+    FLOOR = TERRACE_Y + 1
+    spire(gx, gz, 9 if gx == 0 else 7, 1.4, 600 + i)
+    FLOOR = _floor
+    put(gx, TERRACE_Y, gz, "sea_lantern")
 grove(-31, -25, -1, 503)
 
 # small planters with azaleas between the plaza and the side beds (south-east / south-west lawns)
@@ -788,7 +792,7 @@ SIGN_GRAD = ["light_blue_concrete", "cyan_concrete", "blue_concrete", "purple_co
 
 
 def sky_sign(out):
-    sz = -114
+    sz = -126
     def word(text, scale, x0, ytop, face):
         cols = []
         x = x0
@@ -813,7 +817,7 @@ def sky_sign(out):
     big = 3
     width = 8 * 6 * big - big
     x0 = -width // 2
-    top = 64
+    top = 86
     cols, xend = word("RELAPSED", big, x0, top, "white_concrete")
     bar_y = top - 7 * big - 2
     for x in range(x0, xend + 1):

@@ -262,7 +262,7 @@ hub:
     cannons: [9, 5, -38]
     smp: [27, 5, -38]
   # The beacon under the crystal (particle helix), from the spawn.
-  beacon: [0, -1, -12]
+  beacon: [0, -1, -12]  # no beacon block anymore; the particle helix still spirals up from the Well
   # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts,
   # {phase} = moving gradient (animates every 2 ticks), {logo} = the pack logo.
   holograms:
