@@ -321,106 +321,99 @@ for x in range(-40, 41):
         put(x, TERRACE_Y - 1, TERRACE_Z0 - 1, "sea_lantern")
 
 COLOR = {"skyblock": "lime", "factions": "red", "cannons": "orange", "smp": "light_blue"}
+WALLP = "polished_blackstone_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]"
 
 
 def gate(px, realm):
-    """A grand dark-stone gate: quartz columns, a pointed arch with a glowing realm-coloured outline,
-    a cornice, a stepped gable with a rose window (the realm icon floats in it), banners, and a carpet runner."""
+    """A dark gothic lancet gate: polished blackstone, a thin realm-coloured neon line around the opening and
+    around the whole silhouette (recessed behind a moulding), flanking pilasters with pinnacles, a medallion
+    near the apex for the realm icon, banners and a runner. Dark mass + thin light = premium, not cottage."""
     c = COLOR[realm]
+    neon = f"{c}_concrete"
     y0 = TERRACE_Y + 1
     PZ = PORTAL_Z
-    stairs = lambda m, f, half="bottom": f"{m}_stairs[facing={f},half={half},shape=straight,waterlogged=false]"
-    # pointed opening: half-width 2, sides rise to y0+6, then narrow to a point at y0+9
-    def opening(dx, y):
-        top = {0: 9, 1: 8, 2: 6}.get(abs(dx), -1)
-        return abs(dx) <= 2 and y0 <= y <= y0 + top
-    near = lambda dx, y: (not opening(dx, y)) and any(opening(dx + a, y + b) for a in (-1, 0, 1) for b in (-1, 0, 1))
-    # wall body (two deep: PZ and PZ-1), dx -4..4, up to the cornice
-    for dx in range(-4, 5):
-        for y in range(y0, y0 + 12):
-            for z in (PZ, PZ - 1):
-                if opening(dx, y):
-                    continue
-                put(px + dx, y, z, "deepslate_tiles" if (y + dx) % 7 else "cracked_deepslate_tiles")
-    # glowing outline: sea lanterns in the wall, realm glass in front
-    for dx in range(-3, 4):
-        for y in range(y0, y0 + 11):
-            if near(dx, y):
-                put(px + dx, y, PZ, "sea_lantern")
-                put(px + dx, y, PZ + 1, f"{c}_stained_glass")
-    # white archivolt one step further out (front face)
-    for dx in range(-4, 5):
-        for y in range(y0, y0 + 12):
-            if opening(dx, y) or near(dx, y):
+    TOP = [18, 18, 17, 16, 15, 14, 12]           # silhouette height (above y0) by |dx|
+
+    def inS(dx, dy):
+        return abs(dx) <= 6 and 0 <= dy <= TOP[abs(dx)]
+
+    def opening(dx, dy):
+        t = {0: 9, 1: 8, 2: 6}.get(abs(dx), -1)
+        return abs(dx) <= 2 and 0 <= dy <= t
+
+    def nb(f, dx, dy):
+        return any(f(dx + a, dy + b) for a in (-1, 0, 1) for b in (-1, 0, 1) if a or b)
+
+    ring1 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and nb(opening, dx, dy)
+    ring2 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and not ring1(dx, dy) and nb(ring1, dx, dy)
+    edge = lambda dx, dy: inS(dx, dy) and dy > 0 and any(not inS(dx + a, dy + b) for a, b in ((1, 0), (-1, 0), (0, 1)))
+    MED = (0, 14)                                # medallion centre (dx, dy)
+    med = lambda dx, dy: 1.4 <= math.hypot(dx - MED[0], dy - MED[1]) <= 2.2
+
+    for dx in range(-6, 7):
+        for dy in range(0, 19):
+            if not inS(dx, dy):
                 continue
-            if any(near(dx + a, y + b) for a in (-1, 0, 1) for b in (-1, 0, 1)):
-                put(px + dx, y, PZ + 1, "smooth_quartz")
-    # the portal
-    for dx in range(-2, 3):
-        for y in range(y0, y0 + 10):
-            if opening(dx, y):
-                put(px + dx, y, PZ, "nether_portal[axis=x]")
-                put(px + dx, y, PZ - 1, "obsidian")
-    # columns: 2x2 quartz shafts on deepslate bases with chiseled capitals, either side
+            x, y = px + dx, y0 + dy
+            if opening(dx, dy):
+                put(x, y, PZ, "nether_portal[axis=x]")
+                put(x, y, PZ - 1, "obsidian")
+                continue
+            body = "polished_blackstone_bricks" if h(x, y, 77) > 0.12 else "cracked_polished_blackstone_bricks"
+            put(x, y, PZ - 1, body)
+            if ring1(dx, dy) or edge(dx, dy) or med(dx, dy):
+                put(x, y, PZ, neon)                              # the neon line, recessed
+                if not edge(dx, dy):
+                    put(x, y, PZ + 1, "light[level=12,waterlogged=false]")
+            elif ring2(dx, dy):
+                put(x, y, PZ, body)
+                put(x, y, PZ + 1, "polished_blackstone")         # moulding stands proud of the neon
+            else:
+                put(x, y, PZ, body)
+    # medallion backplate (the icon floats in front of it)
+    for dx in range(-1, 2):
+        for dy in range(13, 16):
+            put(px + dx, y0 + dy, PZ, "chiseled_polished_blackstone" if (dx, dy) == (0, 14) else "polished_blackstone")
+    # pilasters: stand proud on both sides, carry banners, end in pinnacles
     for s_ in (-1, 1):
         for cx in (px + s_ * 5, px + s_ * 6):
-            for z in (PZ, PZ + 1):
-                put(cx, y0, z, "polished_deepslate")
-                put(cx, y0 + 1, z, stairs("polished_deepslate", "south" if z > PZ else "north"))
-                for y in range(y0 + 2, y0 + 10):
-                    put(cx, y, z, "quartz_pillar[axis=y]")
-                put(cx, y0 + 10, z, "chiseled_quartz_block")
-                put(cx, y0 + 11, z, "polished_deepslate")
-        # banner on the outer face of each column pair
-        put(px + s_ * 5, y0 + 8, PZ + 2, f"{c}_wall_banner[facing=south]")
-        put(px + s_ * 6, y0 + 8, PZ + 2, f"{c}_wall_banner[facing=south]")
-        # finial on the column
-        put(px + s_ * 5 + (s_ > 0), y0 + 12, PZ, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
-        put(px + s_ * 5 + (s_ > 0), y0 + 13, PZ, "lantern[hanging=false,waterlogged=false]")
-    # cornice across the top
-    for dx in range(-7, 8):
-        put(px + dx, y0 + 12, PZ, "polished_deepslate")
-        put(px + dx, y0 + 12, PZ - 1, "polished_deepslate")
-        put(px + dx, y0 + 12, PZ + 1, stairs("smooth_quartz", "south", "top"))
-        put(px + dx, y0 + 12, PZ + 2, "smooth_quartz_slab[type=top,waterlogged=false]") if abs(dx) <= 6 else None
-    # stepped gable: tiles inside, deepslate-tile stairs on the slopes, quartz edge
-    for k in range(0, 7):
-        y = y0 + 13 + k
-        w = 6 - k
-        for dx in range(-w, w + 1):
-            for z in (PZ, PZ - 1):
-                put(px + dx, y, z, "deepslate_tiles")
-        if w >= 0:
-            put(px - w - 1, y, PZ, stairs("polished_deepslate", "east"))
-            put(px + w + 1, y, PZ, stairs("polished_deepslate", "west"))
-            put(px - w - 1, y, PZ - 1, stairs("polished_deepslate", "east"))
-            put(px + w + 1, y, PZ - 1, stairs("polished_deepslate", "west"))
-            put(px - w - 1, y, PZ + 1, stairs("smooth_quartz", "east"))
-            put(px + w + 1, y, PZ + 1, stairs("smooth_quartz", "west"))
-    put(px, y0 + 20, PZ, "chiseled_quartz_block")
+            put(cx, y0, PZ + 1, "polished_blackstone")
+            put(cx, y0, PZ + 2, "polished_blackstone_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]")
+            for dy in range(1, 12):
+                put(cx, y0 + dy, PZ + 1, "chiseled_polished_blackstone" if dy in (5, 11) else "polished_blackstone_bricks")
+        put(px + s_ * 5, y0 + 9, PZ + 2, f"{c}_wall_banner[facing=south]")
+        put(px + s_ * 6, y0 + 9, PZ + 2, f"{c}_wall_banner[facing=south]")
+        pin = px + s_ * 6
+        put(pin, y0 + 12, PZ + 1, "polished_blackstone_bricks")
+        put(pin, y0 + 13, PZ + 1, WALLP)
+        put(pin, y0 + 14, PZ + 1, WALLP)
+        put(pin, y0 + 15, PZ + 1, neon)
+        put(pin, y0 + 16, PZ + 1, "end_rod[facing=up]")
+        put(pin, y0 + 12, PZ, "polished_blackstone_bricks")
+    # apex finial
+    put(px, y0 + 19, PZ, "chiseled_polished_blackstone")
+    put(px, y0 + 20, PZ, WALLP)
     put(px, y0 + 21, PZ, "end_rod[facing=up]")
-    # rose window in the gable (radius ~2), lit from behind
-    for dx in range(-2, 3):
-        for dy in range(-2, 3):
-            if dx * dx + dy * dy <= 5:
-                y = y0 + 15 + dy
-                put(px + dx, y, PZ, f"{c}_stained_glass")
-                put(px + dx, y, PZ - 1, "sea_lantern")
-            elif dx * dx + dy * dy <= 8:
-                put(px + dx, y0 + 15 + dy, PZ, "smooth_quartz")
-    # carpet runner + low steps in front
+    # back face: plain blackstone so the gate reads solid from the colonnade side
+    for dx in range(-6, 7):
+        for dy in range(0, 19):
+            if inS(dx, dy) and not opening(dx, dy):
+                put(px + dx, y0 + dy, PZ - 2, "polished_blackstone_bricks") if abs(dx) <= 5 and dy <= TOP[abs(dx)] - 1 else None
+    # runner: polished floor, realm carpet, dark slab kerbs, lamp posts
     for z in range(PZ + 1, PZ + 7):
-        for dx in range(-2, 3):
-            put(px + dx, TERRACE_Y, z, "polished_deepslate")
-            put(px + dx, TERRACE_Y + 1, z, f"{c}_carpet" if abs(dx) <= 1 else "smooth_quartz_slab[type=bottom,waterlogged=false]")
-    # lamp posts flanking the runner
+        for dx in range(-3, 4):
+            put(px + dx, TERRACE_Y, z, "polished_blackstone")
+            if abs(dx) <= 1:
+                put(px + dx, TERRACE_Y + 1, z, f"{c}_carpet")
+            elif abs(dx) == 3 and z > PZ + 2:
+                put(px + dx, TERRACE_Y + 1, z, "polished_blackstone_slab[type=bottom,waterlogged=false]")
+        put(px, TERRACE_Y - 1, z, "sea_lantern")
     for s_ in (-1, 1):
         x = px + s_ * 4
-        put(x, TERRACE_Y + 1, PZ + 5, "polished_deepslate")
-        put(x, TERRACE_Y + 2, PZ + 5, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
-        put(x, TERRACE_Y + 3, PZ + 5, "polished_deepslate_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]")
-        put(x, TERRACE_Y + 4, PZ + 5, "lantern[hanging=false,waterlogged=false]")
-        put(x, TERRACE_Y - 1, PZ + 5, "sea_lantern")
+        put(x, TERRACE_Y + 1, PZ + 6, "polished_blackstone")
+        put(x, TERRACE_Y + 2, PZ + 6, WALLP)
+        put(x, TERRACE_Y + 3, PZ + 6, WALLP)
+        put(x, TERRACE_Y + 4, PZ + 6, "lantern[hanging=false,waterlogged=false]")
 
 
 for realm, px in PORTALS:

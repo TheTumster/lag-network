@@ -274,50 +274,50 @@ hub:
       scale: 1
       text: "<#B9A8D8>{online} online  <dark_gray>|  <#B9A8D8>walk through a gate"
     # each gate: the name sits on the cornice ledge, the player count under it on the arch
-    - offset: [-26.5, 15.05, -35.4]
-      scale: 2.4
+    - offset: [-26.5, 12.75, -35.8]
+      scale: 2.2
       billboard: fixed
       yaw: 0
       bob: false
       text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
-    - offset: [-26.5, 12.15, -35.9]
-      scale: 1
+    - offset: [-26.5, 12.1, -35.8]
+      scale: 0.9
       billboard: fixed
       yaw: 0
       bob: false
       text: "<white>{skyblock} <#B9A8D8>playing"
-    - offset: [-8.5, 15.05, -35.4]
-      scale: 2.4
+    - offset: [-8.5, 12.75, -35.8]
+      scale: 2.2
       billboard: fixed
       yaw: 0
       bob: false
       text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>"
-    - offset: [-8.5, 12.15, -35.9]
-      scale: 1
+    - offset: [-8.5, 12.1, -35.8]
+      scale: 0.9
       billboard: fixed
       yaw: 0
       bob: false
       text: "<white>{factions} <#B9A8D8>playing"
-    - offset: [9.5, 15.05, -35.4]
-      scale: 2.4
+    - offset: [9.5, 12.75, -35.8]
+      scale: 2.2
       billboard: fixed
       yaw: 0
       bob: false
       text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>"
-    - offset: [9.5, 12.15, -35.9]
-      scale: 1
+    - offset: [9.5, 12.1, -35.8]
+      scale: 0.9
       billboard: fixed
       yaw: 0
       bob: false
       text: "<white>{cannons} <#B9A8D8>playing"
-    - offset: [27.5, 15.05, -35.4]
-      scale: 2.4
+    - offset: [27.5, 12.75, -35.8]
+      scale: 2.2
       billboard: fixed
       yaw: 0
       bob: false
       text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"
-    - offset: [27.5, 12.15, -35.9]
-      scale: 1
+    - offset: [27.5, 12.1, -35.8]
+      scale: 0.9
       billboard: fixed
       yaw: 0
       bob: false
@@ -332,24 +332,24 @@ hub:
       scale: 4
       spin: 1
       glow: "#B040FF"
-    - offset: [-26.5, 17.0, -36.2]
+    - offset: [-26.5, 16.5, -36.5]
       item: GRASS_BLOCK
-      scale: 1.7
+      scale: 1.5
       spin: 1
       glow: "#7CFF6B"
-    - offset: [-8.5, 17.0, -36.2]
+    - offset: [-8.5, 16.5, -36.5]
       item: TNT
-      scale: 1.7
+      scale: 1.5
       spin: 1
       glow: "#FF4D6D"
-    - offset: [9.5, 17.0, -36.2]
+    - offset: [9.5, 16.5, -36.5]
       item: DISPENSER
-      scale: 1.7
+      scale: 1.5
       spin: 1
       glow: "#FF9F4D"
-    - offset: [27.5, 17.0, -36.2]
+    - offset: [27.5, 16.5, -36.5]
       item: OAK_SAPLING
-      scale: 1.7
+      scale: 1.5
       spin: 1
       glow: "#7CFF6B"
     - offset: [-32.5, 3.4, -11.5]
