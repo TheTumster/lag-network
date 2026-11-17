@@ -6,17 +6,20 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import dev.kitteh.factions.FPlayer;
 import dev.kitteh.factions.Faction;
 import dev.kitteh.factions.permissible.Relation;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
+import dev.kitteh.factions.permissible.Role;
 
-/** /f who: a clean faction card in chat instead of FactionsUUID's wall of text. */
+/** /f who: a faction profile menu (stats up top, members as heads) instead of FactionsUUID's chat wall. */
 final class Who {
+	private static final String DEFAULT_DESC = "Default faction description :(";
 	private final LagFactions plugin;
 
 	Who(LagFactions plugin) {
@@ -44,49 +47,82 @@ final class Who {
 		};
 	}
 
+	private static Material banner(Relation r) {
+		if (r == null) return Material.WHITE_BANNER;
+		return switch (r) {
+			case MEMBER -> Material.LIME_BANNER;
+			case ENEMY -> Material.RED_BANNER;
+			default -> Material.WHITE_BANNER;
+		};
+	}
+
 	void show(Player viewer, Faction f) {
 		FPlayer me = F.fp(viewer);
 		Relation rel = me != null && me.hasFaction() ? me.faction().relationTo(f) : Relation.NEUTRAL;
 		String rc = relColor(rel);
-		String bar = Ui.GRAD + "<strikethrough>                                                              </strikethrough></gradient>";
 		List<FPlayer> members = new ArrayList<>(f.members());
 		members.sort(Comparator.comparingInt((FPlayer m) -> m.role() == null ? 99 : m.role().ordinal())
 				.thenComparing((FPlayer m) -> !m.isOnline()).thenComparing(FPlayer::name, String.CASE_INSENSITIVE_ORDER));
 		long online = members.stream().filter(FPlayer::isOnline).count();
-		FPlayer leader = f.admin();
+		String desc = f.description() == null || f.description().isBlank() || f.description().equals(DEFAULT_DESC) ? "" : f.description();
 
-		viewer.sendMessage(Component.empty());
-		viewer.sendMessage(Ui.mm(bar));
-		viewer.sendMessage(Ui.mm(" " + rc + "<bold>" + Ui.esc(f.tag()).toUpperCase() + "</bold> <dark_gray>• " + rc + relName(rel)
-				+ (f.description() == null || f.description().isBlank() ? "" : "\n " + Ui.DIM + "<italic>" + Ui.esc(f.description()))));
-		viewer.sendMessage(Component.empty());
-		viewer.sendMessage(Ui.mm(" " + Ui.LABEL + "Leader <white>" + (leader == null ? "-" : Ui.esc(leader.name()))
-				+ "   " + Ui.DIM + "|   " + Ui.LABEL + "Members <white>" + members.size() + Ui.DIM + "/" + "<white>" + f.memberLimit()
-				+ Ui.LABEL + " (" + Ui.GREEN + online + Ui.LABEL + " online)"));
-		viewer.sendMessage(Ui.mm(" " + Ui.LABEL + "Power <white>" + f.power() + Ui.DIM + "/" + "<white>" + f.powerMax()
-				+ "   " + Ui.DIM + "|   " + Ui.LABEL + "Land <white>" + f.claimCount()
-				+ "   " + Ui.DIM + "|   " + Ui.LABEL + "TNT <white>" + String.format("%,d", f.tntBank())));
-		if (plugin.shields != null)
-			viewer.sendMessage(Ui.mm(" " + Ui.LABEL + "Shield " + plugin.shields.status(f) + "   " + Ui.DIM + "|   " + Ui.LABEL + "Window <white>"
-					+ plugin.shields.windowText(plugin.shields.startHour(f))));
+		Gui g = new Gui(6, rc + "<bold>" + Ui.esc(f.tag()).toUpperCase() + "</bold> <dark_gray>• " + Ui.LABEL + relName(rel));
+		g.frame();
+		String founded = "";
 		try {
-			viewer.sendMessage(Ui.mm(" " + Ui.LABEL + "Founded <white>" + DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.of("America/New_York")).format(f.founded())));
+			founded = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.of("America/New_York")).format(f.founded());
 		} catch (Exception ignored) { }
-		// members: one line, hover for role + power, click to message
-		Component line = Ui.mm(" " + Ui.LABEL + "Roster ");
-		boolean first = true;
-		for (FPlayer m : members) {
-			if (!first) line = line.append(Ui.mm(Ui.DIM + ", "));
-			first = false;
-			String col = m.isOnline() ? Ui.GREEN : "<gray>";
-			Component name = Ui.mm(col + F.roleStars(m.role()) + Ui.esc(m.name()))
-					.hoverEvent(HoverEvent.showText(Ui.mm("<white><bold>" + Ui.esc(m.name()) + "</bold>\n" + Ui.LABEL + F.roleName(m.role())
-							+ "\n" + Ui.LABEL + "Power <white>" + (int) m.power() + "/" + (int) m.powerMax()
-							+ "\n" + (m.isOnline() ? Ui.GREEN + "Online" : Ui.DIM + "Offline"))))
-					.clickEvent(ClickEvent.suggestCommand("/msg " + m.name() + " "));
-			line = line.append(name);
+		g.set(4, Ui.item(banner(rel), true, rc + "<bold>" + Ui.esc(f.tag()).toUpperCase(),
+				Ui.LABEL + relName(rel),
+				desc.isEmpty() ? "" : Ui.DIM + "<italic>" + Ui.esc(desc),
+				"", Ui.LABEL + "Founded <white>" + founded));
+
+		// stats row
+		g.set(19, Ui.item(Material.PLAYER_HEAD, "<white><bold>MEMBERS", "<white>" + members.size() + Ui.DIM + "/" + "<white>" + f.memberLimit(),
+				Ui.GREEN + online + Ui.LABEL + " online"));
+		g.set(20, Ui.item(Material.REDSTONE, "<white><bold>POWER", "<white>" + f.power() + Ui.DIM + " / <white>" + f.powerMax()));
+		g.set(21, Ui.item(Material.GRASS_BLOCK, "<white><bold>LAND", "<white>" + f.claimCount() + Ui.LABEL + " chunks"));
+		boolean raid = plugin.shields.raidable(f);
+		g.set(22, Ui.item(raid ? Material.TNT : Material.SHIELD, raid, "<white><bold>SHIELD", plugin.shields.status(f),
+				Ui.LABEL + "Window <white>" + plugin.shields.windowText(plugin.shields.startHour(f))));
+		int rank = plugin.top.rank(f);
+		g.set(23, Ui.item(Material.GOLD_INGOT, "<white><bold>F-TOP", rank > 0 ? Ui.GOLD + "#" + rank : Ui.LABEL + "Unranked",
+				Ui.LABEL + "Value " + Ui.GREEN + Ui.money(plugin.top.value(f))));
+		g.set(24, Ui.item(Material.TNT_MINECART, "<white><bold>TNT BANK", "<white>" + String.format("%,d", f.tntBank())));
+		g.set(25, Ui.item(Material.ANVIL, "<white><bold>UPGRADES",
+				Ui.LABEL + "Spawners <white>Lv " + plugin.upgrades.level(f, Upgrades.Type.SPAWNER) + Ui.LABEL + " • Farms <white>Lv " + plugin.upgrades.level(f, Upgrades.Type.FARM),
+				Ui.LABEL + "Chest <white>Lv " + plugin.upgrades.level(f, Upgrades.Type.CHEST) + Ui.LABEL + " • TNT <white>Lv " + plugin.upgrades.level(f, Upgrades.Type.TNT),
+				Ui.LABEL + "Warps <white>Lv " + plugin.upgrades.level(f, Upgrades.Type.WARPS)));
+
+		// members as heads
+		int[] slots = {28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
+		for (int i = 0; i < Math.min(slots.length, members.size()); i++) {
+			FPlayer m = members.get(i);
+			ItemStack head = Ui.item(Material.PLAYER_HEAD, (m.isOnline() ? Ui.GREEN : "<gray>") + "<bold>" + Ui.esc(m.name()),
+					roleColor(m.role()) + F.roleName(m.role()),
+					Ui.LABEL + "Power <white>" + (int) m.power() + Ui.DIM + "/" + "<white>" + (int) m.powerMax(),
+					m.isOnline() ? Ui.GREEN + "● Online" : Ui.DIM + "● Offline");
+			if (head.getItemMeta() instanceof SkullMeta sm) {
+				sm.setOwningPlayer(Bukkit.getOfflinePlayer(m.uniqueId()));
+				head.setItemMeta(sm);
+			}
+			g.set(slots[i], head);
 		}
-		viewer.sendMessage(line);
-		viewer.sendMessage(Ui.mm(bar));
+		if (members.isEmpty()) g.set(31, Ui.item(Material.BARRIER, Ui.LABEL + "No members"));
+
+		boolean mine = me != null && me.hasFaction() && me.faction().id() == f.id();
+		if (mine) g.set(49, Ui.item(Material.ARROW, Ui.LABEL + "Back to /f menu"), c -> plugin.menu.open(c.player()));
+		else g.set(49, Ui.item(Material.BARRIER, Ui.LABEL + "Close"), c -> c.player().closeInventory());
+		g.open(viewer);
+	}
+
+	private static String roleColor(Role r) {
+		if (r == null) return Ui.LABEL;
+		return switch (r) {
+			case ADMIN -> Ui.GOLD + "★ ";
+			case COLEADER -> Ui.PURPLE + "✦ ";
+			case MODERATOR -> Ui.CYAN + "◆ ";
+			default -> Ui.LABEL;
+		};
 	}
 }
