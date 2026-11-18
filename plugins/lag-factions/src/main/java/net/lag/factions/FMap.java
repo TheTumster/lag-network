@@ -1,7 +1,7 @@
 package net.lag.factions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.bukkit.entity.Player;
 
@@ -13,17 +13,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
- * /f map: a square chunk grid with an info panel beside it, sent as ONE chat message (so chat mods can't stack
- * identical rows into "[x10]"). North is up. You = cyan, your land = green, enemies = red, neutral = white,
- * safe zone = gold, war zone = dark red, wilderness = dark. Hover a chunk for details; click wilderness near you
- * to claim it (FactionsUUID's normal claim rules).
+ * Classic /f map: gold "____.[ (x,z) faction ].____" header, gray "-" wilderness, "+" you, and each faction's land as
+ * its own symbol ("\" for yours in green; others get "/", "#", "$"... in their relation colour), with a symbol legend
+ * underneath. Sent as one chat message so chat mods can't stack the rows. Hover a chunk for info; click wilderness
+ * near you to claim it (FactionsUUID's normal rules).
  */
 final class FMap {
-	static final int W = 21, H = 11, CLICK_RADIUS = 6;
-	private static final String CELL = "█";
-	private static final String WILD = "<#353A46>";
+	static final int W = Classic.WIDTH, H = 17, CLICK_RADIUS = 6;
+	private static final String SYMBOLS = "/#$%&=?!ABCDEFGHJKLMNOPQRSTUVWXYZ";
 	private final LagFactions plugin;
 
 	FMap(LagFactions plugin) {
@@ -36,33 +36,18 @@ final class FMap {
 		String world = p.getWorld().getName();
 		int cx = p.getLocation().getBlockX() >> 4, cz = p.getLocation().getBlockZ() >> 4;
 		Faction here = F.at(world, cx, cz);
+		String hereName = here == null || here.isWilderness() ? "Wilderness" : here.isSafeZone() ? "SafeZone" : here.isWarZone() ? "WarZone" : here.tag();
+		String hereCol = here == null || here.isWilderness() ? "<dark_green>" : colour(here, mine);
 
-		// the info panel shown to the right of the grid, one entry per grid row
-		List<String> panel = new ArrayList<>();
-		panel.add(Ui.DIM + "      N");
-		panel.add(Ui.DIM + "   W " + Ui.CYAN + "✦" + Ui.DIM + " E    " + Ui.LABEL + "facing <white>" + facing(p.getLocation().getYaw()));
-		panel.add(Ui.DIM + "      S");
-		panel.add("");
-		panel.add(Ui.LABEL + "Here  " + here(here, mine));
-		panel.add(Ui.LABEL + "Chunk <white>" + cx + Ui.DIM + ", <white>" + cz);
-		if (mine != null) {
-			panel.add(Ui.LABEL + "Land  <white>" + mine.claimCount() + Ui.DIM + " • " + Ui.LABEL + "Power <white>" + mine.power() + Ui.DIM + "/" + "<white>" + mine.powerMax());
-			panel.add(Ui.LABEL + "You   " + plugin.shields.status(mine));
-		} else {
-			panel.add(Ui.LABEL + "No faction: <white>/f create");
-			panel.add("");
-		}
-		panel.add("");
-		panel.add(Ui.GREEN + CELL + Ui.LABEL + " yours  " + Ui.RED + CELL + Ui.LABEL + " enemy  <white>" + CELL + Ui.LABEL + " neutral");
-		panel.add(Ui.GOLD + CELL + Ui.LABEL + " safe  <dark_red>" + CELL + Ui.LABEL + " war  " + WILD + CELL + Ui.LABEL + " wild  " + Ui.CYAN + CELL + Ui.LABEL + " you");
+		Map<Integer, Character> symbol = new LinkedHashMap<>();
+		Map<Integer, Faction> legend = new LinkedHashMap<>();
+		int next = 0;
 
 		TextComponent.Builder out = Component.text();
-		String bar = Ui.GRAD + "<strikethrough>                                                              </strikethrough></gradient>";
-		out.append(Ui.mm(bar)).append(Component.newline());
-		out.append(Ui.mm(" " + Ui.GRAD + "<bold>FACTION MAP</bold></gradient> " + Ui.DIM + "• " + Ui.LABEL + world)).append(Component.newline());
+		String title = "(" + cx + "," + cz + ") " + hereName;
+		out.append(Ui.mm(Classic.header(hereCol + Ui.esc("(" + cx + "," + cz + ") ") + Ui.esc(hereName), title))).append(Component.newline());
 		for (int row = 0; row < H; row++) {
 			int dz = row - H / 2;
-			out.append(Component.text(" "));
 			String runCol = null;
 			StringBuilder run = new StringBuilder();
 			for (int col = 0; col < W; col++) {
@@ -70,72 +55,96 @@ final class FMap {
 				int x = cx + dx, z = cz + dz;
 				Faction f = F.at(world, x, z);
 				boolean centre = dx == 0 && dz == 0;
-				boolean near = Math.abs(dx) <= CLICK_RADIUS && Math.abs(dz) <= CLICK_RADIUS;
-				String color = centre ? Ui.CYAN : cellColor(f, mine);
 				boolean wild = f == null || f.isWilderness();
+				String col0;
+				char ch;
+				if (centre) { col0 = "<aqua>"; ch = '+'; }
+				else if (wild) { col0 = "<gray>"; ch = '-'; }
+				else if (f.isSafeZone()) { col0 = "<gold>"; ch = '+'; }
+				else if (f.isWarZone()) { col0 = "<dark_red>"; ch = '+'; }
+				else if (mine != null && f.id() == mine.id()) { col0 = "<green>"; ch = '\\'; }
+				else {
+					Character s = symbol.get(f.id());
+					if (s == null) {
+						s = SYMBOLS.charAt(Math.min(next++, SYMBOLS.length() - 1));
+						symbol.put(f.id(), s);
+						legend.put(f.id(), f);
+					}
+					col0 = colour(f, mine);
+					ch = s;
+				}
+				boolean near = Math.abs(dx) <= CLICK_RADIUS && Math.abs(dz) <= CLICK_RADIUS;
 				boolean interactive = centre || !wild || (near && mine != null);
 				if (!interactive) {
-					if (!color.equals(runCol)) {
+					if (!col0.equals(runCol)) {
 						flush(out, runCol, run);
-						runCol = color;
+						runCol = col0;
 					}
-					run.append(CELL);
+					run.append(ch);
 					continue;
 				}
 				flush(out, runCol, run);
 				runCol = null;
-				Component cell = Ui.mm(color + CELL).hoverEvent(HoverEvent.showText(Ui.mm(hover(f, mine, x, z, centre, !centre && near && wild && mine != null))));
+				Component cell = Component.text(String.valueOf(ch), tc(col0))
+						.hoverEvent(HoverEvent.showText(Ui.mm(hover(f, mine, x, z, centre, !centre && near && wild && mine != null))));
 				if (!centre && near && wild && mine != null) cell = cell.clickEvent(ClickEvent.runCommand("/f mapclaim " + x + " " + z));
-				else if (f != null && f.isNormal()) cell = cell.clickEvent(ClickEvent.runCommand("/f who " + f.tag()));
 				out.append(cell);
 			}
 			flush(out, runCol, run);
-			out.append(Ui.mm("  " + panel.get(row)));
 			out.append(Component.newline());
 		}
-		out.append(Ui.mm(" " + Ui.DIM + "Hover a chunk for info • click wilderness near you to claim")).append(Component.newline());
-		out.append(Ui.mm(bar));
+		// legend: \ for your faction, then everyone else on the map
+		TextComponent.Builder lg = Component.text();
+		boolean any = false;
+		if (mine != null) {
+			lg.append(Component.text("\\: " + mine.tag(), NamedTextColor.GREEN));
+			any = true;
+		}
+		for (var e : legend.entrySet()) {
+			if (any) lg.append(Component.text(", ", NamedTextColor.GRAY));
+			any = true;
+			Faction f = e.getValue();
+			lg.append(Component.text(symbol.get(e.getKey()) + ": " + f.tag(), tc(colour(f, mine))));
+		}
+		if (!any) lg.append(Component.text("No factions nearby", NamedTextColor.GRAY));
+		out.append(lg.build());
 		p.sendMessage(out.build());
 	}
 
 	private static void flush(TextComponent.Builder line, String col, StringBuilder run) {
-		if (col != null && run.length() > 0) line.append(Ui.mm(col + run));
+		if (col != null && run.length() > 0) line.append(Component.text(run.toString(), tc(col)));
 		run.setLength(0);
 	}
 
-	private String cellColor(Faction f, Faction mine) {
-		if (f == null || f.isWilderness()) return WILD;
-		if (f.isSafeZone()) return Ui.GOLD;
-		if (f.isWarZone()) return "<dark_red>";
-		if (mine != null && f.id() == mine.id()) return Ui.GREEN;
-		Relation r = mine == null ? Relation.NEUTRAL : mine.relationTo(f);
-		return r == Relation.ENEMY ? Ui.RED : "<white>";
+	private static NamedTextColor tc(String tag) {
+		return switch (tag) {
+			case "<aqua>" -> NamedTextColor.AQUA;
+			case "<gold>" -> NamedTextColor.GOLD;
+			case "<dark_red>" -> NamedTextColor.DARK_RED;
+			case "<green>" -> NamedTextColor.GREEN;
+			case "<red>" -> NamedTextColor.RED;
+			case "<white>" -> NamedTextColor.WHITE;
+			default -> NamedTextColor.GRAY;
+		};
 	}
 
-	private String here(Faction f, Faction mine) {
-		if (f == null || f.isWilderness()) return Ui.DIM + "Wilderness";
-		if (f.isSafeZone()) return Ui.GOLD + "Safe Zone";
-		if (f.isWarZone()) return "<dark_red>War Zone";
-		return cellColor(f, mine) + Ui.esc(f.tag());
+	private String colour(Faction f, Faction mine) {
+		if (f == null || f.isWilderness()) return "<gray>";
+		if (f.isSafeZone()) return "<gold>";
+		if (f.isWarZone()) return "<dark_red>";
+		if (mine != null && f.id() == mine.id()) return "<green>";
+		Relation r = mine == null ? Relation.NEUTRAL : mine.relationTo(f);
+		return r == Relation.ENEMY ? "<red>" : "<white>";
 	}
 
 	private String hover(Faction f, Faction mine, int x, int z, boolean centre, boolean claimable) {
-		String pos = Ui.DIM + "Chunk " + x + ", " + z;
-		String head = centre ? Ui.CYAN + "<bold>You are here</bold>\n" : "";
-		if (f == null || f.isWilderness())
-			return head + Ui.LABEL + "Wilderness\n" + pos + (claimable ? "\n\n" + Ui.CYAN + "Click to claim" : "");
-		if (f.isSafeZone()) return head + Ui.GOLD + "Safe Zone\n" + pos;
-		if (f.isWarZone()) return head + "<dark_red>War Zone\n" + pos;
-		return head + cellColor(f, mine) + "<bold>" + Ui.esc(f.tag()) + "</bold>\n" + Ui.LABEL + Who.relName(mine == null ? Relation.NEUTRAL : mine.relationTo(f))
-				+ "\n" + Ui.LABEL + "Members <white>" + f.members().size() + Ui.LABEL + " • Land <white>" + f.claimCount()
-				+ "\n" + plugin.shields.status(f) + "\n" + pos + "\n\n" + Ui.CYAN + "Click for their profile";
-	}
-
-	/** Compass direction the player faces. */
-	private static String facing(float yaw) {
-		float y = ((yaw % 360) + 360) % 360; // 0 = south, 90 = west, 180 = north, 270 = east
-		String[] a = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
-		return a[Math.round(y / 45f) % 8];
+		String pos = "<gray>(" + x + ", " + z + ")";
+		String head = centre ? "<aqua>You are here\n" : "";
+		if (f == null || f.isWilderness()) return head + "<dark_green>Wilderness " + pos + (claimable ? "\n<yellow>Click to claim" : "");
+		if (f.isSafeZone()) return head + "<gold>SafeZone " + pos;
+		if (f.isWarZone()) return head + "<dark_red>WarZone " + pos;
+		return head + colour(f, mine) + Ui.esc(f.tag()) + " " + pos + "\n<gold>Land: <yellow>" + f.claimCount() + " <gold>Members: <yellow>" + f.members().size()
+				+ "\n" + plugin.shields.status(f);
 	}
 
 	/** /f mapclaim x z (from a map click): claim through FactionsUUID's normal checks. */

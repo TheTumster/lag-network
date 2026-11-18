@@ -183,6 +183,49 @@ final class Shields implements Listener {
 		for (Player o : f.membersOnlineAsPlayers()) Ui.msg(o, mm);
 	}
 
+	// ---------------------------------------------------------------- chat
+
+	/** /f shield [time]: status in chat; with a time (8pm, 20, 8:00pm) moves the window (24h delay). */
+	void command(Player p, String[] args) {
+		Faction f = F.of(p);
+		if (f == null) { Ui.err(p, "You need a faction. <white>/f create <name>"); return; }
+		if (args.length > 0) {
+			Integer h = parseHour(String.join("", args));
+			if (h == null) { Ui.err(p, "Use a time like <white>/f shield 8pm</white> or <white>/f shield 20</white>."); return; }
+			choose(p, h);
+			return;
+		}
+		int cur = startHour(f);
+		Integer pend = pending(f);
+		var out = net.kyori.adventure.text.Component.text();
+		out.append(Ui.mm(Classic.header("<yellow>Shield <gray>- " + Ui.esc(f.tag()), "Shield - " + f.tag()))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<gold>Status: </gold>" + status(f))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm(Classic.line("Raid window", windowText(cur)))).append(net.kyori.adventure.text.Component.newline());
+		if (pend != null) out.append(Ui.mm(Classic.line("Moving to", windowText(pend) + " <gray>in " + Ui.duration(pendingIn(f))))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<gray>Shielded 18h a day: explosions and sand do nothing in your claims.")).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<gold>Change it: <yellow>/f shield <time> <gray>(e.g. 9pm, takes effect in 24h) "))
+				.append(Ui.mm("<aqua>[pick]").hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Ui.mm("<gray>Open the picker in /f")))
+						.clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f menu shield")));
+		p.sendMessage(out.build());
+	}
+
+	static Integer parseHour(String s) {
+		s = s.toLowerCase(java.util.Locale.ROOT).replace(" ", "").replace("est", "");
+		boolean pm = s.endsWith("pm"), am = s.endsWith("am");
+		if (pm || am) s = s.substring(0, s.length() - 2);
+		if (s.contains(":")) s = s.substring(0, s.indexOf(':'));
+		try {
+			int h = Integer.parseInt(s);
+			if (pm || am) {
+				if (h < 1 || h > 12) return null;
+				h = h % 12 + (pm ? 12 : 0);
+			}
+			return h >= 0 && h < 24 ? h : null;
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
 	// ---------------------------------------------------------------- GUI
 
 	void open(Player p) {

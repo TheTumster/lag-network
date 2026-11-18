@@ -36,6 +36,22 @@ final class Help {
 			{Material.BARRIER, "/f leave • /f disband", "Leave or delete your faction", null},
 	};
 
+	/** /f help in chat: every command, hover for what it does, click to fill it in. */
+	void chat(Player p) {
+		var out = net.kyori.adventure.text.Component.text();
+		out.append(Ui.mm(Classic.header("<yellow>Faction Commands", "Faction Commands")));
+		for (Object[] c : CMDS) {
+			String cmd = (String) c[1];
+			String fill = cmd.contains(" <") ? cmd.substring(0, cmd.indexOf(" <") + 1) : cmd.split(" •")[0];
+			out.append(net.kyori.adventure.text.Component.newline());
+			out.append(Ui.mm("<yellow>" + Ui.esc(cmd) + " <gray>- " + Ui.esc((String) c[2]))
+					.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Ui.mm("<gray>Click to type it")))
+					.clickEvent(net.kyori.adventure.text.event.ClickEvent.suggestCommand(fill)));
+		}
+		out.append(net.kyori.adventure.text.Component.newline()).append(Ui.mm("<gray>Everything else is in <yellow>/f</yellow>."));
+		p.sendMessage(out.build());
+	}
+
 	void open(Player p) {
 		Gui g = new Gui(5, Ui.GRAD + "<bold>FACTION COMMANDS</bold></gradient>");
 		g.frame();

@@ -283,6 +283,28 @@ final class Outpost implements Listener {
 
 	// ---------------------------------------------------------------- /f outpost
 
+	/** /f outpost in chat (tp: /f outpost tp). */
+	void command(Player p, String[] args) {
+		if (!enabled() || world == null) { Ui.err(p, "The outpost isn't open."); return; }
+		if (args.length > 0 && (args[0].equalsIgnoreCase("tp") || args[0].equalsIgnoreCase("go"))) {
+			p.teleport(world.getSpawnLocation().add(0.5, 0, 0.5).setDirection(new org.bukkit.util.Vector(0, 0, -1)));
+			Ui.msg(p, Ui.LABEL + "Welcome to the outpost. The core is the beacon in the middle.");
+			return;
+		}
+		Faction o = owner();
+		double boost = plugin.getConfig().getDouble("outpost.boost", 25);
+		var out = net.kyori.adventure.text.Component.text();
+		out.append(Ui.mm(Classic.header("<light_purple>Outpost", "Outpost"))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm(Classic.line("Held by", o == null ? "nobody" : Ui.esc(o.tag()) + " <gray>for " + Ui.duration(System.currentTimeMillis() - ownedSince))))
+				.append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm(Classic.line("Core", rebuildTask == -1 ? "<green>up</green>" : "rebuilding " + rebuildPercent() + "%"))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<gray>Cannon in and break the core (beacon) by hand. Owners get <green>+" + (int) boost + "%</green> spawner + farm speed."))
+				.append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<aqua>[Teleport]").hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Ui.mm("<gray>PvP and cannons everywhere")))
+				.clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f outpost tp")));
+		p.sendMessage(out.build());
+	}
+
 	void open(Player p) {
 		if (!enabled() || world == null) { Ui.err(p, "The outpost isn't open."); return; }
 		Faction o = owner();

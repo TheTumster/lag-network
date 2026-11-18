@@ -96,8 +96,22 @@ public final class LagFactions extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		String sub = a.length > 1 ? a[1].toLowerCase(Locale.ROOT) : "";
 		switch (sub) {
-			case "", "menu", "gui", "m" -> { e.setCancelled(true); menu.open(p); }
-			case "shield", "shields", "raidwindow" -> { e.setCancelled(true); shields.open(p); }
+			case "" -> { e.setCancelled(true); menu.open(p); }
+			case "menu", "gui", "m" -> {
+				// /f menu <page>: the one GUI, opened at a page (used by chat links)
+				e.setCancelled(true);
+				String page = a.length > 2 ? a[2].toLowerCase(Locale.ROOT) : "";
+				switch (page) {
+					case "shield" -> shields.open(p);
+					case "upgrades" -> upgrades.open(p);
+					case "shop" -> shop.open(p);
+					case "top" -> top.open(p);
+					case "perms" -> perms.open(p);
+					case "outpost" -> outpost.open(p);
+					default -> menu.open(p);
+				}
+			}
+			case "shield", "shields", "raidwindow" -> { e.setCancelled(true); shields.command(p, java.util.Arrays.copyOfRange(a, 2, a.length)); }
 			case "show", "who" -> {
 				Faction f = a.length > 2 ? resolve(a[2]) : F.of(p);
 				if (f == null && a.length > 2) return; // let FactionsUUID say "not found"
@@ -113,12 +127,12 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			case "upgrades", "upgrade", "u" -> { e.setCancelled(true); upgrades.open(p); }
 			case "shop", "store" -> { e.setCancelled(true); shop.open(p); }
 			case "chest", "pv" -> { e.setCancelled(true); chest.open(p); }
-			case "top", "ftop" -> { if (a.length > 2) return; e.setCancelled(true); top.open(p); }
+			case "top", "ftop" -> { if (a.length > 2) return; e.setCancelled(true); top.chat(p); }
 			case "perms", "perm", "permissions" -> { e.setCancelled(true); perms.open(p); }
-			case "outpost", "op" -> { e.setCancelled(true); outpost.open(p); }
-			case "help", "?", "h", "commands" -> { e.setCancelled(true); help.open(p); }
+			case "outpost", "op" -> { e.setCancelled(true); outpost.command(p, java.util.Arrays.copyOfRange(a, 2, a.length)); }
+			case "help", "?", "h", "commands" -> { e.setCancelled(true); help.chat(p); }
 			case "set" -> {
-				// ClassicFactions turns /f perms into /f set perm; with no further arguments that's our menu
+				// ClassicFactions turns /f perms into /f set perm; with no further arguments that's the perms page
 				if (a.length == 3 && (a[2].equalsIgnoreCase("perm") || a[2].equalsIgnoreCase("perms"))) { e.setCancelled(true); perms.open(p); }
 			}
 			case "mapclaim" -> {

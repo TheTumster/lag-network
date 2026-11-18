@@ -29,11 +29,11 @@ final class Menu {
 			return;
 		}
 		boolean raid = plugin.shields.raidable(f);
-		g.set(4, Ui.item(Material.RED_BANNER, true, "<white><bold>" + Ui.esc(f.tag()).toUpperCase(),
+		g.set(4, Ui.item(Material.RED_BANNER, true, "<white><bold>" + Ui.esc(f.tag()),
 				Ui.LABEL + "Members <white>" + f.members().size() + "/" + f.memberLimit() + Ui.LABEL + " • Online <white>" + f.membersOnline(true).size(),
 				Ui.LABEL + "Power <white>" + f.power() + "/" + f.powerMax() + Ui.LABEL + " • Land <white>" + f.claimCount(),
 				Ui.LABEL + "Shield " + plugin.shields.status(f),
-				"", Ui.CYAN + "Click for the full card"), c -> { c.player().closeInventory(); plugin.who.show(c.player(), f); });
+				"", Ui.CYAN + "Click for the full card"), c -> plugin.who.profile(c.player(), f));
 
 		g.set(19, Ui.item(raid ? Material.TNT : Material.SHIELD, "<white><bold>SHIELD",
 				plugin.shields.status(f), Ui.LABEL + "Window <white>" + plugin.shields.windowText(plugin.shields.startHour(f)),
@@ -63,7 +63,7 @@ final class Menu {
 				Ui.LABEL + "Owners get faster spawners + farms", "", Ui.CYAN + "Click to open"), c -> plugin.outpost.open(c.player()));
 		g.set(36, Ui.item(Material.BOOK, Ui.LABEL + "<bold>All commands", Ui.DIM + "/f help"), c -> plugin.help.open(c.player()));
 		g.set(33, Ui.item(Material.PLAYER_HEAD, "<white><bold>MEMBERS", Ui.LABEL + "Invite: <white>/f invite <player>", Ui.LABEL + "Promote: <white>/f role <player> <role>"),
-				c -> { c.player().closeInventory(); plugin.who.show(c.player(), f); });
+				c -> plugin.who.profile(c.player(), f));
 		g.open(p);
 	}
 }

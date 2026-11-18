@@ -115,6 +115,25 @@ final class FTop implements Listener, Supplier<String> {
 		} catch (IOException ignored) { }
 	}
 
+	/** /f top: classic chat leaderboard (top 10). */
+	void chat(Player p) {
+		List<Object[]> r = ranking;
+		var out = net.kyori.adventure.text.Component.text();
+		out.append(Ui.mm(Classic.header("<yellow>Top Factions", "Top Factions")));
+		if (r.isEmpty()) out.append(net.kyori.adventure.text.Component.newline()).append(Ui.mm("<gray>No factions yet. <yellow>/f create <name>"));
+		for (int i = 0; i < Math.min(10, r.size()); i++) {
+			Faction f = (Faction) r.get(i)[0];
+			double v = (double) r.get(i)[1];
+			out.append(net.kyori.adventure.text.Component.newline());
+			out.append(Ui.mm("<gold>" + (i + 1) + ". <yellow>" + Ui.esc(f.tag()) + " <gray>- <green>" + Ui.money(v)
+					+ " <gray>(" + f.membersOnline(true).size() + "/" + f.members().size() + " online)")
+					.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Ui.mm("<gold>Land: <yellow>" + f.claimCount() + "\n" + plugin.shields.status(f) + "\n<gray>Click for /f who")))
+					.clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/f who " + f.tag())));
+		}
+		out.append(net.kyori.adventure.text.Component.newline()).append(Ui.mm("<gray>Ranked by spawner value in claims. Updates every 2 minutes."));
+		p.sendMessage(out.build());
+	}
+
 	/** 1-based F-top place (0 = not ranked yet). */
 	int rank(Faction f) {
 		List<Object[]> r = ranking;
@@ -146,9 +165,8 @@ final class FTop implements Listener, Supplier<String> {
 			g.set(slots[i], Ui.item(icon, i == 0, col + "<bold>#" + (i + 1) + " " + Ui.esc(f.tag()),
 					Ui.LABEL + "Value <#7CFF6B>" + Ui.money(v),
 					Ui.LABEL + "Members <white>" + f.members().size() + Ui.LABEL + " • Land <white>" + f.claimCount(),
-					Ui.LABEL + "Shield " + plugin.shields.status(f), "", Ui.CYAN + "Click for /f who"), c -> {
-				c.player().closeInventory();
-				plugin.who.show(c.player(), f);
+					Ui.LABEL + "Shield " + plugin.shields.status(f), "", Ui.CYAN + "Click for their profile"), c -> {
+				plugin.who.profile(c.player(), f);
 			});
 		}
 		if (r.isEmpty()) g.set(22, Ui.item(Material.BARRIER, Ui.LABEL + "No factions yet", Ui.LABEL + "Be the first: <white>/f create"));

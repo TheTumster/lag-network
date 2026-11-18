@@ -144,7 +144,7 @@ final class Koth {
 		bar = Bukkit.createBossBar("KOTH", BarColor.YELLOW, BarStyle.SEGMENTED_10);
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			bar.addPlayer(p);
-			p.showTitle(Title.title(Ui.mm(Ui.GOLD + "<bold>KOTH: " + Ui.esc(ar.name()).toUpperCase()), Ui.mm(Ui.LABEL + "at <white>" + ar.x() + ", " + ar.z() + Ui.LABEL + " • hold it for " + Ui.duration(capTime))));
+			p.showTitle(Title.title(Ui.mm(Ui.GOLD + "<bold>KOTH: " + Ui.esc(ar.name())), Ui.mm(Ui.LABEL + "at <white>" + ar.x() + ", " + ar.z() + Ui.LABEL + " • hold it for " + Ui.duration(capTime))));
 			p.playSound(p.getLocation(), Sound.EVENT_RAID_HORN, 1f, 1f);
 		}
 		Bukkit.broadcast(Ui.mm(Ui.PREFIX + Ui.GOLD + "<bold>KOTH</bold> <white>" + Ui.esc(ar.name()) + Ui.LABEL + " has started at <white>" + ar.x() + ", " + ar.z()
@@ -200,7 +200,7 @@ final class Koth {
 		Bukkit.broadcast(Ui.mm(Ui.PREFIX + Ui.GOLD + "<bold>KOTH</bold> <white><bold>" + Ui.esc(p.getName()) + "</bold>" + (f == null ? "" : Ui.LABEL + " of <white>" + Ui.esc(f.tag()))
 				+ Ui.LABEL + " captured " + Ui.GOLD + "<bold>" + Ui.esc(ar.name()) + "</bold>" + Ui.LABEL + "!"));
 		for (Player o : Bukkit.getOnlinePlayers()) {
-			o.showTitle(Title.title(Ui.mm(Ui.GOLD + "<bold>" + Ui.esc(ar.name()).toUpperCase() + " CAPTURED"), Ui.mm("<white>" + Ui.esc(p.getName()) + (f == null ? "" : Ui.LABEL + " • " + Ui.esc(f.tag())))));
+			o.showTitle(Title.title(Ui.mm(Ui.GOLD + "<bold>" + Ui.esc(ar.name()) + " CAPTURED"), Ui.mm("<white>" + Ui.esc(p.getName()) + (f == null ? "" : Ui.LABEL + " • " + Ui.esc(f.tag())))));
 			o.playSound(o.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1f);
 		}
 		reward(p, f);

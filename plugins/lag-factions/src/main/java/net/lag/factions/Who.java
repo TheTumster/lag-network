@@ -56,7 +56,8 @@ final class Who {
 		};
 	}
 
-	void show(Player viewer, Faction f) {
+	/** The profile page inside the /f menu. */
+	void profile(Player viewer, Faction f) {
 		FPlayer me = F.fp(viewer);
 		Relation rel = me != null && me.hasFaction() ? me.faction().relationTo(f) : Relation.NEUTRAL;
 		String rc = relColor(rel);
@@ -66,13 +67,13 @@ final class Who {
 		long online = members.stream().filter(FPlayer::isOnline).count();
 		String desc = f.description() == null || f.description().isBlank() || f.description().equals(DEFAULT_DESC) ? "" : f.description();
 
-		Gui g = new Gui(6, rc + "<bold>" + Ui.esc(f.tag()).toUpperCase() + "</bold> <dark_gray>• " + Ui.LABEL + relName(rel));
+		Gui g = new Gui(6, rc + "<bold>" + Ui.esc(f.tag()) + "</bold> <dark_gray>• " + Ui.LABEL + relName(rel));
 		g.frame();
 		String founded = "";
 		try {
 			founded = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.of("America/New_York")).format(f.founded());
 		} catch (Exception ignored) { }
-		g.set(4, Ui.item(banner(rel), true, rc + "<bold>" + Ui.esc(f.tag()).toUpperCase(),
+		g.set(4, Ui.item(banner(rel), true, rc + "<bold>" + Ui.esc(f.tag()),
 				Ui.LABEL + relName(rel),
 				desc.isEmpty() ? "" : Ui.DIM + "<italic>" + Ui.esc(desc),
 				"", Ui.LABEL + "Founded <white>" + founded));
@@ -114,6 +115,49 @@ final class Who {
 		if (mine) g.set(49, Ui.item(Material.ARROW, Ui.LABEL + "Back to /f menu"), c -> plugin.menu.open(c.player()));
 		else g.set(49, Ui.item(Material.BARRIER, Ui.LABEL + "Close"), c -> c.player().closeInventory());
 		g.open(viewer);
+	}
+
+	/** /f who: classic chat profile. */
+	void show(Player viewer, Faction f) {
+		FPlayer me = F.fp(viewer);
+		Relation rel = me != null && me.hasFaction() ? me.faction().relationTo(f) : Relation.NEUTRAL;
+		String rc = relColor(rel);
+		List<FPlayer> members = new ArrayList<>(f.members());
+		members.sort(Comparator.comparingInt((FPlayer m) -> m.role() == null ? 99 : m.role().ordinal())
+				.thenComparing(FPlayer::name, String.CASE_INSENSITIVE_ORDER));
+		String desc = f.description() == null || f.description().isBlank() || f.description().equals(DEFAULT_DESC) ? "" : f.description();
+		String founded = "";
+		try {
+			founded = DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.of("America/New_York")).format(f.founded());
+		} catch (Exception ignored) { }
+		var out = net.kyori.adventure.text.Component.text();
+		out.append(Ui.mm(Classic.header(rc + Ui.esc(f.tag()), f.tag()))).append(net.kyori.adventure.text.Component.newline());
+		if (!desc.isEmpty()) out.append(Ui.mm(Classic.line("Description", Ui.esc(desc)))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm(Classic.line("Land / Power / Max Power", f.claimCount() + " / " + f.power() + " / " + f.powerMax()))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm("<gold>Shield: </gold>" + plugin.shields.status(f) + " <gray>(" + plugin.shields.windowText(plugin.shields.startHour(f)) + ")"))
+				.append(net.kyori.adventure.text.Component.newline());
+		int rank = plugin.top.rank(f);
+		out.append(Ui.mm(Classic.line("F-Top", (rank > 0 ? "#" + rank + " " : "") + Ui.money(plugin.top.value(f))))).append(net.kyori.adventure.text.Component.newline());
+		out.append(Ui.mm(Classic.line("TNT Bank", String.format("%,d", f.tntBank())))).append(net.kyori.adventure.text.Component.newline());
+		if (!founded.isEmpty()) out.append(Ui.mm(Classic.line("Founded", founded))).append(net.kyori.adventure.text.Component.newline());
+		long on = members.stream().filter(FPlayer::isOnline).count();
+		out.append(roster("Online", members.stream().filter(FPlayer::isOnline).toList(), on, f.memberLimit())).append(net.kyori.adventure.text.Component.newline());
+		out.append(roster("Offline", members.stream().filter(m -> !m.isOnline()).toList(), members.size() - on, -1));
+		viewer.sendMessage(out.build());
+	}
+
+	private net.kyori.adventure.text.Component roster(String label, List<FPlayer> list, long n, int limit) {
+		var b = net.kyori.adventure.text.Component.text();
+		b.append(Ui.mm("<gold>" + label + " (" + n + (limit > 0 ? "/" + limit : "") + "): </gold>"));
+		boolean first = true;
+		for (FPlayer m : list) {
+			if (!first) b.append(Ui.mm("<yellow>, "));
+			first = false;
+			b.append(Ui.mm((m.isOnline() ? "<green>" : "<gray>") + F.roleStars(m.role()) + Ui.esc(m.name()))
+					.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Ui.mm("<gold>" + F.roleName(m.role()) + "\n<gold>Power: <yellow>" + (int) m.power() + "/" + (int) m.powerMax()))));
+		}
+		if (list.isEmpty()) b.append(Ui.mm("<gray>none"));
+		return b.build();
 	}
 
 	private static String roleColor(Role r) {
