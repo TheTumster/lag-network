@@ -57,6 +57,16 @@ public final class LagFactions extends JavaPlugin implements Listener {
 	public void onEnable() {
 		saveDefaultConfig();
 		getConfig().options().copyDefaults(true);
+		// v2 prices (Nov 18): upgrades in the millions, 5M TNT bank, $2M iron golems, 5x5/7x7/9x9 picks, busters
+		if (getConfig().getInt("config-version", 1) < 2 && getConfig().getDefaults() != null) {
+			for (String k : new String[] {"upgrades", "shop"}) {
+				var def = getConfig().getDefaults().getConfigurationSection(k);
+				if (def == null) continue;
+				getConfig().set(k, null);
+				for (String leaf : def.getKeys(true)) if (!def.isConfigurationSection(leaf)) getConfig().set(k + "." + leaf, def.get(leaf));
+			}
+			getConfig().set("config-version", 2);
+		}
 		saveConfig();
 		shields = new Shields(this);
 		menu = new Menu(this);
@@ -169,13 +179,14 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			Ui.msg(sender, "Reloaded.");
 			return true;
 		}
-		// /lf give <player> spawner <type> [amount] | /lf give <player> pick <trench3|trench5|tray3|tray5>
+		// /lf give <player> spawner <type> [amount] | /lf give <player> pick <trench5|trench7|trench9|tray5|tray7|tray9> | buster <1|3>
 		if (args.length >= 4 && args[0].equalsIgnoreCase("give")) {
 			Player t = Bukkit.getPlayerExact(args[1]);
 			if (t == null) { Ui.msg(sender, "<red>Player not online."); return true; }
 			org.bukkit.inventory.ItemStack it;
 			try {
-				it = args[2].equalsIgnoreCase("spawner")
+				if (args[2].equalsIgnoreCase("buster")) it = shop.buster(Integer.parseInt(args[3]) >= 3 ? 3 : 1);
+				else it = args[2].equalsIgnoreCase("spawner")
 						? shop.spawner(org.bukkit.entity.EntityType.valueOf(args[3].toUpperCase(Locale.ROOT)), args.length > 4 ? Integer.parseInt(args[4]) : 1)
 						: shop.pick(args[3].toLowerCase(Locale.ROOT));
 			} catch (Exception ex) {
@@ -186,7 +197,7 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			Ui.msg(sender, "Given.");
 			return true;
 		}
-		Ui.msg(sender, "<gray>/lf reload <dark_gray>• <gray>/lf give <player> spawner <type> [amount] <dark_gray>• <gray>/lf give <player> pick <trench3|trench5|tray3|tray5>");
+		Ui.msg(sender, "<gray>/lf reload <dark_gray>• <gray>/lf give <player> spawner <type> [amount] <dark_gray>• <gray>/lf give <player> pick <trench5|trench7|trench9|tray5|tray7|tray9> | buster <1|3>");
 		return true;
 	}
 }

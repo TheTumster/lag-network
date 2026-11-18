@@ -1,3 +1,4 @@
+config-version: 2
 # laGFactions (RelapsedMC factions layer). /lf reload after editing.
 
 shield:
@@ -12,19 +13,19 @@ shield:
 # /f upgrades. cost = price per level (list length = max level). value = what each level gives (index 0 = no upgrade).
 upgrades:
   spawner:
-    cost: [250000, 750000, 2000000, 5000000, 12000000]
+    cost: [1000000, 2000000, 3500000, 5000000, 8000000]
     value: [0, 10, 20, 35, 50, 75]          # % faster spawners in your claims
   farm:
-    cost: [100000, 300000, 900000, 2500000, 6000000]
+    cost: [750000, 1500000, 2500000, 4000000, 6000000]
     value: [0, 10, 20, 35, 50, 75]          # % chance of an extra cane/cactus/bamboo block per growth
   chest:
-    cost: [100000, 400000, 1000000]
+    cost: [1000000, 2000000, 3000000]
     value: [3, 4, 5, 6]                     # rows in /f chest
   tnt:
-    cost: [100000, 300000, 750000, 2000000]
-    value: [25000, 50000, 100000, 250000, 1000000]   # TNT bank cap
+    cost: [1000000, 2000000, 3000000, 5000000]
+    value: [250000, 500000, 1000000, 2500000, 5000000]   # TNT bank cap
   warps:
-    cost: [150000, 400000, 1000000]
+    cost: [1000000, 2000000, 3000000]
     value: [2, 3, 4, 5]                     # /f warps (FactionsUUID allows up to 5)
 
 # /f shop. Spawner prices also set their F-top value (ftop.spawner-values overrides).
@@ -40,12 +41,17 @@ shop:
     blaze: 200000
     enderman: 250000
     creeper: 300000
-    iron_golem: 500000
+    iron_golem: 2000000
   picks:
-    trench3: 150000
     trench5: 500000
-    tray3: 75000
-    tray5: 250000
+    trench7: 1000000
+    trench9: 2000000
+    tray5: 500000
+    tray7: 1000000
+    tray9: 2000000
+  busters:
+    1x1: 500000
+    3x3: 3000000
 
 spawners:
   # chance a spawner drops as an item when it's blown up (raid loot)
@@ -55,12 +61,15 @@ ftop:
   default-spawner-value: 10000
   spawner-values: {}
 
-# Raiding outpost (its own world "outpost"): break the core (beacon) to capture; owners get this % faster spawners
+# Raiding outpost (its own world "outpost"): cannon through the walls, break the core (beacon) to capture; owners get this % faster spawners
 # and farms. After a capture the fortress rebuilds over rebuild-minutes. /lf outpost rebuild forces a rebuild.
 outpost:
   enabled: true
   boost: 25
   rebuild-minutes: 30
+  walls: 100              # watered walls around the core (every 5th is obsidian)
+  wall-height: 30
+  first-build-minutes: 5
 
 # Recolour FactionsUUID's own messages to the RelapsedMC palette on every start.
 theme-messages: true
