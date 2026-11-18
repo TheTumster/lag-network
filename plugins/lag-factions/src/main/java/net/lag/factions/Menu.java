@@ -61,6 +61,7 @@ final class Menu {
 				c -> plugin.perms.open(c.player()));
 		g.set(40, Ui.item(Material.BEACON, true, Ui.PURPLE + "<bold>OUTPOST", Ui.LABEL + "Held by <white>" + (plugin.outpost.owner() == null ? "nobody" : Ui.esc(plugin.outpost.owner().tag())),
 				Ui.LABEL + "Owners get faster spawners + farms", "", Ui.CYAN + "Click to open"), c -> plugin.outpost.open(c.player()));
+		g.set(36, Ui.item(Material.BOOK, Ui.LABEL + "<bold>All commands", Ui.DIM + "/f help"), c -> plugin.help.open(c.player()));
 		g.set(33, Ui.item(Material.PLAYER_HEAD, "<white><bold>MEMBERS", Ui.LABEL + "Invite: <white>/f invite <player>", Ui.LABEL + "Promote: <white>/f role <player> <role>"),
 				c -> { c.player().closeInventory(); plugin.who.show(c.player(), f); });
 		g.open(p);
