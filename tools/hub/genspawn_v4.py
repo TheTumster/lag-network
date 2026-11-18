@@ -25,7 +25,7 @@ PLAZA = 17
 TERRACE_Z0, TERRACE_Z1 = -29, -45   # the Gallery terrace (north)
 TERRACE_Y = FLOOR + 2      # terrace floor
 PORTAL_Z = -38
-PORTALS = [("skyblock", -27), ("factions", -9), ("cannons", 9), ("smp", 27)]
+PORTALS = [("skyblock", -30), ("factions", -12), ("cannons", 12), ("smp", 30)]
 blocks = {}
 
 
@@ -268,17 +268,6 @@ for y in range(0, CR_H):
             put(CX + x, CR_Y + y, CZ + z, "pearlescent_froglight" if ridge else "amethyst_block")
 put(CX, CR_Y - 1, CZ, "amethyst_cluster[facing=down,waterlogged=false]")
 put(CX, CR_Y + CR_H, CZ, "amethyst_cluster[facing=up,waterlogged=false]")
-# halo: one clean white ring around the gem's widest point, with four light nodes
-HALO_R = 10.5
-for i in range(240):
-    a_ = i / 240 * math.pi * 2
-    x, z = round(CX + HALO_R * math.cos(a_)), round(CZ + HALO_R * math.sin(a_))
-    put(x, CR_Y + CR_MID, z, "smooth_quartz_slab[type=bottom,waterlogged=false]")
-for k in range(4):
-    a_ = k * math.pi / 2 + math.pi / 4
-    x, z = round(CX + HALO_R * math.cos(a_)), round(CZ + HALO_R * math.sin(a_))
-    put(x, CR_Y + CR_MID, z, "sea_lantern")
-    put(x, CR_Y + CR_MID - 1, z, "end_rod[facing=down]")
 # ======================================================================= the Gallery terrace + realm portals
 for x in range(-41, 42):
     for z in range(TERRACE_Z1, TERRACE_Z0 + 1):
@@ -346,7 +335,7 @@ def gate(px, realm):
 
     ring1 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and nb(opening, dx, dy)
     ring2 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and not ring1(dx, dy) and nb(ring1, dx, dy)
-    edge = lambda dx, dy: inS(dx, dy) and dy > 0 and any(not inS(dx + a, dy + b) for a, b in ((1, 0), (-1, 0), (0, 1)))
+    edge = lambda dx, dy: inS(dx, dy) and dy > 0 and any(not inS(dx + a, dy + b) for a in (-1, 0, 1) for b in (0, 1) if a or b)
     MED = (0, 14)                                # medallion centre (dx, dy)
     med = lambda dx, dy: 1.4 <= math.hypot(dx - MED[0], dy - MED[1]) <= 2.2
 
@@ -418,6 +407,29 @@ def gate(px, realm):
 
 for realm, px in PORTALS:
     gate(px, realm)
+
+
+def monolith():
+    """Between the two middle gates, dead centre of the spawn view: a dark slab with a purple neon outline.
+    The RelapsedMC logo hologram floats in front of it."""
+    y0, PZ = TERRACE_Y + 1, PORTAL_Z - 1
+    TOPM = [11, 11, 11, 10, 9]
+    inM = lambda dx, dy: abs(dx) <= 4 and 0 <= dy <= TOPM[abs(dx)]
+    for dx in range(-4, 5):
+        for dy in range(0, 12):
+            if not inM(dx, dy):
+                continue
+            x, y = dx, y0 + dy
+            edge = dy > 0 and any(not inM(dx + a, dy + b) for a in (-1, 0, 1) for b in (0, 1) if a or b)
+            put(x, y, PZ - 1, "polished_blackstone_bricks")
+            put(x, y, PZ, "purple_concrete" if edge else "polished_blackstone")
+    for dx in range(-5, 6):
+        put(dx, y0, PZ + 1, "polished_blackstone_slab[type=bottom,waterlogged=false]")
+    put(0, y0 + 12, PZ, WALLP)
+    put(0, y0 + 13, PZ, "end_rod[facing=up]")
+
+
+monolith()
 
 # realm spotlights: a coloured beacon beam straight up behind every portal (seen from anywhere on the island)
 BEAM = {"skyblock": "lime_stained_glass", "factions": "red_stained_glass", "cannons": "orange_stained_glass", "smp": "light_blue_stained_glass"}
