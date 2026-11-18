@@ -56,12 +56,22 @@ final class InfoPanel implements Listener {
 
 	private static final class View {
 		String tab;
-		final List<Entity> ents = new ArrayList<>();
+		final List<Entity> ents = new ArrayList<>();      // everything (removed when the player leaves)
+		final List<Entity> cardEnts = new ArrayList<>();  // just the current tab's cards (swapped on a tab change)
 		final List<Hit> hits = new ArrayList<>();
+		final List<Hit> cardHits = new ArrayList<>();
+		final Map<String, BlockDisplay> tabFaces = new HashMap<>();
 		final List<Entity> layer = new ArrayList<>();
 		Hit hovered;
 		long lastClick;
+		boolean built;
 	}
+
+	/** Cards being drawn right now go into the card lists, so a tab change only swaps them. */
+	private boolean drawingCards;
+	/** Players waiting for their copy; a few are built per tick so a wave of joins doesn't spike the server. */
+	private final java.util.ArrayDeque<UUID> queue = new java.util.ArrayDeque<>();
+	private static final int BUILDS_PER_TICK = 2;
 
 	private final LagCore plugin;
 	private final HubBuild anchor;
@@ -77,7 +87,7 @@ final class InfoPanel implements Listener {
 		this.anchor = anchor;
 		this.role = role;
 		load();
-		Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 3L);
+		Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 20L, 2L);
 	}
 
 	/** plugins/laGCore/panels.yml if it exists (live edits), else the one in the jar. */
@@ -165,6 +175,7 @@ final class InfoPanel implements Listener {
 			hide(e, p);
 		});
 		v.ents.add(b);
+		if (drawingCards) v.cardEnts.add(b);
 		return b;
 	}
 
@@ -185,6 +196,7 @@ final class InfoPanel implements Listener {
 			hide(e, p);
 		});
 		v.ents.add(t);
+		if (drawingCards) v.cardEnts.add(t);
 		return t;
 	}
 
@@ -202,6 +214,7 @@ final class InfoPanel implements Listener {
 			it = new ItemStack(mat == null ? Material.BARRIER : mat);
 		}
 		ItemStack fin = it;
+		final boolean cardsNow = drawingCards;
 		ItemDisplay d = l.getWorld().spawn(l, ItemDisplay.class, e -> {
 			e.setItemStack(fin);
 			e.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GUI);
@@ -211,6 +224,7 @@ final class InfoPanel implements Listener {
 			hide(e, p);
 		});
 		v.ents.add(d);
+		if (cardsNow) v.cardEnts.add(d);
 	}
 
 	private void clickable(Player p, View v, Box b, String action, BlockDisplay face) {
@@ -219,6 +233,7 @@ final class InfoPanel implements Listener {
 		h.action = action;
 		h.face = face;
 		v.hits.add(h);
+		if (drawingCards) v.cardHits.add(h);
 	}
 
 	/**
@@ -246,9 +261,13 @@ final class InfoPanel implements Listener {
 	private void build(Player p, View v) {
 		for (Entity e : v.ents) e.remove();
 		v.ents.clear();
+		v.cardEnts.clear();
 		v.hits.clear();
+		v.cardHits.clear();
+		v.tabFaces.clear();
 		v.layer.clear();
 		v.hovered = null;
+		v.built = true;
 		double hw = width / 2;
 		// frame: screen, accent bars
 		rect(p, v, -hw - 0.06, -0.06, hw + 0.06, height + 0.06, -0.02, def.getString("frame", "polished_blackstone"));
@@ -267,12 +286,41 @@ final class InfoPanel implements Listener {
 			double u1 = -hw + 0.15 + i * tw + 0.04, u2 = u1 + tw - 0.08;
 			double t1 = height - 1.12, t2 = height - 0.8;
 			BlockDisplay face = rect(p, v, u1, t1, u2, t2, 0.01, on ? "purple_concrete" : "gray_concrete");
-			text(p, v, (u1 + u2) / 2, t1 + 0.08, (on ? "<white><bold>" : "<gray>") + tabs.get(i).get("label"), 0.6f, false);
+			text(p, v, (u1 + u2) / 2, t1 + 0.08, "<white><bold>" + tabs.get(i).get("label"), 0.6f, false);
 			clickable(p, v, new Box(u1, t1, u2, t2), "tab:" + id, face);
+			v.tabFaces.put(id, face);
 		}
-		// cards for the current tab
-		Map<?, ?> tab = tabs.stream().filter(t -> String.valueOf(t.get("id")).equals(v.tab)).findFirst().orElse(tabs.isEmpty() ? null : tabs.get(0));
 		clickLayer(p, v);
+		cards(p, v);
+	}
+
+	/** Swaps only the cards (and the tab colours) on a tab change: the frame, title and tabs stay put. */
+	private void switchTab(Player p, View v, String id) {
+		v.tab = id;
+		if (v.hovered != null && v.cardHits.contains(v.hovered)) v.hovered = null;
+		for (Entity e : v.cardEnts) e.remove();
+		v.ents.removeAll(v.cardEnts);
+		v.hits.removeAll(v.cardHits);
+		v.cardEnts.clear();
+		v.cardHits.clear();
+		for (var e : v.tabFaces.entrySet()) {
+			if (e.getValue().isValid()) e.getValue().setBlock(Bukkit.createBlockData(e.getKey().equals(id) ? Material.PURPLE_CONCRETE : Material.GRAY_CONCRETE));
+		}
+		cards(p, v);
+	}
+
+	private void cards(Player p, View v) {
+		drawingCards = true;
+		try {
+			drawCards(p, v);
+		} finally {
+			drawingCards = false;
+		}
+	}
+
+	private void drawCards(Player p, View v) {
+		List<Map<?, ?>> tabs = def.getMapList("tabs");
+		Map<?, ?> tab = tabs.stream().filter(t -> String.valueOf(t.get("id")).equals(v.tab)).findFirst().orElse(tabs.isEmpty() ? null : tabs.get(0));
 		if (tab == null) return;
 		Object cards = tab.get("cards");
 		if (!(cards instanceof List<?> list)) return;
@@ -318,12 +366,20 @@ final class InfoPanel implements Listener {
 				v = new View();
 				v.tab = def.getMapList("tabs").isEmpty() ? "" : String.valueOf(def.getMapList("tabs").get(0).get("id"));
 				views.put(p.getUniqueId(), v);
-				build(p, v);
+				queue.add(p.getUniqueId());
 			} else if (!near && v != null) {
 				drop(p.getUniqueId());
 				continue;
 			}
-			if (v != null) hover(p, v);
+			if (v != null && v.built) hover(p, v);
+		}
+		for (int i = 0; i < BUILDS_PER_TICK && !queue.isEmpty(); ) {
+			UUID id = queue.poll();
+			View v = views.get(id);
+			Player p = Bukkit.getPlayer(id);
+			if (v == null || p == null || v.built) continue;
+			build(p, v);
+			i++;
 		}
 		views.keySet().removeIf(id -> {
 			if (Bukkit.getPlayer(id) == null) {
@@ -336,6 +392,7 @@ final class InfoPanel implements Listener {
 	}
 
 	private void drop(UUID id) {
+		queue.remove(id);
 		View v = views.remove(id);
 		if (v != null) v.ents.forEach(Entity::remove);
 	}
@@ -379,7 +436,7 @@ final class InfoPanel implements Listener {
 	private void click(Player p, Entity e) {
 		View v = views.get(p.getUniqueId());
 		if (v == null) return;
-		if (!v.layer.contains(e)) return;
+		if (e != null && !v.layer.contains(e)) return;
 		Hit h = aim(p, v);
 		if (h == null) return;
 		long now = System.currentTimeMillis();
@@ -391,8 +448,8 @@ final class InfoPanel implements Listener {
 	private void run(Player p, View v, String action) {
 		p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.4f);
 		if (action.startsWith("tab:")) {
-			v.tab = action.substring(4);
-			build(p, v);
+			String id = action.substring(4);
+			if (!id.equals(v.tab)) switchTab(p, v, id);
 		} else if (action.startsWith("cmd:")) {
 			String cmd = action.substring(4).replace("{player}", p.getName());
 			Bukkit.getScheduler().runTask(plugin, () -> p.performCommand(cmd));
@@ -416,6 +473,28 @@ final class InfoPanel implements Listener {
 			e.setCancelled(true);
 			click(e.getPlayer(), e.getAttacked());
 		}
+	}
+
+	/**
+	 * The click entities only reach about 3 blocks (the game's entity reach), but a card lights up from much further.
+	 * So any left click (arm swing) or right click while a card is lit counts as clicking it, at any distance.
+	 */
+	@EventHandler(ignoreCancelled = false)
+	public void onSwing(org.bukkit.event.player.PlayerAnimationEvent e) {
+		if (e.getAnimationType() != org.bukkit.event.player.PlayerAnimationType.ARM_SWING) return;
+		View v = views.get(e.getPlayer().getUniqueId());
+		if (v != null && v.built && aim(e.getPlayer(), v) != null) click(e.getPlayer(), null);
+	}
+
+	@EventHandler(ignoreCancelled = false, priority = org.bukkit.event.EventPriority.LOW)
+	public void onUse(org.bukkit.event.player.PlayerInteractEvent e) {
+		var a = e.getAction();
+		if (a != org.bukkit.event.block.Action.RIGHT_CLICK_AIR && a != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
+		if (e.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
+		View v = views.get(e.getPlayer().getUniqueId());
+		if (v == null || !v.built || aim(e.getPlayer(), v) == null) return;
+		e.setCancelled(true);
+		click(e.getPlayer(), null);
 	}
 
 	@EventHandler
