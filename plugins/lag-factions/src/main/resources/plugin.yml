@@ -10,6 +10,9 @@ commands:
     description: laGFactions admin
     aliases: [lf]
     permission: lag.factions.admin
+  koth:
+    description: KOTH status (staff - create, start, stop)
+    aliases: [koths]
 permissions:
   lag.factions.admin:
     default: op

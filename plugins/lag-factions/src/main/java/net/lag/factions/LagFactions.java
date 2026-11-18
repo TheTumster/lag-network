@@ -39,6 +39,8 @@ public final class LagFactions extends JavaPlugin implements Listener {
 	FTop top;
 	Perms perms;
 	Outpost outpost;
+	Koth koth;
+	Help help;
 
 	@Override
 	public void onLoad() {
@@ -66,6 +68,8 @@ public final class LagFactions extends JavaPlugin implements Listener {
 		top = new FTop(this);
 		perms = new Perms(this);
 		outpost = new Outpost(this);
+		koth = new Koth(this);
+		help = new Help(this);
 		var pm = getServer().getPluginManager();
 		pm.registerEvents(this, this);
 		pm.registerEvents(shields, this);
@@ -112,6 +116,7 @@ public final class LagFactions extends JavaPlugin implements Listener {
 			case "top", "ftop" -> { if (a.length > 2) return; e.setCancelled(true); top.open(p); }
 			case "perms", "perm", "permissions" -> { e.setCancelled(true); perms.open(p); }
 			case "outpost", "op" -> { e.setCancelled(true); outpost.open(p); }
+			case "help", "?", "h", "commands" -> { e.setCancelled(true); help.open(p); }
 			case "set" -> {
 				// ClassicFactions turns /f perms into /f set perm; with no further arguments that's our menu
 				if (a.length == 3 && (a[2].equalsIgnoreCase("perm") || a[2].equalsIgnoreCase("perms"))) { e.setCancelled(true); perms.open(p); }
@@ -139,6 +144,7 @@ public final class LagFactions extends JavaPlugin implements Listener {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (command.getName().equalsIgnoreCase("koth")) return koth.command(sender, args);
 		if (args.length > 1 && args[0].equalsIgnoreCase("outpost") && args[1].equalsIgnoreCase("rebuild")) {
 			outpost.startRebuild();
 			Ui.msg(sender, "Outpost rebuilding.");

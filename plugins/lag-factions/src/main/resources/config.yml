@@ -64,3 +64,14 @@ outpost:
 
 # Recolour FactionsUUID's own messages to the RelapsedMC palette on every start.
 theme-messages: true
+
+# KOTHs (staff-started): /koth create <name> [radius], /koth start <name> [minutes], /koth stop, /koth list
+koth:
+  cap-minutes: 10
+  reward:
+    money: 1000000          # to the winner's faction bank (or the player if factionless)
+    gear-pieces: 2          # random Protection 5 netherite armor pieces (tagged KOTH gear)
+    protection: 5
+    sword: true
+    sword-chance: 0.5       # Sharpness 5 netherite sword
+    commands: []            # console commands, {player} {faction}
