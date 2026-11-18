@@ -20,7 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * every shot finishes and nothing is left frozen mid-flight to go off inside the cannon later.
  *
  * Guard against permanent chunk loaders (a cannon on a clock re-lights TNT forever): a chunk is held for at most
- * cannons.tnt-chunk-loading.max-seconds after it would otherwise have stopped, then it rests for the same time.
+ * cannons.tnt-chunk-loading.max-seconds (default 2 minutes) after it would otherwise have stopped, then it rests for the same time.
  * Chunks are let go once no TNT/sand has been in them for release-ticks.
  */
 final class TntChunkLoader {
@@ -60,7 +60,7 @@ final class TntChunkLoader {
 			return;
 		}
 		int radius = Math.max(0, plugin.getConfig().getInt("cannons.tnt-chunk-loading.radius", 1));
-		long maxTicks = 20L * plugin.getConfig().getInt("cannons.tnt-chunk-loading.max-seconds", 30);
+		long maxTicks = 20L * plugin.getConfig().getInt("cannons.tnt-chunk-loading.max-seconds", 120);
 		long releaseTicks = plugin.getConfig().getInt("cannons.tnt-chunk-loading.release-ticks", 100);
 
 		// 1. every chunk with a live shot (plus the cannon around it) stays loaded

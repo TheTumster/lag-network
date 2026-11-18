@@ -64,10 +64,6 @@ sandbots:
   # Max spots one bot can manage, and max bots per player.
   max-spots: 64
   max-bots-per-player: 5
-  # Lag guards: bots only run while a player is within this many blocks, and the whole server places at most
-  # this many blocks per tick (bots take turns).
-  active-range: 96
-  max-sand-per-tick: 512
   # Spots must be within this many blocks of the bot.
   range: 16
   # What they place. SAND, RED_SAND, GRAVEL, or any *_CONCRETE_POWDER.
@@ -166,10 +162,11 @@ fps-menu:
 
 # TNT loads the cannon: lit TNT / falling sand keep their chunk and the chunks around it (radius) loaded and running,
 # so a cannon keeps working when its owner flies away and no shot is left frozen to go off inside it later.
-# max-seconds: a chunk is held at most this long with nobody around (stops clock cannons being free chunk loaders).
+# max-seconds: grace after everyone leaves - a chunk is held at most this long with nobody around, then rests as long
+# (stops clock cannons being free chunk loaders).
 cannons:
   tnt-chunk-loading:
     enabled: true
     radius: 1
-    max-seconds: 30
+    max-seconds: 120
     release-ticks: 100

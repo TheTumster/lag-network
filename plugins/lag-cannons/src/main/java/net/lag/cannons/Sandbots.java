@@ -129,47 +129,21 @@ final class Sandbots implements Listener {
 		return m != null && m.hasGravity() ? m : Material.SAND;
 	}
 
-	private int rotate = 0;
-
-	/**
-	 * Refill bots. Lag guards: a bot only runs while a player is within sandbots.active-range blocks (idle bots cost
-	 * nothing), bots start on different ticks, and at most sandbots.max-sand-per-tick blocks are placed per tick across
-	 * the server, taking turns so one huge bot can't spike a tick.
-	 */
+	/** Refill every active bot whose chunk is loaded. No caps: cannoning speed is never throttled. */
 	private void refill() {
 		Material mat = material();
 		int def = Math.max(1, plugin.getConfig().getInt("sandbots.interval-ticks", 2));
-		double range = plugin.getConfig().getDouble("sandbots.active-range", 96);
-		int budget = plugin.getConfig().getInt("sandbots.max-sand-per-tick", 512);
-		java.util.List<Bot> list = new java.util.ArrayList<>(bots.values());
-		if (list.isEmpty()) return;
-		rotate = (rotate + 1) % list.size();
-		for (int n = 0; n < list.size() && budget > 0; n++) {
-			Bot b = list.get((n + rotate) % list.size());
+		for (Bot b : bots.values()) {
 			if (!b.active) continue;
 			if (++b.counter < (b.every > 0 ? b.every : def)) continue;
 			b.counter = 0;
 			World w = Bukkit.getWorld(b.world);
 			if (w == null || !w.isChunkLoaded((int) Math.floor(b.x) >> 4, (int) Math.floor(b.z) >> 4)) continue;
-			if (!someoneNear(w, b, range)) continue;
-			for (int[] c : b.coords()) {
+			for (int[] c : b.coords()) { // spots parsed once, not every refill
 				Block blk = w.getBlockAt(c[0], c[1], c[2]);
-				if (blk.getType().isAir()) {
-					blk.setType(mat, true);
-					if (--budget <= 0) break;
-				}
+				if (blk.getType().isAir()) blk.setType(mat, true);
 			}
 		}
-	}
-
-	private static boolean someoneNear(World w, Bot b, double range) {
-		double r2 = range * range;
-		for (Player p : w.getPlayers()) {
-			Location l = p.getLocation();
-			double dx = l.getX() - b.x, dz = l.getZ() - b.z;
-			if (dx * dx + dz * dz <= r2) return true;
-		}
-		return false;
 	}
 
 	private void showSpots() {
