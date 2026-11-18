@@ -83,7 +83,7 @@ final class IslandTop implements Listener, CommandExecutor {
 	}
 
 	static String money(double d) {
-		return "$" + MONEY.format(d);
+		return LagSkyblock.shards(d);
 	}
 
 	/** Spawner value per mob (tier price), plus island-top.extra-values for mobs outside the ladder. */

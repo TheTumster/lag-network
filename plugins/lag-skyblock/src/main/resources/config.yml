@@ -1,52 +1,119 @@
-# RelapsedMC Skyblock: spawner tiers.
-# Tiers go cheapest first. Tier 1 is unlocked for everyone; each next tier is unlocked by trading in
-# `unlock` heads of the tier before it (/spawners). Spawner mobs drop their head when they die - in a grinder or
-# to a sword - so: grind a tier, collect its heads, unlock the next, build a grinder for it.
-# head-chance: chance (percent) that each spawner mob drops its head when it dies (whole stacks roll per mob).
-head-chance: 4.0
-tiers:
-  - {mob: chicken,    name: Chicken,    color: "#F4E7C8", price: 25000,    head-value: 40,    unlock: 0}
-  - {mob: pig,        name: Pig,        color: "#F2A3B5", price: 60000,    head-value: 90,    unlock: 16}
-  - {mob: cow,        name: Cow,        color: "#B98A62", price: 125000,   head-value: 175,   unlock: 24}
-  - {mob: spider,     name: Spider,     color: "#C0392B", price: 250000,   head-value: 325,   unlock: 32}
-  - {mob: zombie,     name: Zombie,     color: "#5DAE4A", price: 450000,   head-value: 550,   unlock: 32}
-  - {mob: skeleton,   name: Skeleton,   color: "#E0E0E0", price: 750000,   head-value: 850,   unlock: 48}
-  - {mob: slime,      name: Slime,      color: "#7CFF6B", price: 1200000,  head-value: 1300,  unlock: 48}
-  - {mob: silverfish, name: Silverfish, color: "#9AA3AD", price: 2000000,  head-value: 2000,  unlock: 64}
-  - {mob: creeper,    name: Creeper,    color: "#4CDB4C", price: 3250000,  head-value: 3000,  unlock: 64}
-  - {mob: witch,      name: Witch,      color: "#9B59B6", price: 5000000,  head-value: 4500,  unlock: 96}
-  - {mob: blaze,      name: Blaze,      color: "#FFB020", price: 7500000,  head-value: 6500,  unlock: 96}
-  - {mob: enderman,   name: Enderman,   color: "#B040FF", price: 11000000, head-value: 9500,  unlock: 128}
-  - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 16000000, head-value: 14000, unlock: 128}
+# RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector):
+# mine your gen -> sell to the Collector -> buy cages (spawners) -> grinder kills the stacks -> sell the loot
+# -> heads unlock the next cage -> the cages you place are your island's value -> top islands win the season.
+# Design doc: "RelapsedMC Skyblock - Economy" in the RelapsedMC project.
 
+# Bumped when the economy changes: an older config.yml is moved to config-old-<n>.yml and replaced with this one.
+config-version: 3
+
+# Shards: the currency. Written into Essentials on start (symbol + what a new player starts with).
+shards:
+  symbol: "◆"
+  starting-balance: 3500
+
+# The cage ladder, cheapest first. Tier 1 is open to everyone; each next tier unlocks by trading in `unlock` heads
+# of the tier below in /spawners. Heads are proof only: they never sell.
+#   price: Shards per cage (also what it adds to island value)
+#   value: Shards the Collector pays for one mob's loot (split evenly over the loot items)
+#   loot:  what every mob from that cage drops (replaces vanilla drops, grinders and swords alike). Every item is
+#          tagged as spawner loot; the Collector pays these prices only for tagged items.
+# head-chance: % per mob killed (whole stacks roll once per mob).
+head-chance: 1.0
+tiers:
+  - {mob: chicken, name: Chicken,    color: "#F4E7C8", price:      5000, unlock:    0, value: 0.86, loot: {FEATHER: 1, CHICKEN: 1}}
+  - {mob: pig, name: Pig,        color: "#F2A3B5", price:     12000, unlock:   24, value: 1.89, loot: {PORKCHOP: 2}}
+  - {mob: cow, name: Cow,        color: "#B98A62", price:     30000, unlock:   40, value: 4.37, loot: {LEATHER: 1, BEEF: 2}}
+  - {mob: spider, name: Spider,     color: "#C0392B", price:     75000, unlock:   64, value: 10.15, loot: {STRING: 2, SPIDER_EYE: 1}}
+  - {mob: zombie, name: Zombie,     color: "#5DAE4A", price:    180000, unlock:   96, value: 22.77, loot: {ROTTEN_FLESH: 2}}
+  - {mob: skeleton, name: Skeleton,   color: "#E0E0E0", price:    450000, unlock:  128, value: 53.42, loot: {BONE: 2, ARROW: 1}}
+  - {mob: slime, name: Slime,      color: "#7CFF6B", price:   1100000, unlock:  192, value: 123.01, loot: {SLIME_BALL: 2}}
+  - {mob: silverfish, name: Silverfish, color: "#9AA3AD", price:   2700000, unlock:  256, value: 285.39, loot: {IRON_NUGGET: 2}}
+  - {mob: creeper, name: Creeper,    color: "#4CDB4C", price:   6500000, unlock:  384, value: 651.35, loot: {GUNPOWDER: 2}}
+  - {mob: witch, name: Witch,      color: "#9B59B6", price:  16000000, unlock:  512, value: 1524.16, loot: {REDSTONE: 1, GLOWSTONE_DUST: 1, SUGAR: 1}}
+  - {mob: blaze, name: Blaze,      color: "#FFB020", price:  40000000, unlock:  768, value: 3631.08, loot: {BLAZE_ROD: 1}}
+  - {mob: enderman, name: Enderman,   color: "#B040FF", price: 100000000, unlock: 1024, value: 8669.72, loot: {ENDER_PEARL: 1}}
+  - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 250000000, unlock: 1536, value: 20742.07, loot: {IRON_INGOT: 3, POPPY: 1}}
 # RoseStacker (real mobs, stacked): written into its config on start.
-# kill-entire-stack-on: damage causes that kill a WHOLE stack at once with loot for every mob - these are the AFK
-#   grinders (drop chutes = FALL, lava blades = LAVA/FIRE, magma floors = HOT_FLOOR...). A player's sword kills
-#   one mob at a time (that's how you farm XP).
-# player-activation-range: how close someone has to be for spawners to run (blocks).
-# settings: any other RoseStacker config.yml key, e.g. global-spawner-settings.spawn-max-nearby-entities: 8
-# prefix: RoseStacker's chat prefix (its own colour format: & codes, <g:#from:#to> gradients).
+# A cage makes spawn-count mobs every spawn-delay ticks (2 every 400 = 360 an hour) while an island member is
+# within player-activation-range. kill-entire-stack-on: damage that kills a WHOLE stack at once (the AFK grinders).
 rosestacker:
   kill-entire-stack-on: [FALL, LAVA, FIRE, FIRE_TICK, HOT_FLOOR, DROWNING, SUFFOCATION, CRAMMING, CONTACT, FREEZE, CAMPFIRE]
   player-activation-range: 24
+  spawn-delay: 400
+  spawn-count: 2
+  max-cage-stack: 256
   settings: {}
   prefix: "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7"
 
-# Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
-# Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen.
-generator-tiers:
-  - {name: Cobble,   color: "#9AA3AD", icon: COBBLESTONE,   price: 0,        ores: {COBBLESTONE: 90, COAL_ORE: 10}}
-  - {name: Coal,     color: "#5A5A5A", icon: COAL_ORE,      price: 25000,    ores: {COBBLESTONE: 75, COAL_ORE: 18, IRON_ORE: 7}}
-  - {name: Iron,     color: "#D8AF93", icon: IRON_ORE,      price: 100000,   ores: {COBBLESTONE: 65, COAL_ORE: 18, IRON_ORE: 12, COPPER_ORE: 5}}
-  - {name: Gold,     color: "#FFD84D", icon: GOLD_ORE,      price: 350000,   ores: {COBBLESTONE: 55, COAL_ORE: 15, IRON_ORE: 15, GOLD_ORE: 10, COPPER_ORE: 5}}
-  - {name: Lapis,    color: "#3C6EE0", icon: LAPIS_ORE,     price: 900000,   ores: {COBBLESTONE: 48, COAL_ORE: 12, IRON_ORE: 15, GOLD_ORE: 12, REDSTONE_ORE: 8, LAPIS_ORE: 5}}
-  - {name: Diamond,  color: "#5BE3E3", icon: DIAMOND_ORE,   price: 2500000,  ores: {COBBLESTONE: 42, COAL_ORE: 10, IRON_ORE: 15, GOLD_ORE: 14, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 5}}
-  - {name: Emerald,  color: "#3CDB6E", icon: EMERALD_ORE,   price: 6000000,  ores: {COBBLESTONE: 36, COAL_ORE: 8, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 8, EMERALD_ORE: 5}}
-  - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 15000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
+# The Collector buys everything (/sell, /sell hand, the Collector at spawn). Spawner loot is priced from the tiers
+# above. These are untagged items: gen ore drops and crops. Anything not listed can't be sold.
+collector:
+  ores: {COBBLESTONE: 1.0, COAL: 4, RAW_IRON: 7, RAW_COPPER: 2.5, RAW_GOLD: 10, REDSTONE: 3, LAPIS_LAZULI: 2.5, DIAMOND: 30, EMERALD: 40, ANCIENT_DEBRIS: 150}
+  crops: {WHEAT: 1.2, CARROT: 0.8, POTATO: 0.8, BEETROOT: 1.0, SUGAR_CANE: 1.2, CACTUS: 1.2, MELON_SLICE: 0.5, PUMPKIN: 3, NETHER_WART: 1.5, COCOA_BEANS: 1.0, BAMBOO: 0.3}
 
-# Starter island: the RelapsedMC blueprint (bigger island, tree, beach, starter chest) and a bigger claim.
-# Team sizes are written into BSkyBlock's config on start. Coop/trusted players can build and grind on an island,
-# so they're 0 to keep the 4-player cap real.
+# The Market (/market, the Merchant at spawn): buy-only basics. Shards each.
+market:
+  Building: {DIRT: 3, GRASS_BLOCK: 10, SAND: 5, GRAVEL: 5, GLASS: 4, OAK_LOG: 8, SPRUCE_LOG: 8, STONE_BRICKS: 4, SMOOTH_STONE: 4, OAK_SLAB: 2, STONE_SLAB: 2, TORCH: 2, LANTERN: 15, SEA_LANTERN: 40}
+  Farming: {OAK_SAPLING: 50, CHERRY_SAPLING: 80, WHEAT_SEEDS: 10, SUGAR_CANE: 20, CACTUS: 20, MELON_SEEDS: 50, PUMPKIN_SEEDS: 50, CARROT: 15, POTATO: 15, NETHER_WART: 40, BONE_MEAL: 6, COCOA_BEANS: 30}
+  Grinders: {HOPPER: 350, CHEST: 40, MAGMA_BLOCK: 25, SOUL_SAND: 25, OAK_SIGN: 5, OAK_TRAPDOOR: 6, IRON_BARS: 10, COBWEB: 30, CAMPFIRE: 60, WATER_BUCKET: 150, LAVA_BUCKET: 750}
+  Utility: {ICE: 200, OBSIDIAN: 150, CRAFTING_TABLE: 10, FURNACE: 15, ANVIL: 2500, ENCHANTING_TABLE: 8000, EXPERIENCE_BOTTLE: 60, NAME_TAG: 500}
+
+# Ore generators: a lava + water generator on your island makes these blocks instead of cobblestone.
+# Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen (the Gen Smith).
+generator-tiers:
+  - {name: Cobble,   color: "#9AA3AD", icon: COBBLESTONE,    price: 0,       ores: {COBBLESTONE: 90, COAL_ORE: 10}}
+  - {name: Coal,     color: "#5A5A5A", icon: COAL_ORE,       price: 10000,   ores: {COBBLESTONE: 75, COAL_ORE: 18, IRON_ORE: 7}}
+  - {name: Iron,     color: "#D8AF93", icon: IRON_ORE,       price: 40000,   ores: {COBBLESTONE: 65, COAL_ORE: 18, IRON_ORE: 12, COPPER_ORE: 5}}
+  - {name: Gold,     color: "#FFD84D", icon: GOLD_ORE,       price: 120000,  ores: {COBBLESTONE: 55, COAL_ORE: 15, IRON_ORE: 15, GOLD_ORE: 10, COPPER_ORE: 5}}
+  - {name: Lapis,    color: "#3C6EE0", icon: LAPIS_ORE,      price: 350000,  ores: {COBBLESTONE: 48, COAL_ORE: 12, IRON_ORE: 15, GOLD_ORE: 12, REDSTONE_ORE: 8, LAPIS_ORE: 5}}
+  - {name: Diamond,  color: "#5BE3E3", icon: DIAMOND_ORE,    price: 1000000, ores: {COBBLESTONE: 42, COAL_ORE: 10, IRON_ORE: 15, GOLD_ORE: 14, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 5}}
+  - {name: Emerald,  color: "#3CDB6E", icon: EMERALD_ORE,    price: 3000000, ores: {COBBLESTONE: 36, COAL_ORE: 8, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 8, EMERALD_ORE: 5}}
+  - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 8000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
+
+# Spawn (the Shattered World, built by laGCore). Positions are [x, y, z] from the spawn floor centre (origin).
+spawn:
+  origin: [0, 100, 0]
+  # station NPCs: where they stand and which way they face (yaw: 0 south, 90 west, 180 north, -90 east)
+  npcs:
+    collector: {name: "<gradient:#38E0FF:#B040FF><bold>THE COLLECTOR</bold></gradient>", sub: "<gray>He buys everything <white>/sell", at: [0.5, 2, -4.5], yaw: 0, type: WANDERING_TRADER, command: collector}
+    keeper:    {name: "<gradient:#B040FF:#FF4DD2><bold>CAGE KEEPER</bold></gradient>", sub: "<gray>Cages + unlocks <white>/spawners", at: [58.5, 2, 0.5], yaw: 90, type: CLERIC, command: spawners}
+    smith:     {name: "<gradient:#FFB020:#FF6A3D><bold>GEN SMITH</bold></gradient>", sub: "<gray>Upgrade your gen <white>/gen", at: [-53.5, 1, 0.5], yaw: -90, type: ARMORER, command: gen}
+    merchant:  {name: "<gradient:#7CFF6B:#38E0FF><bold>MERCHANT</bold></gradient>", sub: "<gray>Basics + grinder parts <white>/market", at: [-40.5, 1, -35.5], yaw: -45, type: FARMER, command: market}
+  # the 13 cages in the Cage Sanctum, tier order (cage floor centre); each shows its mob
+  cages: [[49.5, 2, -4.5], [52.5, 2, -7.5], [56.5, 2, -9.5], [61.5, 2, -9.5], [64.5, 2, -7.5], [67.5, 2, -3.5], [68.5, 2, 0.5], [67.5, 2, 4.5], [64.5, 2, 8.5], [61.5, 2, 10.5], [56.5, 2, 10.5], [52.5, 2, 8.5], [49.5, 2, 5.5]]
+  # Hall of Champions board (live island top) and the Season Obelisk sign
+  champions: [41.5, 7.2, -45.9]
+  obelisk: [-40.5, 20.5, 41.5]
+
+# The Warzone: the shattered arena under spawn, the only PvP on Skyblock. Islands are always safe.
+# centre / radius / y-range are from the spawn origin. Combat tag: no commands (but chat ones), no flying, no pearling
+# out, logging out kills you. Envoys drop loot in it; KOTH runs on its hill.
+warzone:
+  centre: [0, -44, 20]
+  radius: 44
+  y-range: [-60, -24]
+  tag-seconds: 15
+  keep-inventory: false
+  kill-reward: 0
+  allowed-commands: [msg, tell, w, r, reply, m, whisper]
+  envoy:
+    interval-minutes: 30
+    min-players: 1
+    chests: 8
+    despawn-minutes: 10
+    # rewards per rarity: shards [min, max], items {MATERIAL: amount}, commands ("{player}" = who opened it)
+    common:    {weight: 70, shards: [3000, 15000], items: {HOPPER: 4, MAGMA_BLOCK: 16, EXPERIENCE_BOTTLE: 8}}
+    rare:      {weight: 25, shards: [40000, 150000], items: {HOPPER: 16, EXPERIENCE_BOTTLE: 32}}
+    legendary: {weight: 5,  shards: [400000, 1500000], commands: []}
+  koth:
+    point: [0, -39, 18]
+    radius: 2.5
+    capture-seconds: 120
+    interval-minutes: 120
+    min-players: 2
+    shards: 750000
+    commands: []
+
 island:
   protection-range: 75
   max-team-size: 4
@@ -58,18 +125,6 @@ island:
 island-top:
   refresh-seconds: 60
   extra-values: {}
-
-# The Pit: the only PvP on Skyblock, an arena south of spawn in the spawn world. Islands are always safe.
-# center: [x, y, z] of the arena floor in the spawn world. /lsb pit build places it again after you change it.
-pit:
-  enabled: true
-  center: [0, 100, 80]
-  radius: 16
-  tag-seconds: 15
-  keep-inventory: false
-  kill-reward: 0
-  # commands still allowed while in combat
-  allowed-commands: [msg, tell, w, r, reply, m, whisper]
 
 # Seasons (monthly). The number and end date live in plugins/laGSkyblock/season.yml (/lsb season ends <date> <time>).
 # /lsb season end confirm: saves the final top to seasons/season-N.yml, gives titles, stops the server; the next start

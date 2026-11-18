@@ -16,14 +16,35 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.economy.Economy;
 
-/** RelapsedMC Skyblock: the spawner tier ladder and mob heads (heads drop from spawner mobs; RoseStacker stacks them). */
+/**
+ * RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector): gens and cages (spawners) make
+ * loot, the Collector buys it, Shards buy more cages, heads unlock the next tier, placed cages are island value.
+ */
 public final class LagSkyblock extends JavaPlugin {
-	/** One rung of the ladder. index 0 = tier 1. */
-	record Tier(int index, String mob, String name, String color, double price, double headValue, int unlock, String texture) {
+	static final int CONFIG_VERSION = 3;
+
+	/** One rung of the ladder. index 0 = tier 1. value = Shards per mob's loot; loot = fixed drops per mob. */
+	record Tier(int index, String mob, String name, String color, double price, int unlock, double value,
+			Map<org.bukkit.Material, Integer> loot, String texture) {
 		int number() {
 			return index + 1;
 		}
+
+		/** What the Collector pays for one tagged loot item from this tier. */
+		double itemPrice() {
+			int n = 0;
+			for (int a : loot.values()) n += a;
+			return n == 0 ? 0 : value / n;
+		}
 	}
+
+	/** Shards, formatted: "◆12,500". */
+	static String shards(double d) {
+		return symbol + MONEY.format(Math.floor(d));
+	}
+
+	static String symbol = "◆";
+	private static final java.text.DecimalFormat MONEY = new java.text.DecimalFormat("#,##0");
 
 	static final String HEAD_KEY = "lagskyblock:head";
 	final List<Tier> tiers = new ArrayList<>();
@@ -41,12 +62,27 @@ public final class LagSkyblock extends JavaPlugin {
 	Generators generators;
 	IslandTop top;
 	Season season;
-	Pit pit;
+	Loot loot;
+	Collector collector;
+	Market market;
+	Stations stations;
+	Warzone warzone;
 
 	@Override
 	public void onLoad() {
 		saveDefaultConfig();
 		reloadConfig();
+		// a new economy replaces an older config.yml once (the old one is kept next to it)
+		if (getConfig().getInt("config-version", 0) < CONFIG_VERSION) {
+			File cfg = new File(getDataFolder(), "config.yml");
+			File old = new File(getDataFolder(), "config-old-" + getConfig().getInt("config-version", 0) + ".yml");
+			if (cfg.renameTo(old)) {
+				saveDefaultConfig();
+				reloadConfig();
+				getLogger().warning("config.yml replaced with the v" + CONFIG_VERSION + " economy (yours is in " + old.getName() + ")");
+			}
+		}
+		symbol = getConfig().getString("shards.symbol", "◆");
 		loadTiers();
 		// a season was ended: wipe islands/spawners/money before anything loads them
 		try {
@@ -54,13 +90,13 @@ public final class LagSkyblock extends JavaPlugin {
 		} catch (Exception e) {
 			getLogger().severe("Season wipe failed: " + e);
 		}
-		// before RoseStacker / EconomyShopGUI read their files: grinder rules + branding, old spawner shop off
+		// before RoseStacker / Essentials read their files: grinder rules + branding, Shards
 		try {
 			patchRoseStacker();
-			patchShop();
+			patchEssentials();
 			installIsland();
 		} catch (Exception e) {
-			getLogger().warning("Could not patch RoseStacker / EconomyShopGUI files: " + e);
+			getLogger().warning("Could not patch RoseStacker / Essentials files: " + e);
 		}
 	}
 
@@ -69,11 +105,17 @@ public final class LagSkyblock extends JavaPlugin {
 		spawners = new Spawners(this);
 		getServer().getPluginManager().registerEvents(spawners, this);
 		getCommand("spawners").setExecutor(spawners);
-		getCommand("sellheads").setExecutor(spawners);
 		generators = new Generators(this);
 		getServer().getPluginManager().registerEvents(generators, this);
 		getCommand("gen").setExecutor(generators);
-		new MobHeads(this);
+		loot = new Loot(this);
+		collector = new Collector(this);
+		getServer().getPluginManager().registerEvents(collector, this);
+		getCommand("sell").setExecutor(collector);
+		getCommand("collector").setExecutor(collector);
+		market = new Market(this);
+		getServer().getPluginManager().registerEvents(market, this);
+		getCommand("market").setExecutor(market);
 		IslandFly fly = new IslandFly(this);
 		getServer().getPluginManager().registerEvents(fly, this);
 		getCommand("islandfly").setExecutor(fly);
@@ -82,21 +124,21 @@ public final class LagSkyblock extends JavaPlugin {
 		getCommand("istop").setExecutor(top);
 		season = new Season(this);
 		getCommand("season").setExecutor(season);
-		pit = new Pit(this);
-		getServer().getPluginManager().registerEvents(pit, this);
-		getCommand("pit").setExecutor(pit);
+		warzone = new Warzone(this);
+		getServer().getPluginManager().registerEvents(warzone, this);
+		getCommand("warzone").setExecutor(warzone);
+		stations = new Stations(this);
+		getServer().getPluginManager().registerEvents(stations, this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		getCommand("lagskyblock").setExecutor((s, c, l, a) -> {
 			String sub = a.length > 0 ? a[0].toLowerCase() : "reload";
 			switch (sub) {
 				case "season" -> season.admin(s, a);
-				case "pit" -> {
-					if (a.length > 1 && a[1].equalsIgnoreCase("build")) {
-						int n = pit.build();
-						pit.holograms();
-						s.sendMessage(Spawners.mm("<#7CFF6B>The Pit rebuilt <gray>(" + n + " blocks)"));
-					}
-					else s.sendMessage(Spawners.mm("<gray>/lsb pit build <dark_gray>- place the arena again (center/radius: pit in config.yml)"));
+				case "envoy" -> warzone.envoy(s);
+				case "koth" -> warzone.kothAdmin(s, a);
+				case "stations" -> {
+					stations.respawn();
+					s.sendMessage(Spawners.mm("<#7CFF6B>Spawn stations respawned"));
 				}
 				case "top" -> {
 					top.refresh();
@@ -104,13 +146,17 @@ public final class LagSkyblock extends JavaPlugin {
 				}
 				case "reload" -> {
 					reloadConfig();
+					symbol = getConfig().getString("shards.symbol", "◆");
 					loadTiers();
+					loot.load();
+					collector.load();
+					stations.respawn();
 					spawners.load();
 					generators.load();
 					top.refresh();
 					s.sendMessage(Spawners.mm("<#7CFF6B>laG Skyblock reloaded <gray>(" + tiers.size() + " tiers)"));
 				}
-				default -> s.sendMessage(Spawners.mm("<gray>/lsb reload | top | pit build | season [ends <date> <time> | end]"));
+				default -> s.sendMessage(Spawners.mm("<gray>/lsb reload | top | stations | envoy | koth [start|stop] | season [ends <date> <time> | end]"));
 			}
 			return true;
 		});
@@ -119,6 +165,7 @@ public final class LagSkyblock extends JavaPlugin {
 		Bukkit.getScheduler().runTaskLater(this, () -> {
 			try {
 				if (patchRoseStacker()) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rs reload");
+				if (patchEssentials()) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "essentials reload");
 			} catch (Exception e) {
 				getLogger().warning("Could not patch RoseStacker: " + e);
 			}
@@ -127,6 +174,8 @@ public final class LagSkyblock extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		if (stations != null) stations.clear();
+		if (warzone != null) warzone.clear();
 		if (spawners != null) spawners.save();
 		if (top != null) top.save();
 		if (generators != null) generators.save();
@@ -141,8 +190,15 @@ public final class LagSkyblock extends JavaPlugin {
 		for (int i = 0; i < list.size(); i++) {
 			Map<?, ?> m = list.get(i);
 			String mob = String.valueOf(m.get("mob")).toLowerCase();
+			Map<org.bukkit.Material, Integer> loot = new java.util.LinkedHashMap<>();
+			if (m.get("loot") instanceof Map<?, ?> lm) {
+				for (var e : lm.entrySet()) {
+					org.bukkit.Material mat = org.bukkit.Material.matchMaterial(String.valueOf(e.getKey()));
+					if (mat != null) loot.put(mat, (int) num(e.getValue()));
+				}
+			}
 			tiers.add(new Tier(i, mob, String.valueOf(m.get("name")), String.valueOf(m.containsKey("color") ? m.get("color") : "#FFFFFF"),
-					num(m.get("price")), num(m.get("head-value")), (int) num(m.get("unlock")), textures.get(mob)));
+					num(m.get("price")), (int) num(m.get("unlock")), num(m.get("value")), loot, textures.get(mob)));
 		}
 	}
 
@@ -183,8 +239,8 @@ public final class LagSkyblock extends JavaPlugin {
 			sb.append("profile={properties:[{name:\"textures\",value:\"").append(b64).append("\"}]},");
 		}
 		sb.append("item_name={text:\"").append(t.name()).append(" Head\",color:\"").append(t.color()).append("\"},");
-		sb.append("lore=[{text:\"Tier ").append(t.number()).append(" head\",color:\"gray\",italic:false},");
-		sb.append("{text:\"Sell or trade in: /spawners\",color:\"dark_gray\",italic:false}]");
+		sb.append("lore=[{text:\"Proof: tier ").append(t.number()).append(" mastered\",color:\"gray\",italic:false},");
+		sb.append("{text:\"Trade in to unlock the next cage: /spawners\",color:\"dark_gray\",italic:false}]");
 		if (tagged) sb.append(",custom_data={PublicBukkitValues:{\"").append(HEAD_KEY).append("\":\"").append(t.mob()).append("\"}}");
 		return sb.append("]").toString();
 	}
@@ -207,6 +263,13 @@ public final class LagSkyblock extends JavaPlugin {
 			want.put("global-spawner-settings.silk-touch-required", false);
 			want.put("global-spawner-settings.spawn-player-activation-range", getConfig().getInt("rosestacker.player-activation-range", 24));
 			want.put("global-spawner-settings.disable-mob-ai", false);
+			// a fixed 360 mobs an hour per cage (2 every 400 ticks), so the economy's numbers hold
+			int delay = getConfig().getInt("rosestacker.spawn-delay", 400);
+			want.put("global-spawner-settings.spawn-delay-minimum", delay);
+			want.put("global-spawner-settings.spawn-delay-maximum", delay);
+			want.put("global-spawner-settings.spawn-count-stack-size-multiplier", getConfig().getInt("rosestacker.spawn-count", 2));
+			want.put("global-spawner-settings.spawn-count-stack-size-randomized", false);
+			want.put("global-spawner-settings.max-stack-size", getConfig().getInt("rosestacker.max-cage-stack", 256));
 			ConfigurationSection extra = getConfig().getConfigurationSection("rosestacker.settings");
 			if (extra != null) for (String k : extra.getKeys(true)) if (!extra.isConfigurationSection(k)) want.put(k, extra.get(k));
 			for (var e : want.entrySet()) {
@@ -281,15 +344,26 @@ public final class LagSkyblock extends JavaPlugin {
 		}
 	}
 
-	private void patchShop() throws Exception {
-		File sec = new File(getDataFolder().getParentFile(), "EconomyShopGUI" + File.separator + "sections" + File.separator + "Spawners.yml");
-		if (sec.exists()) {
-			YamlConfiguration y = YamlConfiguration.loadConfiguration(sec);
-			if (y.getBoolean("enable", true)) {
-				y.set("enable", false);
-				y.save(sec);
-				getLogger().info("Turned off EconomyShopGUI's spawner section (spawners are sold in /spawners)");
-			}
+	/** Shards: Essentials shows our symbol and new players start with shards.starting-balance. */
+	private boolean patchEssentials() throws Exception {
+		File f = new File(getDataFolder().getParentFile(), "Essentials" + File.separator + "config.yml");
+		if (!f.exists()) return false;
+		YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
+		boolean changed = false;
+		String sym = getConfig().getString("shards.symbol", "◆");
+		double start = getConfig().getDouble("shards.starting-balance", 3500);
+		if (!sym.equals(y.getString("currency-symbol"))) {
+			y.set("currency-symbol", sym);
+			changed = true;
 		}
+		if (y.getDouble("starting-balance", -1) != start) {
+			y.set("starting-balance", start);
+			changed = true;
+		}
+		if (changed) {
+			y.save(f);
+			getLogger().info("Essentials: Shards (" + sym + "), new players start with " + shards(start));
+		}
+		return changed;
 	}
 }
