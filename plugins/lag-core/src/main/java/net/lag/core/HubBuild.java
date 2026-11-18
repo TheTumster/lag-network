@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 13; // v13: realm info boards, lore panels, realm spotlights, higher sky sign
+	static final int BUILD_VERSION = 14; // v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;

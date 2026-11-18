@@ -257,125 +257,101 @@ hub:
   time: 18000
   # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre (spawn faces north = -z).
   portals:
-    skyblock: [-27, 5, -38]
-    factions: [-9, 5, -38]
-    cannons: [9, 5, -38]
-    smp: [27, 5, -38]
+    skyblock: [-30, 5, -38]
+    factions: [-12, 5, -38]
+    cannons: [12, 5, -38]
+    smp: [30, 5, -38]
   # The beacon under the crystal (particle helix), from the spawn.
   beacon: [0, -1, -12]  # no beacon block anymore; the particle helix still spirals up from the Well
   # Floating text ([x, y, z] from the spawn floor centre). {factions} {smp} {online} = player counts,
   # {phase} = moving gradient (animates every 2 ticks), {logo} = the pack logo.
   holograms:
-    # ---- spawn: the logo + a welcome panel
-    - offset: [0.5, 5.9, -7.5]
-      scale: 2
+    # spawn: the logo and one quiet line. Lore and realm info live in the Codex (hotbar book), not on walls.
+    - offset: [0.5, 5.9, -37.5]
+      scale: 3.8
+      bob: false
       text: "{logo}"
-    - offset: [0.5, 3.3, -7.5]
-      scale: 1.15
+    - offset: [0.5, 4.3, -37.5]
+      scale: 1.5
       bob: false
-      width: 260
-      background: "#E02A1240"
-      text: "<white><bold>WELCOME TO THE NETWORK</bold>\n<gray>4 realms <dark_gray>• <gray>1 team <dark_gray>• <gray>1 client\n<#38E0FF><bold>◀ DISCORD</bold>   <white>{online} <gray>online   <#B040FF><bold>PARKOUR ▶</bold>"
-    # ---- the Gallery: a name + an info board over every portal (yaw 0 = the board faces south, toward spawn)
-    - offset: [-26.5, 17.9, -37.2]
-      scale: 4.2
-      text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>"
-    - offset: [-26.5, 15.2, -37.0]
-      scale: 2.0
+      text: "<white>{online} <#C9B8E8>online  <#6A5A80>|  <#C9B8E8>walk through a gate"
+    # each gate: the name sits on the cornice ledge, the player count under it on the arch
+    - offset: [-29.5, 12.75, -35.8]
+      scale: 2.6
       billboard: fixed
       yaw: 0
       bob: false
-      width: 230
-      background: "#E60F3A1F"
-      text: "<#7CFF6B><bold>SEASON 1</bold> <dark_gray>• <white>{skyblock} <gray>playing\n<gray>Build an empire in the void\n<white>13 <gray>spawner tiers <dark_gray>• <white>8 <gray>ore gens\n<gray>The Pit <dark_gray>• <gray>monthly prizes"
-    - offset: [-8.5, 17.9, -37.2]
-      scale: 4.2
-      text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>FACTIONS</bold></gradient>"
-    - offset: [-8.5, 15.2, -37.0]
-      scale: 2.0
-      billboard: fixed
-      yaw: 0
-      bob: false
-      width: 230
-      background: "#E63A0F1A"
-      text: "<#FF4D6D><bold>{map}</bold> <dark_gray>• <white>{factions} <gray>playing\n<gray>Raid, cannon, take the corners\n<white>8<gray>-mans <dark_gray>• <gray>no allies <dark_gray>• <gray>18h shields\n<gray>KOTH gear <dark_gray>• <gray>F-top prizes"
-    - offset: [9.5, 17.9, -37.2]
-      scale: 4.2
-      text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>"
-    - offset: [9.5, 15.2, -37.0]
-      scale: 2.0
-      billboard: fixed
-      yaw: 0
-      bob: false
-      width: 230
-      background: "#E63A200C"
-      text: "<#FF9F4D><bold>TEST SERVER</bold> <dark_gray>• <white>{cannons} <gray>playing\n<gray>Build it here. Raid with it there.\n<white>512×512 <gray>private plots <dark_gray>• <gray>free /tntfill\n<gray>Same cannon jar as Factions"
-    - offset: [27.5, 17.9, -37.2]
-      scale: 4.2
-      text: "<gradient:#38E0FF:#7CFF6B:#38E0FF:{phase}><bold>SMP</bold></gradient>"
-    - offset: [27.5, 15.2, -37.0]
-      scale: 2.0
-      billboard: fixed
-      yaw: 0
-      bob: false
-      width: 230
-      background: "#E60F2A3A"
-      text: "<#38E0FF><bold>FOREVER WORLD</bold> <dark_gray>• <white>{smp} <gray>playing\n<gray>A world that never resets\n<gray>Land claims <dark_gray>• <gray>trust <dark_gray>• <gray>no griefing\n<gray>Homes <dark_gray>• <gray>tpa <dark_gray>• <gray>rtp"
-    # ---- the plaza: lore (west) and the network basics (east), facing the Well
-    - offset: [-15.5, 3.0, -11.5]
+      text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
+    - offset: [-29.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
-      yaw: -90
+      yaw: 0
       bob: false
-      width: 230
-      background: "#E02A1240"
-      text: "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>THE RELAPSE</bold></gradient>\n<gray>The old world broke. It always does.\n<gray>Every map ends in fire. Every season\n<gray>gets swallowed by the void.\n<gray>And every time, we come back\n<gray>for one more run.\n<white><italic>Nobody quits. Everybody relapses."
-    - offset: [16.5, 3.0, -11.5]
+      text: "<white>{skyblock} <#B9A8D8>playing"
+    - offset: [-11.5, 12.75, -35.8]
+      scale: 2.6
+      billboard: fixed
+      yaw: 0
+      bob: false
+      text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>"
+    - offset: [-11.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
-      yaw: 90
+      yaw: 0
       bob: false
-      width: 230
-      background: "#E02A1240"
-      text: "<gradient:#B040FF:#38E0FF:#B040FF:{phase}><bold>ONE NETWORK</bold></gradient>\n<white>/team create <dark_gray>» <gray>one crew, every realm\n<white>/team chat <dark_gray>» <gray>talk across servers\n<white>/hub <dark_gray>» <gray>back here any time\n<white>RelapsedMC Client <dark_gray>» <gray>free, see Discord"
-    # ---- the south walk: what we stand for (faces north, back toward spawn)
-    - offset: [0.5, 3.4, 29.5]
-      scale: 1.4
+      text: "<white>{factions} <#B9A8D8>playing"
+    - offset: [12.5, 12.75, -35.8]
+      scale: 2.6
       billboard: fixed
-      yaw: 180
+      yaw: 0
       bob: false
-      width: 220
-      background: "#E02A1240"
-      text: "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>NO PAY-TO-WIN. EVER.</bold></gradient>\n<gray>Ranks are cosmetic + convenience\n<gray>Prizes are earned, not bought\n<white>Built by players who never quit."
-    # ---- west: the Discord pavilion
+      text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>"
+    - offset: [12.5, 12.0, -35.8]
+      scale: 1.3
+      billboard: fixed
+      yaw: 0
+      bob: false
+      text: "<white>{cannons} <#B9A8D8>playing"
+    - offset: [30.5, 12.75, -35.8]
+      scale: 2.6
+      billboard: fixed
+      yaw: 0
+      bob: false
+      text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"
+    - offset: [30.5, 12.0, -35.8]
+      scale: 1.3
+      billboard: fixed
+      yaw: 0
+      bob: false
+      text: "<white>{smp} <#B9A8D8>playing"
     - offset: [-32.5, 4.8, -11.5]
       scale: 1.4
-      text: "<gradient:#B040FF:#38E0FF:#B040FF:{phase}><bold>DISCORD</bold></gradient>\n<gray>Updates <dark_gray>• <gray>giveaways <dark_gray>• <gray>support\n<white>Coming soon"
+      text: "<gradient:#B040FF:#38E0FF><bold>DISCORD</bold></gradient>\n<#B9A8D8>coming soon"
   # Spinning, glowing 3D items (the realm icons spin inside their portals). glow = outline colour.
   displays:
-    - offset: [0.5, 45.5, -11.5]
+    - offset: [0.5, 42.8, -11.5]
       item: NETHER_STAR
       scale: 4
       spin: 1
       glow: "#B040FF"
-    - offset: [-26.5, 5.2, -37.0]
+    - offset: [-29.5, 16.5, -36.5]
       item: GRASS_BLOCK
-      scale: 3
+      scale: 1.5
       spin: 1
       glow: "#7CFF6B"
-    - offset: [-8.5, 5.2, -37.0]
+    - offset: [-11.5, 16.5, -36.5]
       item: TNT
-      scale: 3
+      scale: 1.5
       spin: 1
       glow: "#FF4D6D"
-    - offset: [9.5, 5.2, -37.0]
+    - offset: [12.5, 16.5, -36.5]
       item: DISPENSER
-      scale: 3
+      scale: 1.5
       spin: 1
       glow: "#FF9F4D"
-    - offset: [27.5, 5.2, -37.0]
+    - offset: [30.5, 16.5, -36.5]
       item: OAK_SAPLING
-      scale: 3
+      scale: 1.5
       spin: 1
       glow: "#7CFF6B"
     - offset: [-32.5, 3.4, -11.5]

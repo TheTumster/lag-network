@@ -25,7 +25,7 @@ PLAZA = 17
 TERRACE_Z0, TERRACE_Z1 = -29, -45   # the Gallery terrace (north)
 TERRACE_Y = FLOOR + 2      # terrace floor
 PORTAL_Z = -38
-PORTALS = [("skyblock", -27), ("factions", -9), ("cannons", 9), ("smp", 27)]
+PORTALS = [("skyblock", -30), ("factions", -12), ("cannons", 12), ("smp", 30)]
 blocks = {}
 
 
@@ -252,41 +252,22 @@ for i in range(16):
     lamp(x, FLOOR + 1, z)
 
 # ======================================================================= the Crystal (floating over the Well)
-CR_Y = 12
-CR_H, CR_MID, CR_W = 30, 11, 7.2
+CR_Y = 13
+CR_H, CR_MID, CR_W = 27, 9, 5.6
 for y in range(0, CR_H):
-    # double cone: widest at CR_MID, points at top and bottom; chunky faceted body
-    rr = (y / CR_MID) * CR_W if y <= CR_MID else max(0, (CR_H - 1 - y) / (CR_H - 1 - CR_MID) * CR_W)
-    for x in range(-9, 10):
-        for z in range(-9, 10):
-            d = max(abs(x), abs(z)) * 0.55 + (abs(x) + abs(z)) * 0.5   # octagonal facets
-            if d > rr + 0.3:
+    rr = (y / CR_MID) * CR_W if y <= CR_MID else (CR_H - 1 - y) / (CR_H - 1 - CR_MID) * CR_W
+    R_ = round(rr)
+    for x in range(-R_, R_ + 1):
+        for z in range(-R_, R_ + 1):
+            d = abs(x) + abs(z)
+            if d > R_:
                 continue
-            on_axis = x == 0 and z == 0
-            shell = d > rr - 1.4
-            if on_axis:
-                b = "magenta_stained_glass"     # the beacon beam passes here and turns pink
-            elif shell:
-                # facet bands: alternating amethyst / glass stripes read as cut faces from far away
-                band = (y + (0 if abs(x) > abs(z) else 2)) % 5
-                b = "amethyst_block" if band < 2 else ("purple_stained_glass" if band < 4 else "magenta_stained_glass")
-            else:
-                b = "purple_stained_glass" if (x + y + z) % 3 else "magenta_stained_glass"
-            put(CX + x, CR_Y + y, CZ + z, b)
-# light inside so it glows from within (froglights off-axis)
-for (x, y, z) in ((2, 10, 2), (-2, 11, -2), (2, 12, -2), (-2, 9, 2), (0, 16, 2), (0, 6, -2), (3, 11, 0), (-3, 12, 0), (0, 20, -1)):
-    put(CX + x, CR_Y + y, CZ + z, "pearlescent_froglight")
-# orbiting shards on two tilted rings
-for ring, (rad, tilt, n, y0) in enumerate(((13, 0.18, 16, CR_Y + 10), (18, -0.12, 22, CR_Y + 13))):
-    for i in range(n):
-        a = i / n * math.pi * 2
-        x = round(CX + rad * math.cos(a))
-        z = round(CZ + rad * math.sin(a))
-        y = round(y0 + rad * tilt * math.sin(a))
-        put(x, y, z, "amethyst_block" if i % 2 else ("purple_stained_glass" if ring else "magenta_stained_glass"))
-        put(x, y - 1, z, "amethyst_cluster[facing=down,waterlogged=false]")
-        if i % 2 == 0:
-            put(x, y + 1, z, "amethyst_cluster[facing=up,waterlogged=false]")
+            if d < R_ - 1 and 0 < y < CR_H - 1:
+                continue                      # hollow: only the skin is built
+            ridge = x == 0 or z == 0          # the four ridge lines of the gem glow
+            put(CX + x, CR_Y + y, CZ + z, "pearlescent_froglight" if ridge else "amethyst_block")
+put(CX, CR_Y - 1, CZ, "amethyst_cluster[facing=down,waterlogged=false]")
+put(CX, CR_Y + CR_H, CZ, "amethyst_cluster[facing=up,waterlogged=false]")
 # ======================================================================= the Gallery terrace + realm portals
 for x in range(-41, 42):
     for z in range(TERRACE_Z1, TERRACE_Z0 + 1):
@@ -328,65 +309,127 @@ for x in range(-40, 41):
         put(x, TERRACE_Y, TERRACE_Z0 - 1, glow_at((x + 40) / 80))
         put(x, TERRACE_Y - 1, TERRACE_Z0 - 1, "sea_lantern")
 
-THEME = {
-    "skyblock": dict(frame="calcite", trim="moss_block", accent="verdant_froglight", glass="light_blue_stained_glass",
-                     pad="moss_block", corner="flowering_azalea_leaves" + LEAF, post="birch_log[axis=y]", deco="flowering_azalea"),
-    "factions": dict(frame="polished_blackstone_bricks", trim="red_nether_bricks", accent="shroomlight", glass="red_stained_glass",
-                     pad="crimson_nylium", corner="nether_wart_block", post="crimson_stem[axis=y]", deco="tnt[unstable=false]"),
-    "cannons": dict(frame="deepslate_bricks", trim="waxed_cut_copper", accent="ochre_froglight", glass="orange_stained_glass",
-                    pad="waxed_copper_block", corner="redstone_block", post="waxed_copper_block", deco="dispenser[facing=up,triggered=false]"),
-    "smp": dict(frame="mossy_stone_bricks", trim="stripped_spruce_log[axis=y]", accent="lantern[hanging=false,waterlogged=false]",
-                glass="lime_stained_glass", pad="podzol[snowy=false]", corner="spruce_leaves" + LEAF, post="spruce_log[axis=y]", deco="flowering_azalea"),
-}
+COLOR = {"skyblock": "lime", "factions": "red", "cannons": "orange", "smp": "light_blue"}
+WALLP = "polished_blackstone_wall[east=none,north=none,south=none,up=true,waterlogged=false,west=none]"
 
 
-def portal(px, realm):
-    t = THEME[realm]
+def gate(px, realm):
+    """A dark gothic lancet gate: polished blackstone, a thin realm-coloured neon line around the opening and
+    around the whole silhouette (recessed behind a moulding), flanking pilasters with pinnacles, a medallion
+    near the apex for the realm icon, banners and a runner. Dark mass + thin light = premium, not cottage."""
+    c = COLOR[realm]
+    neon = f"{c}_concrete"
     y0 = TERRACE_Y + 1
-    W, H = 3, 7                      # inner half-width (portal is 5 wide: -2..2) / height
-    # themed pad in front of the portal
-    for x in range(px - 4, px + 5):
-        for z in range(PORTAL_Z + 1, PORTAL_Z + 5):
-            put(x, TERRACE_Y, z, t["pad"] if abs(x - px) <= 3 else t["frame"])
-    # frame: pillars + arch
-    for y in range(y0, y0 + H + 1):
-        for s in (-W, W):
-            put(px + s, y, PORTAL_Z, t["frame"] if y % 3 else t["trim"])
-            put(px + s * 1 + (1 if s > 0 else -1), y, PORTAL_Z, t["frame"] if y < y0 + H - 1 else t["trim"])
-    for x in range(px - W - 1, px + W + 2):
-        put(x, y0 + H, PORTAL_Z, t["trim"])
-        put(x, y0 + H + 1, PORTAL_Z, t["frame"])
-    for x in range(px - W + 1, px + W):
-        put(x, y0 + H + 2, PORTAL_Z, t["frame"])
-    for x in range(px - 1, px + 2):
-        put(x, y0 + H + 3, PORTAL_Z, t["trim"])
-    put(px, y0 + H + 4, PORTAL_Z, t["accent"])
-    put(px, y0 + H + 5, PORTAL_Z, "end_rod[facing=up]")
-    # the portal itself
-    for x in range(px - W + 1, px + W):
-        for y in range(y0, y0 + H):
-            put(x, y, PORTAL_Z, "nether_portal[axis=x]")
-        put(x, TERRACE_Y, PORTAL_Z, t["trim"])
-    # stained-glass halo behind (colours the light around the arch)
-    for x in range(px - W - 1, px + W + 2):
-        for y in range(y0, y0 + H + 3):
-            if get(x, y, PORTAL_Z - 1) is None and (abs(x - px) >= W or y >= y0 + H):
-                put(x, y, PORTAL_Z - 1, t["glass"])
-    # lamps either side of the pad + theme deco
-    for s in (-1, 1):
-        x = px + s * 5
-        put(x, TERRACE_Y + 1, PORTAL_Z + 2, t["post"])
-        put(x, TERRACE_Y + 2, PORTAL_Z + 2, t["post"])
-        put(x, TERRACE_Y + 3, PORTAL_Z + 2, t["accent"])
-        put(x, TERRACE_Y + 4, PORTAL_Z + 2, t["corner"])
-        put(px + s * 4, TERRACE_Y + 1, PORTAL_Z + 4, t["deco"])
-    # light under the pad edges
-    for x in (px - 4, px + 4):
-        put(x, TERRACE_Y - 1, PORTAL_Z + 4, "sea_lantern")
+    PZ = PORTAL_Z
+    TOP = [18, 18, 17, 16, 15, 14, 12]           # silhouette height (above y0) by |dx|
+
+    def inS(dx, dy):
+        return abs(dx) <= 6 and 0 <= dy <= TOP[abs(dx)]
+
+    def opening(dx, dy):
+        t = {0: 9, 1: 8, 2: 6}.get(abs(dx), -1)
+        return abs(dx) <= 2 and 0 <= dy <= t
+
+    def nb(f, dx, dy):
+        return any(f(dx + a, dy + b) for a in (-1, 0, 1) for b in (-1, 0, 1) if a or b)
+
+    ring1 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and nb(opening, dx, dy)
+    ring2 = lambda dx, dy: inS(dx, dy) and not opening(dx, dy) and not ring1(dx, dy) and nb(ring1, dx, dy)
+    edge = lambda dx, dy: inS(dx, dy) and dy > 0 and any(not inS(dx + a, dy + b) for a in (-1, 0, 1) for b in (0, 1) if a or b)
+    MED = (0, 14)                                # medallion centre (dx, dy)
+    med = lambda dx, dy: 1.4 <= math.hypot(dx - MED[0], dy - MED[1]) <= 2.2
+
+    for dx in range(-6, 7):
+        for dy in range(0, 19):
+            if not inS(dx, dy):
+                continue
+            x, y = px + dx, y0 + dy
+            if opening(dx, dy):
+                put(x, y, PZ, "nether_portal[axis=x]")
+                put(x, y, PZ - 1, "obsidian")
+                continue
+            body = "polished_blackstone_bricks" if h(x, y, 77) > 0.12 else "cracked_polished_blackstone_bricks"
+            put(x, y, PZ - 1, body)
+            if ring1(dx, dy) or edge(dx, dy) or med(dx, dy):
+                put(x, y, PZ, neon)                              # the neon line, recessed
+                if not edge(dx, dy):
+                    put(x, y, PZ + 1, "light[level=12,waterlogged=false]")
+            elif ring2(dx, dy):
+                put(x, y, PZ, body)
+                put(x, y, PZ + 1, "polished_blackstone")         # moulding stands proud of the neon
+            else:
+                put(x, y, PZ, body)
+    # medallion backplate (the icon floats in front of it)
+    for dx in range(-1, 2):
+        for dy in range(13, 16):
+            put(px + dx, y0 + dy, PZ, "chiseled_polished_blackstone" if (dx, dy) == (0, 14) else "polished_blackstone")
+    # pilasters: stand proud on both sides, carry banners, end in pinnacles
+    for s_ in (-1, 1):
+        for cx in (px + s_ * 5, px + s_ * 6):
+            put(cx, y0, PZ + 1, "polished_blackstone")
+            put(cx, y0, PZ + 2, "polished_blackstone_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]")
+            for dy in range(1, 12):
+                put(cx, y0 + dy, PZ + 1, "chiseled_polished_blackstone" if dy in (5, 11) else "polished_blackstone_bricks")
+        put(px + s_ * 5, y0 + 9, PZ + 2, f"{c}_wall_banner[facing=south]")
+        put(px + s_ * 6, y0 + 9, PZ + 2, f"{c}_wall_banner[facing=south]")
+        pin = px + s_ * 6
+        put(pin, y0 + 12, PZ + 1, "polished_blackstone_bricks")
+        put(pin, y0 + 13, PZ + 1, WALLP)
+        put(pin, y0 + 14, PZ + 1, WALLP)
+        put(pin, y0 + 15, PZ + 1, neon)
+        put(pin, y0 + 16, PZ + 1, "end_rod[facing=up]")
+        put(pin, y0 + 12, PZ, "polished_blackstone_bricks")
+    # apex finial
+    put(px, y0 + 19, PZ, "chiseled_polished_blackstone")
+    put(px, y0 + 20, PZ, WALLP)
+    put(px, y0 + 21, PZ, "end_rod[facing=up]")
+    # back face: plain blackstone so the gate reads solid from the colonnade side
+    for dx in range(-6, 7):
+        for dy in range(0, 19):
+            if inS(dx, dy) and not opening(dx, dy):
+                put(px + dx, y0 + dy, PZ - 2, "polished_blackstone_bricks") if abs(dx) <= 5 and dy <= TOP[abs(dx)] - 1 else None
+    # runner: polished floor, realm carpet, dark slab kerbs, lamp posts
+    for z in range(PZ + 1, PZ + 7):
+        for dx in range(-3, 4):
+            put(px + dx, TERRACE_Y, z, "polished_blackstone")
+            if abs(dx) <= 1:
+                put(px + dx, TERRACE_Y + 1, z, f"{c}_carpet")
+            elif abs(dx) == 3 and z > PZ + 2:
+                put(px + dx, TERRACE_Y + 1, z, "polished_blackstone_slab[type=bottom,waterlogged=false]")
+        put(px, TERRACE_Y - 1, z, "sea_lantern")
+    for s_ in (-1, 1):
+        x = px + s_ * 4
+        put(x, TERRACE_Y + 1, PZ + 6, "polished_blackstone")
+        put(x, TERRACE_Y + 2, PZ + 6, WALLP)
+        put(x, TERRACE_Y + 3, PZ + 6, WALLP)
+        put(x, TERRACE_Y + 4, PZ + 6, "lantern[hanging=false,waterlogged=false]")
 
 
 for realm, px in PORTALS:
-    portal(px, realm)
+    gate(px, realm)
+
+
+def monolith():
+    """Between the two middle gates, dead centre of the spawn view: a dark slab with a purple neon outline.
+    The RelapsedMC logo hologram floats in front of it."""
+    y0, PZ = TERRACE_Y + 1, PORTAL_Z - 1
+    TOPM = [11, 11, 11, 10, 9]
+    inM = lambda dx, dy: abs(dx) <= 4 and 0 <= dy <= TOPM[abs(dx)]
+    for dx in range(-4, 5):
+        for dy in range(0, 12):
+            if not inM(dx, dy):
+                continue
+            x, y = dx, y0 + dy
+            edge = dy > 0 and any(not inM(dx + a, dy + b) for a in (-1, 0, 1) for b in (0, 1) if a or b)
+            put(x, y, PZ - 1, "polished_blackstone_bricks")
+            put(x, y, PZ, "purple_concrete" if edge else "polished_blackstone")
+    for dx in range(-5, 6):
+        put(dx, y0, PZ + 1, "polished_blackstone_slab[type=bottom,waterlogged=false]")
+    put(0, y0 + 12, PZ, WALLP)
+    put(0, y0 + 13, PZ, "end_rod[facing=up]")
+
+
+monolith()
 
 # realm spotlights: a coloured beacon beam straight up behind every portal (seen from anywhere on the island)
 BEAM = {"skyblock": "lime_stained_glass", "factions": "red_stained_glass", "cannons": "orange_stained_glass", "smp": "light_blue_stained_glass"}
@@ -586,20 +629,6 @@ def grove(cx, cz, side, seed):
 
 
 grove(31, -25, 1, 501)
-# crystal planters between the portals on the Gallery
-for i, gx in enumerate((-18, 0, 18)):
-    gz = PORTAL_Z - 2
-    for dx in range(-2, 3):
-        for dz in range(-2, 3):
-            edge = abs(dx) == 2 or abs(dz) == 2
-            put(gx + dx, TERRACE_Y + 1, gz + dz, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]" if edge else "amethyst_block")
-    for dx, dz in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
-        put(gx + dx, TERRACE_Y + 2, gz + dz, "amethyst_cluster[facing=up,waterlogged=false]")
-    _floor = FLOOR
-    FLOOR = TERRACE_Y + 1
-    spire(gx, gz, 9 if gx == 0 else 7, 1.4, 600 + i)
-    FLOOR = _floor
-    put(gx, TERRACE_Y, gz, "sea_lantern")
 grove(-31, -25, -1, 503)
 
 # small planters with azaleas between the plaza and the side beds (south-east / south-west lawns)
@@ -657,8 +686,7 @@ for a_deg in (0, 180, 60, 120, 225, 315):
 
 # ======================================================================= parkour (helix around the island, starts at the east arch)
 PK_R, PK_A0, PK_SWEEP, PK_N, PK_RISE = 58, 0, -300, 80, 30
-PK_MATS = ["purpur_block", "amethyst_block", "light_blue_stained_glass", "sea_lantern", "purple_stained_glass",
-           "polished_blackstone_bricks", "pearlescent_froglight", "cyan_concrete", "magenta_stained_glass"]
+PK_MATS = ["polished_deepslate", "smooth_quartz", "polished_deepslate", "amethyst_block"]
 parkour = {"start": None, "checkpoints": [], "finish": None, "entrance": None}
 
 
@@ -846,7 +874,7 @@ def sky_sign(out):
             out[(px, py, sz + 2)] = "minecraft:light[level=15,waterlogged=false]"
 
 
-sky_sign(blocks)
+# (sky sign removed in v14: the floating logo hologram is the brand now)
 
 # ======================================================================= write
 blocks = {k: v for k, v in blocks.items() if v != "minecraft:air"}
