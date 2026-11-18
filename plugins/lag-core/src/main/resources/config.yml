@@ -267,14 +267,14 @@ hub:
   # {phase} = moving gradient (animates every 2 ticks), {logo} = the pack logo.
   holograms:
     # spawn: the logo and one quiet line. Lore and realm info live in the Codex (hotbar book), not on walls.
-    - offset: [0.5, 6.4, -37.5]
-      scale: 2.6
+    - offset: [0.5, 5.9, -37.5]
+      scale: 3.8
       bob: false
       text: "{logo}"
-    - offset: [0.5, 4.6, -37.5]
-      scale: 1.1
+    - offset: [0.5, 4.3, -37.5]
+      scale: 1.5
       bob: false
-      text: "<#B9A8D8>{online} online  <dark_gray>|  <#B9A8D8>walk through a gate"
+      text: "<white>{online} <#C9B8E8>online  <#6A5A80>|  <#C9B8E8>walk through a gate"
     # each gate: the name sits on the cornice ledge, the player count under it on the arch
     - offset: [-29.5, 12.75, -35.8]
       scale: 2.6
@@ -282,8 +282,8 @@ hub:
       yaw: 0
       bob: false
       text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
-    - offset: [-29.5, 12.1, -35.8]
-      scale: 0.9
+    - offset: [-29.5, 12.0, -35.8]
+      scale: 1.3
       billboard: fixed
       yaw: 0
       bob: false
@@ -294,8 +294,8 @@ hub:
       yaw: 0
       bob: false
       text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>"
-    - offset: [-11.5, 12.1, -35.8]
-      scale: 0.9
+    - offset: [-11.5, 12.0, -35.8]
+      scale: 1.3
       billboard: fixed
       yaw: 0
       bob: false
@@ -306,8 +306,8 @@ hub:
       yaw: 0
       bob: false
       text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>"
-    - offset: [12.5, 12.1, -35.8]
-      scale: 0.9
+    - offset: [12.5, 12.0, -35.8]
+      scale: 1.3
       billboard: fixed
       yaw: 0
       bob: false
@@ -318,8 +318,8 @@ hub:
       yaw: 0
       bob: false
       text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"
-    - offset: [30.5, 12.1, -35.8]
-      scale: 0.9
+    - offset: [30.5, 12.0, -35.8]
+      scale: 1.3
       billboard: fixed
       yaw: 0
       bob: false
