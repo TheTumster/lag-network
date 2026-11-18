@@ -12,8 +12,8 @@ realms:
     icon: GRASS_BLOCK
     slot: 10
     lore:
-      - "<gray>Competitive islands, grinding, spawners."
-      - "<gray>Island top • challenges • shop"
+      - "<gray>Competitive islands, real mob grinders."
+      - "<gray>Cage ladder • Warzone • monthly seasons"
       - ""
       - "<#38E0FF>▶ Click to play"
   factions:
@@ -65,7 +65,7 @@ fresh-chat:
       - ""
       - "{c}<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient> <dark_gray>•</dark_gray> <gray>grind <dark_gray>•</dark_gray> <gray>spawners <dark_gray>•</dark_gray> <gray>monthly seasons"
       - ""
-      - "{c}[[<#7CFF6B><bold>⬢ ISLAND</bold>|/is|<gray>Create or go to your island]]   [[<#FFD24D><bold>★ TOP</bold>|/is top|<gray>Island top]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
+      - "{c}[[<#7CFF6B><bold>⬢ ISLAND</bold>|/is|<gray>Create or go to your island]]   [[<#B040FF><bold>◆ SELL</bold>|/sell|<gray>Sell everything to the Collector]]   [[<#FFD24D><bold>★ TOP</bold>|/is top|<gray>Island top]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     cannons:
       - "{logo}"
@@ -187,32 +187,49 @@ spawns:
         glow: "#38E0FF"
   skyblock:
     y: 100
-    protect-radius: 46
+    # v3 "the Shattered World": the core + 8 district islands, and the Warzone (PvP) under it
+    stand-y: 2
+    protect-radius: 90
     catch-falls: true
+    # PvP + damage are allowed this far below the floor (the Warzone); building stays protected
+    pvp-below: -20
+    clear: [80, 70, 40]
     portals:
-      hub: [0, 5, -21]
+      hub: [0, 7, -61]
     holograms:
-      - offset: [0.5, 4.6, -7.5]
+      - offset: [0.5, 5.4, -10.5]
         scale: 3
-        text: "<gradient:#7CFF6B:#38E0FF:#7CFF6B:{phase}><bold>SKYBLOCK</bold></gradient>"
-      - offset: [0.5, 3.5, -7.5]
-        scale: 1
-        text: "<gray>Turn left for the <white>Getting Started</white> board"
-      - offset: [0.5, 6.4, -7.5]
-        scale: 0.85
-        text: "<dark_gray><italic>When the Corrupted world collapsed, the pieces that didn't fall became islands.\n<dark_gray><italic>Every month the void takes them back."
-      - offset: [0.5, 3.4, 20.5]
-        scale: 1.4
-        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>THE PIT</bold></gradient>\n<gray>The only PvP on Skyblock <dark_gray>• <white>/pit"
-      - offset: [0.5, 13.2, -20.5]
-        scale: 1.4
-        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
-      - offset: [16.5, 6.2, 0.5]
-        scale: 1.6
-        text: "<gradient:#7CFF6B:#38E0FF><bold>MARKET</bold></gradient>"
-      - offset: [16.5, 5.5, 0.5]
+        text: "<gradient:#7CFF6B:#38E0FF:#B040FF:{phase}><bold>SKYBLOCK</bold></gradient>"
+      - offset: [0.5, 4.3, -10.5]
         scale: 0.9
-        text: "<gray>Buy and sell <white>/shop"
+        text: "<dark_gray><italic>When the Corrupted world collapsed, the pieces that didn't fall became islands.\n<dark_gray><italic>Every month the void takes them back."
+      - offset: [0.5, 3.5, -10.5]
+        scale: 1
+        text: "<gray>New here? The <white>Getting Started</white> board is to your left <dark_gray>• <white>/is <gray>to start"
+      - offset: [0.5, 18.5, -60.5]
+        scale: 2
+        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+      - offset: [58.5, 10.5, 0.5]
+        scale: 2
+        text: "<gradient:#B040FF:#FF4DD2><bold>CAGE SANCTUM</bold></gradient>\n<gray>13 cages, one ladder <dark_gray>• <white>/spawners"
+      - offset: [-58.5, 11, 0.5]
+        scale: 2
+        text: "<gradient:#FFB020:#FF6A3D><bold>GENS FORGE</bold></gradient>\n<gray>Your island remembers deeper ore <dark_gray>• <white>/gen"
+      - offset: [-40.5, 11, -40.5]
+        scale: 2
+        text: "<gradient:#7CFF6B:#38E0FF><bold>MARKET</bold></gradient>\n<gray>Basics + grinder parts <dark_gray>• <white>/market"
+      - offset: [41.5, 15.5, -46.5]
+        scale: 2
+        text: "<gradient:#FFD84D:#FF8A3D><bold>HALL OF CHAMPIONS</bold></gradient>"
+      - offset: [41.5, 7.5, 41.5]
+        scale: 2
+        text: "<gradient:#FFB020:#B040FF><bold>CRATES</bold></gradient>\n<gray>Opening soon"
+      - offset: [0.5, 8, 48.5]
+        scale: 2.2
+        text: "<gradient:#FF4D6D:#B040FF:#FF4D6D:{phase}><bold>THE RIFT</bold></gradient>\n<gray>Jump in: the <white>Warzone<gray> is below <dark_gray>• <red>PvP<dark_gray> • <gray>envoys • KOTH"
+      - offset: [0.5, -38, 48.5]
+        scale: 1.4
+        text: "<gradient:#FF4D6D:#B040FF><bold>WARZONE</bold></gradient>\n<gray>PvP is on <dark_gray>• <gray>combat tag 15s <dark_gray>• <gray>leave: <white>/spawn"
   cannons:
     y: ground
     protect-radius: 25

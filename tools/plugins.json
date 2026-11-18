@@ -142,28 +142,13 @@
       "subdir": "BentoBox/addons"
     },
     {
-      "github": "BentoBoxWorld/Challenges",
-      "subdir": "BentoBox/addons",
-      "optional": true
-    },
-    {
       "github": "BentoBoxWorld/Warps",
-      "subdir": "BentoBox/addons",
-      "optional": true
-    },
-    {
-      "github": "BentoBoxWorld/Upgrades",
       "subdir": "BentoBox/addons",
       "optional": true
     },
     {
       "modrinth": "rosestacker",
       "loader": "paper"
-    },
-    {
-      "modrinth": "economyshopgui",
-      "loader": "paper",
-      "optional": true
     },
     {
       "local": "laGSkyblock"
