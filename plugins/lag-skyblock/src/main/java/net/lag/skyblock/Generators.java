@@ -124,7 +124,7 @@ final class Generators implements Listener, CommandExecutor {
 	// ---------------------------------------------------------------- /gen menu
 
 	private static String money(double d) {
-		return "$" + MONEY.format(d);
+		return LagSkyblock.shards(d);
 	}
 
 	private static String pretty(Material m) {

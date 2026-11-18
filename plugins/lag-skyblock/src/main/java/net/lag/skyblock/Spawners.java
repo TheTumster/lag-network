@@ -1,7 +1,6 @@
 package net.lag.skyblock;
 
 import java.io.File;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,14 +34,13 @@ import net.lag.skyblock.LagSkyblock.Tier;
 
 /**
  * /spawners: the tier ladder. Tier 1 is open to everyone; trade in heads of the tier below to unlock the next one.
- * Unlocked tiers can be bought (left = 1, right = 8). /sellheads or the gold button sells every tier head you carry.
+ * Unlocked tiers can be bought (left = 1, right = 8). Heads are proof only: they never sell.
  */
 final class Spawners implements Listener, CommandExecutor {
 	// the path through the menu: across the top row, down the right, back along the bottom row
 	private static final int[] PATH = {10, 11, 12, 13, 14, 15, 16, 34, 33, 32, 31, 30, 29, 28};
 	private static final int LINK = 25; // connects 16 and 34
-	private static final int INFO = 47, SELL = 49, CLOSE = 51;
-	private static final DecimalFormat MONEY = new DecimalFormat("#,##0");
+	private static final int INFO = 47, PROOF = 49, CLOSE = 51;
 
 	private final LagSkyblock plugin;
 	private final NamespacedKey headKey;
@@ -94,7 +92,7 @@ final class Spawners implements Listener, CommandExecutor {
 	}
 
 	private static String money(double d) {
-		return "$" + MONEY.format(d);
+		return LagSkyblock.shards(d);
 	}
 
 	// ---------------------------------------------------------------- heads
@@ -125,32 +123,6 @@ final class Spawners implements Listener, CommandExecutor {
 			amount -= take;
 		}
 		p.getInventory().setStorageContents(inv);
-	}
-
-	private void sellHeads(Player p) {
-		if (plugin.eco() == null) {
-			p.sendMessage(mm("<red>The economy isn't running right now."));
-			return;
-		}
-		double total = 0;
-		int count = 0;
-		ItemStack[] inv = p.getInventory().getStorageContents();
-		for (int i = 0; i < inv.length; i++) {
-			Tier t = headTier(inv[i]);
-			if (t == null) continue;
-			total += t.headValue() * inv[i].getAmount();
-			count += inv[i].getAmount();
-			inv[i] = null;
-		}
-		if (count == 0) {
-			p.sendMessage(mm("<gray>You have no mob heads to sell. Spawner mobs drop them when they die."));
-			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
-			return;
-		}
-		p.getInventory().setStorageContents(inv);
-		plugin.eco().depositPlayer(p, total);
-		p.sendMessage(mm("<#7CFF6B>Sold <white>" + count + "</white> heads for <gold><bold>" + money(total)));
-		p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.6f);
 	}
 
 	// ---------------------------------------------------------------- menu
@@ -191,29 +163,31 @@ final class Spawners implements Listener, CommandExecutor {
 		if (tiers.size() > 7) inv.setItem(LINK, pane(top >= 8 ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE));
 		// unused path slots stay dark
 		inv.setItem(INFO, named(Material.BOOK, "<#38E0FF><bold>HOW IT WORKS", List.of(
-				"<gray>Spawners spawn real mobs that stack up.",
+				"<gray>Cages spawn real mobs that stack up.",
 				"<gray>Build a <white>grinder</white>: drop or burn the stack",
 				"<gray>and the whole stack dies into your hoppers.",
-				"<gray>Some drop their <white>mob head</white>.",
+				"<gray>Sell the loot to <white>the Collector</white> (/sell).",
 				"",
-				"<gray>Heads can be <gold>sold</gold>, or traded in to",
-				"<gray>unlock the <white>next spawner tier</white>.",
+				"<gray>1 in 100 mobs drops its <white>head</white>: proof.",
+				"<gray>Trade heads in to unlock the <white>next cage</white>.",
 				"",
 				"<dark_gray>Stack spawners by placing them on each other.")));
-		double worth = 0;
-		int count = 0;
-		for (ItemStack it : p.getInventory().getStorageContents()) {
-			Tier t = headTier(it);
-			if (t != null) {
-				worth += t.headValue() * it.getAmount();
-				count += it.getAmount();
-			}
+		// next unlock progress
+		if (top < plugin.tiers.size()) {
+			Tier next = plugin.tiers.get(top), cur = plugin.tiers.get(top - 1);
+			int have = countHeads(p, cur);
+			int pct = (int) Math.min(100, have * 100L / Math.max(1, next.unlock()));
+			String bar = "<#7CFF6B>" + "|".repeat(pct / 5) + "<dark_gray>" + "|".repeat(20 - pct / 5);
+			inv.setItem(PROOF, named(Material.SKELETON_SKULL, "<#FFB020><bold>NEXT CAGE: " + next.name().toUpperCase(), List.of(
+					"<gray>Proof needed: <white>" + next.unlock() + "× " + cur.name() + " Head",
+					"<gray>You carry: <white>" + have,
+					bar + " <gray>" + pct + "%",
+					"",
+					"<dark_gray>Heads drop from " + cur.name() + " cages.")));
+		} else {
+			inv.setItem(PROOF, named(Material.NETHER_STAR, "<gradient:#FFD84D:#FF8A3D><bold>EVERY CAGE UNLOCKED", List.of(
+					"<gray>You've mastered the whole ladder.", "<gray>Now stack them: <white>/is top")));
 		}
-		inv.setItem(SELL, named(Material.GOLD_BLOCK, "<gold><bold>SELL HEADS", List.of(
-				"<gray>Heads in your inventory: <white>" + count,
-				"<gray>Worth: <gold>" + money(worth),
-				"",
-				count > 0 ? "<#7CFF6B>▶ Click to sell them all" : "<dark_gray>No heads to sell")));
 		inv.setItem(CLOSE, named(Material.BARRIER, "<red>Close", List.of()));
 	}
 
@@ -227,8 +201,8 @@ final class Spawners implements Listener, CommandExecutor {
 			im.lore(lore(List.of(
 					"<#7CFF6B>✔ Unlocked",
 					"",
-					"<gray>Spawner: <white>" + money(t.price()),
-					"<gray>Head sells for: <gold>" + money(t.headValue()),
+					"<gray>Cage: <white>" + money(t.price()),
+					"<gray>Loot: <gold>" + money(t.value() * 360) + "<gray>/hour per cage",
 					"",
 					"<#38E0FF>▶ Left-click <gray>buy 1",
 					"<#38E0FF>▶ Right-click <gray>buy 8")));
@@ -249,8 +223,8 @@ final class Spawners implements Listener, CommandExecutor {
 					"<gray>Unlock with <white>" + t.unlock() + "× " + prev.name() + " Head",
 					"<gray>You have: " + (ready ? "<#7CFF6B>" : "<red>") + have + "<gray>/" + t.unlock(),
 					"",
-					"<gray>Spawner: <white>" + money(t.price()),
-					"<gray>Head sells for: <gold>" + money(t.headValue()),
+					"<gray>Cage: <white>" + money(t.price()),
+					"<gray>Loot: <gold>" + money(t.value() * 360) + "<gray>/hour per cage",
 					"",
 					ready ? "<#7CFF6B>▶ Click to unlock" : "<dark_gray>Collect more " + prev.name() + " heads")));
 			it.setItemMeta(im);
@@ -276,11 +250,6 @@ final class Spawners implements Listener, CommandExecutor {
 			p.closeInventory();
 			return;
 		}
-		if (slot == SELL) {
-			sellHeads(p);
-			draw(p, e.getInventory());
-			return;
-		}
 		for (int i = 0; i < plugin.tiers.size() && i < PATH.length; i++) {
 			if (PATH[i] != slot) continue;
 			Tier t = plugin.tiers.get(i);
@@ -293,7 +262,7 @@ final class Spawners implements Listener, CommandExecutor {
 		}
 	}
 
-	/** The tier head players collect (sellable, counts toward unlocks). */
+	/** The tier head players collect: proof that counts toward the next unlock. */
 	ItemStack head(Tier t) {
 		try {
 			return Bukkit.getItemFactory().createItemStack(plugin.headSpec(t, true));
@@ -376,8 +345,7 @@ final class Spawners implements Listener, CommandExecutor {
 			s.sendMessage("Players only.");
 			return true;
 		}
-		if (cmd.getName().equalsIgnoreCase("sellheads")) sellHeads(p);
-		else open(p);
+		open(p);
 		return true;
 	}
 }

@@ -27,6 +27,18 @@ final class SpawnProtect implements Listener {
 		return plugin.optNum(spawn.base + ".protect-radius", 40);
 	}
 
+	/**
+	 * Safe (no damage, no PvP) near spawn, except under pvp-below: a spawn can keep a PvP arena under its floor
+	 * (skyblock's Warzone, y below origin + pvp-below). Building stays protected there.
+	 */
+	private boolean safe(org.bukkit.Location l) {
+		if (!spawn.near(l, radius())) return false;
+		Object pb = plugin.opt(spawn.base + ".pvp-below", null);
+		if (pb == null) return true;
+		var o = spawn.origin();
+		return o == null || l.getY() >= o.getY() + plugin.optNum(spawn.base + ".pvp-below", -1000);
+	}
+
 	private boolean builder(Player p) {
 		return p.hasPermission("lag.build");
 	}
@@ -48,12 +60,12 @@ final class SpawnProtect implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onDamage(EntityDamageEvent e) {
-		if (e.getEntity() instanceof Player p && spawn.near(p.getLocation(), radius())) e.setCancelled(true);
+		if (e.getEntity() instanceof Player p && safe(p.getLocation())) e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onPvp(EntityDamageByEntityEvent e) {
-		if (e.getEntity() instanceof Player p && spawn.near(p.getLocation(), radius())) e.setCancelled(true);
+		if (e.getEntity() instanceof Player p && safe(p.getLocation())) e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -72,7 +84,8 @@ final class SpawnProtect implements Listener {
 		var o = spawn.origin();
 		var s = spawn.spawnPoint();
 		if (o == null || s == null || !e.getTo().getWorld().equals(o.getWorld())) return;
-		if (e.getTo().getY() < o.getY() - 50 && Math.abs(e.getTo().getX() - o.getX()) < 60 && Math.abs(e.getTo().getZ() - o.getZ()) < 60
+		double box = Math.max(60, radius());
+		if (e.getTo().getY() < o.getY() - 50 && Math.abs(e.getTo().getX() - o.getX()) < box && Math.abs(e.getTo().getZ() - o.getZ()) < box
 				&& plugin.optBool(spawn.base + ".catch-falls", false)) {
 			e.getPlayer().teleport(s);
 			e.getPlayer().setFallDistance(0);

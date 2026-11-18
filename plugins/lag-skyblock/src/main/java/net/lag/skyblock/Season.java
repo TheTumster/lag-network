@@ -64,6 +64,11 @@ final class Season implements CommandExecutor {
 		}
 	}
 
+	/** Time left as "3d 4h", or null when no end date is set. */
+	String left() {
+		return timeLeft();
+	}
+
 	private String timeLeft() {
 		if (ends == null || ends.isBlank()) return null;
 		try {

@@ -2,16 +2,21 @@ name: laGSkyblock
 version: '${version}'
 main: net.lag.skyblock.LagSkyblock
 api-version: '1.21'
-softdepend: [Vault, Essentials, RoseStacker, EconomyShopGUI, BentoBox]
-loadbefore: [EconomyShopGUI]
-description: RelapsedMC Skyblock - spawner tiers, mob heads, ore gens, island top, the Pit, seasons
+softdepend: [Vault, Essentials, RoseStacker, BentoBox]
+description: RelapsedMC Skyblock - Shards economy, cage ladder, the Collector, Market, gens, island top, Warzone, seasons
 commands:
   spawners:
-    description: Spawner tiers - buy spawners, unlock the next tier with heads
+    description: The cage ladder - buy cages (spawners), unlock the next tier with heads
     aliases: [spawnershop, tiers]
-  sellheads:
-    description: Sell every mob head in your inventory
-    aliases: [sellhead]
+  sell:
+    description: Sell everything the Collector buys (/sell hand for just your hand)
+    aliases: [sellall]
+  collector:
+    description: The Collector's price list
+    aliases: [prices, worth]
+  market:
+    description: The Market - buy basics and grinder parts
+    aliases: [shop, buy]
   gen:
     description: Your island's ore generator tiers
     aliases: [generator, generators, oregen]
@@ -24,9 +29,9 @@ commands:
   season:
     description: This Skyblock season - time left, top islands, prizes
     aliases: [seasons]
-  pit:
-    description: The Pit - the PvP arena at spawn
-    aliases: [arena]
+  warzone:
+    description: The Warzone - the PvP arena under spawn (envoys, KOTH)
+    aliases: [pit, wz, arena, koth, envoy, envoys]
   lagskyblock:
     description: laG Skyblock admin
     aliases: [lsb]

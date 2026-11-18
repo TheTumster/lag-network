@@ -83,7 +83,7 @@ final class HubBuild implements Listener {
 	private int version() {
 		if (hub) return BUILD_VERSION;
 		if ("spawns.factions".equals(base)) return 2; // factions v2: "the Fault" (tools/hub/genspawn_factions.py)
-		return "spawns.skyblock".equals(base) ? 2 : SPAWN_VERSION; // skyblock v2: full rebuild
+		return "spawns.skyblock".equals(base) ? 3 : SPAWN_VERSION; // skyblock v3: the Shattered World (tools/hub/genspawn_skyblock.py)
 	}
 
 	/** Spawn point on the island (null until built). */
@@ -120,9 +120,13 @@ final class HubBuild implements Listener {
 			int cleared = 0;
 			// on real terrain only clear above the floor (never dig a pit into the world); void spawns clear it all
 			boolean ground = "ground".equalsIgnoreCase(String.valueOf(plugin.opt(base + ".y", 100)));
-			for (int x = ox - 48; x <= ox + 48; x++) {
-				for (int z = oz - 48; z <= oz + 48; z++) {
-					for (int y = ground ? oy + 1 : oy - 48; y <= oy + 32; y++) {
+			// clear: [radius, depth, height] around the old build (bigger spawns set their own)
+			List<?> cl = plugin.getConfig().getList(base + ".clear");
+			int cr = cl != null && cl.size() >= 3 ? (int) num(cl.get(0)) : 48, cd = cl != null && cl.size() >= 3 ? (int) num(cl.get(1)) : 48,
+					cu = cl != null && cl.size() >= 3 ? (int) num(cl.get(2)) : 32;
+			for (int x = ox - cr; x <= ox + cr; x++) {
+				for (int z = oz - cr; z <= oz + cr; z++) {
+					for (int y = ground ? oy + 1 : oy - cd; y <= oy + cu; y++) {
 						var b = w.getBlockAt(x, y, z);
 						if (!b.getType().isAir()) {
 							b.setBlockData(air, false);
@@ -135,7 +139,7 @@ final class HubBuild implements Listener {
 			// the new layout ships its own holograms / portal / protection settings: take them from the jar
 			var defs = plugin.getConfig().getDefaults();
 			if (defs != null) {
-				for (String k : new String[] {"holograms", "displays", "portals", "protect-radius", "catch-falls"}) {
+				for (String k : new String[] {"holograms", "displays", "portals", "protect-radius", "catch-falls", "pvp-below", "clear", "stand-y"}) {
 					Object dv = defs.get(base + "." + k);
 					if (dv instanceof ConfigurationSection cs) plugin.getConfig().createSection(base + "." + k, cs.getValues(false));
 					else if (dv != null) plugin.getConfig().set(base + "." + k, dv);
@@ -197,11 +201,12 @@ final class HubBuild implements Listener {
 		var c = plugin.getConfig();
 		c.set(base + ".origin", w.getName() + "," + ox + "," + oy + "," + oz);
 		// stand on the purple glass over the beacon, facing the Factions portal (north)
-		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + 1) + "," + (oz + 0.5) + ",180.0,0.0");
+		double standY = num(plugin.opt(base + ".stand-y", 1)); // a spawn whose centre is a raised dais stands higher
+		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + standY) + "," + (oz + 0.5) + ",180.0,0.0");
 		c.set(base + ".void-y", oy - 60);
 		c.set(base + ".build-version", version());
 		plugin.saveConfig();
-		w.setSpawnLocation(ox, oy + 1, oz);
+		w.setSpawnLocation(ox, oy + (int) standY, oz);
 		plugin.getLogger().info("Built the " + base + " spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
 		return n;
 	}
