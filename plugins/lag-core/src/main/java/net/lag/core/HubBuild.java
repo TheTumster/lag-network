@@ -41,7 +41,7 @@ final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
-	static final int CHRISTMAS_REV = 7; // 7: market town, clock tower, Santa's Workshop. 6: themed portal houses, ice palace + bridge. 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
+	static final int CHRISTMAS_REV = 7; // (fx are entities: no rebuild needed) 7: market town, clock tower, Santa's Workshop. 6: themed portal houses, ice palace + bridge. 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -267,6 +267,7 @@ final class HubBuild implements Listener {
 		for (TextDisplay d : live.keySet()) bad |= !d.isValid();
 		for (var d : spinners.keySet()) bad |= !d.isValid();
 		for (Entity n : npcs) bad |= !n.isValid();
+		if (fx != null && christmas()) bad |= !fx.valid();
 		if (bad) holograms();
 	}
 
@@ -274,8 +275,9 @@ final class HubBuild implements Listener {
 		Location o = origin();
 		if (o == null) return;
 		// keep the spawn area loaded even with nobody in the hub, so the displays aren't unloaded with it
-		for (int cx = (o.getBlockX() >> 4) - 6; cx <= (o.getBlockX() >> 4) + 6; cx++) {
-			for (int cz = (o.getBlockZ() >> 4) - 8; cz <= (o.getBlockZ() >> 4) + 5; cz++) {
+		int far = christmas() ? 2 : 0;           // Christmas: the palace, the aurora and the sleigh's circle reach further out
+		for (int cx = (o.getBlockX() >> 4) - 6 - far; cx <= (o.getBlockX() >> 4) + 6 + far; cx++) {
+			for (int cz = (o.getBlockZ() >> 4) - 8 - far; cz <= (o.getBlockZ() >> 4) + 5; cz++) {
 				o.getWorld().getChunkAt(cx, cz).addPluginChunkTicket(plugin);
 			}
 		}
@@ -305,6 +307,14 @@ final class HubBuild implements Listener {
 			text(at, text, scale, m);
 		}
 		spawnNpcs(o);
+		if (christmas()) {
+			if (fx == null) fx = new ChristmasFx(plugin, holoKey, base);
+			try {
+				fx.spawn(o);
+			} catch (Throwable t) {
+				plugin.getLogger().warning("Christmas set pieces failed to start: " + t);
+			}
+		}
 		// parkour start (leaderboard) + finish
 		if (plugin.parkour != null) {
 			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram(), pb = plugin.parkour.boardHologram();
@@ -346,6 +356,7 @@ final class HubBuild implements Listener {
 		refresh();
 		if ("spawns.factions".equals(base) && tick % 4 == 0) faultFx();
 		if (hub && tick % 4 == 0 && "christmas".equals(theme()) && plugin.optBool(base + ".snow", true)) snowFx();
+		if (fx != null && christmas()) fx.tick(tick);
 		if (tick % 40 != 0) return;
 		boolean up = (tick / 40) % 2 == 0;
 		for (var en : liveScale.entrySet()) {
@@ -548,6 +559,7 @@ final class HubBuild implements Listener {
 	// ---------------------------------------------------------------- Christmas: NPCs (hub.christmas.npcs)
 
 	private final NamespacedKey npcKey = new NamespacedKey("lagcore", "npc");
+	private ChristmasFx fx;
 	private final java.util.List<Entity> npcs = new java.util.ArrayList<>();
 	private final Map<UUID, Long> npcCooldown = new HashMap<>();
 
