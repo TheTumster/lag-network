@@ -41,6 +41,7 @@ final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
+	static final int SKY_CHRISTMAS_REV = 1; // skyblock christmas: snow, icicles, decorated spruces, candy canes, crystal garland, the Great Tree north of the hub portal
 	static final int CHRISTMAS_REV = 7; // (fx are entities: no rebuild needed) 7: market town, clock tower, Santa's Workshop. 6: themed portal houses, ice palace + bridge. 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
@@ -71,7 +72,7 @@ final class HubBuild implements Listener {
 	void start() {
 		World w = Bukkit.getWorlds().get(0);
 		// hub theme: "christmas" swaps in the dressed-up build; changing it rebuilds once on the next start
-		boolean themeChanged = hub && !themeStamp().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
+		boolean themeChanged = themed() && !themeStamp().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
 		if ((plugin.getConfig().getInt(base + ".build-version", 0) < version() || themeChanged) && plugin.optBool(base + ".auto-build", true)) {
 			String ys = String.valueOf(plugin.opt(base + ".y", 100));
 			Location old = origin();
@@ -85,19 +86,25 @@ final class HubBuild implements Listener {
 	}
 
 	/** The hub's seasonal theme ("default" or "christmas"), from config hub.theme. */
+	/** Spawns with a seasonal theme: the hub and Skyblock (spawns.skyblock.theme). */
+	private boolean themed() {
+		return hub || "spawns.skyblock".equals(base);
+	}
+
 	String theme() {
-		if (!hub) return "default";
+		if (!themed()) return "default";
 		String t = String.valueOf(plugin.opt(base + ".theme", "christmas")).toLowerCase(java.util.Locale.ROOT);
 		return t.equals("christmas") ? t : "default";
 	}
 
 	private String themeStamp() {
-		return "christmas".equals(theme()) ? "christmas:" + CHRISTMAS_REV : "default";
+		return "christmas".equals(theme()) ? "christmas:" + (hub ? CHRISTMAS_REV : SKY_CHRISTMAS_REV) : "default";
 	}
 
 	/** The build file in the jar for this spawn (the hub's depends on its theme). */
 	private String resource() {
-		return hub && "christmas".equals(theme()) ? "hub-spawn-christmas.txt.gz" : file;
+		if (!"christmas".equals(theme())) return file;
+		return hub ? "hub-spawn-christmas.txt.gz" : "spawn-skyblock-christmas.txt.gz";
 	}
 
 	private int version() {
@@ -226,7 +233,7 @@ final class HubBuild implements Listener {
 		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + standY) + "," + (oz + 0.5) + ",180.0,0.0");
 		c.set(base + ".void-y", oy - 60);
 		c.set(base + ".build-version", version());
-		if (hub) c.set(base + ".build-theme", themeStamp());
+		if (themed()) c.set(base + ".build-theme", themeStamp());
 		plugin.saveConfig();
 		w.setSpawnLocation(ox, oy + (int) standY, oz);
 		plugin.getLogger().info("Built the " + base + " spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
@@ -355,7 +362,7 @@ final class HubBuild implements Listener {
 		tick += 2;
 		refresh();
 		if ("spawns.factions".equals(base) && tick % 4 == 0) faultFx();
-		if (hub && tick % 4 == 0 && "christmas".equals(theme()) && plugin.optBool(base + ".snow", true)) snowFx();
+		if (themed() && tick % 4 == 0 && "christmas".equals(theme()) && plugin.optBool(base + ".snow", true)) snowFx();
 		if (fx != null && christmas()) fx.tick(tick);
 		if (tick % 40 != 0) return;
 		boolean up = (tick / 40) % 2 == 0;

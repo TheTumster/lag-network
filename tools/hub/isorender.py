@@ -3,6 +3,9 @@ import math
 from PIL import Image, ImageDraw
 
 COLORS = [
+    ("snow", (240, 244, 250)), ("spruce_leaves", (45, 85, 50)), ("packed_ice", (140, 180, 235)), ("blue_ice", (115, 165, 245)), ("ice", (160, 200, 245)),
+    ("ochre_froglight", (250, 225, 150)), ("verdant_froglight", (215, 245, 200)), ("shroomlight", (245, 150, 70)), ("sea_lantern", (210, 235, 230)),
+    ("glowstone", (250, 210, 120)), ("green_", (75, 100, 40)), ("carved_pumpkin", (220, 130, 30)), ("yellow_", (240, 200, 50)),
     ("crying_obsidian", (70, 20, 120)), ("crimson_stem", (110, 30, 50)), ("nether_wart_block", (130, 15, 20)), ("crimson_nylium", (150, 30, 40)),
     ("bone_block", (225, 220, 190)), ("stripped_dark_oak", (80, 60, 45)), ("dark_oak", (70, 45, 25)), ("weeping", (170, 20, 20)), ("red_nether", (90, 20, 25)), ("gilded_blackstone", (90, 70, 40)), ("blackstone", (42, 36, 44)),
     ("sculk_catalyst", (30, 60, 70)), ("sculk", (12, 40, 52)), ("mud", (60, 55, 60)), ("gold_block", (240, 200, 60)),

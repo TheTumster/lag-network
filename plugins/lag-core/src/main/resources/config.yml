@@ -188,12 +188,18 @@ spawns:
   skyblock:
     y: 100
     # v3 "the Shattered World": the core + 8 district islands, and the Warzone (PvP) under it
+    # Seasonal: "christmas" (snow, icicles, decorated spruces, candy canes, the Great Tree north of the hub portal)
+    # or "default". Change it and restart: the spawn is cleared and rebuilt in that theme (NPCs and boards stay put).
+    theme: christmas
+    # Christmas only: snow falling round players at spawn.
+    snow: true
     stand-y: 2
-    protect-radius: 90
+    protect-radius: 115
     catch-falls: true
     # PvP + damage are allowed this far below the floor (the Warzone); building stays protected
     pvp-below: -20
-    clear: [80, 70, 40]
+    # [radius, depth, height] cleared before a rebuild: covers the Great Tree island (z -104) and its star (y +42)
+    clear: [110, 70, 60]
     portals:
       hub: [0, 7, -61]
     holograms:
