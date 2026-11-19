@@ -808,6 +808,10 @@ for dx in range(-2, 3):
 present(SX + 2, FLOOR + 1, SZ - 2, 1, 991)
 present(SX + 2, FLOOR + 1, SZ + 1, 1, 992)
 
+# ======================================================================= the market town (tools/hub/xmas_market.py)
+import xmas_market
+xmas_market.build(V, NO_SNOW, SPRUCE, present, parkour_keepout)
+
 # ======================================================================= snow over everything
 WALKWAY_Y = {FLOOR, TERRACE_Y}
 NOT_UNDER = ("glass", "slab", "stairs", "_wall", "fence", "lantern", "end_rod", "chain", "carpet", "pane", "bars", "tulip",
@@ -835,7 +839,7 @@ for (x, z), y in tops.items():
     if (x, y, z) in NO_SNOW or any(t in n for t in NOT_UNDER):
         continue
     if math.hypot(x - CX, z - CZ) > R + 6 and not (math.hypot(abs(x) - 62, z + 48) < 12 or math.hypot(x - TX, z - TZ) < 30
-                                                    or (abs(x) < 12 and abs(z - 58) < 14) or (math.hypot(abs(x) - 62, z + 48) < 14)):
+                                                    or (abs(x) < 20 and 34 <= z <= 70) or (math.hypot(abs(x) - 62, z + 48) < 14)):
         continue                                    # parkour and anything else out in the void stays clear
     if walkway(x, y, z) or (math.hypot(x - CX, z - CZ) <= PLAZA + 1 and y <= FLOOR + 1) or math.hypot(x, z) <= 4.5:
         continue                                    # paving, the rink and the spawn dais stay clean

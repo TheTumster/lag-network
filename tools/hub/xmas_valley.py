@@ -72,6 +72,12 @@ def build(V, NO_SNOW, SPRUCE, present):
             return True
         if xmas_paths.nearest(x, z)[0] <= 3.6:      # the realm runners cut through the snowbanks
             return True
+        import xmas_market as M                      # market stalls and the clock tower sit on flat pads
+        for (sx, sz, _) in M.STALLS:
+            if sx - 2 <= x <= sx + 5 and sz - 2 <= z <= sz + 4:
+                return True
+        if M.CLOCK[0] - 2 <= x <= M.CLOCK[0] + 6 and M.CLOCK[1] - 2 <= z <= M.CLOCK[1] + 6:
+            return True
         return False
 
     cells = [(x, z) for x in range(-R - 10, R + 11) for z in range(CZ - R - 10, CZ + R + 11) if V.in_island(x, z)]
