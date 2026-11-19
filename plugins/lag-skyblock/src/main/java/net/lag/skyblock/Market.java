@@ -37,7 +37,7 @@ final class Market implements Listener, CommandExecutor {
 	private static final class Menu implements InventoryHolder {
 		Inventory inv;
 		int tab;
-		final List<Material> shown = new ArrayList<>();
+		final java.util.Map<Integer, Material> shown = new java.util.HashMap<>();
 
 		@Override
 		public Inventory getInventory() {
@@ -68,7 +68,7 @@ final class Market implements Listener, CommandExecutor {
 
 	void open(Player p) {
 		Menu m = new Menu();
-		m.inv = Bukkit.createInventory(m, 54, Spawners.mm("<gradient:#7CFF6B:#38E0FF><bold>MARKET</bold></gradient> <dark_gray>· " + LagSkyblock.shards(bal(p))));
+		m.inv = Bukkit.createInventory(m, 54, Gui.title("MARKET", LagSkyblock.shards(bal(p)), "#1E6B2E"));
 		draw(p, m);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_TRADE, 0.6f, 1.1f);
@@ -102,22 +102,23 @@ final class Market implements Listener, CommandExecutor {
 
 	private void draw(Player p, Menu m) {
 		Inventory inv = m.inv;
-		for (int i = 0; i < 54; i++) inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) inv.setItem(i, pane(i % 2 == 0 ? Material.LIME_STAINED_GLASS_PANE : Material.CYAN_STAINED_GLASS_PANE));
+		Gui.frame(inv, Material.LIME_STAINED_GLASS_PANE);
 		var cats = new ArrayList<>(categories().entrySet());
 		for (int i = 0; i < cats.size() && i < TABS.length; i++) {
 			boolean on = i == m.tab;
 			inv.setItem(TABS[i], named(TAB_ICONS[i % TAB_ICONS.length], (on ? "<#7CFF6B>▶ " : "<gray>") + "<bold>" + cats.get(i).getKey().toUpperCase(),
-					List.of("<dark_gray>" + cats.get(i).getValue().size() + " items"), on));
+					List.of("<#9A9A9A>" + cats.get(i).getValue().size() + " items"), on));
 		}
 		m.shown.clear();
 		if (m.tab < cats.size()) {
-			int slot = 9;
-			for (var e : cats.get(m.tab).getValue().entrySet()) {
-				if (slot > 44) break;
-				m.shown.add(e.getKey());
+			var entries = new ArrayList<>(cats.get(m.tab).getValue().entrySet());
+			List<Integer> slots = Gui.balanced(1, 4, entries.size());
+			for (int i = 0; i < entries.size() && i < slots.size(); i++) {
+				var e = entries.get(i);
+				int slot = slots.get(i);
+				m.shown.put(slot, e.getKey());
 				String each = e.getValue() >= 100 ? LagSkyblock.shards(e.getValue()) : LagSkyblock.symbol + String.format("%,.0f", e.getValue());
-				inv.setItem(slot++, named(e.getKey(), "<white>" + pretty(e.getKey()), List.of(
+				inv.setItem(slot, named(e.getKey(), "<white><bold>" + pretty(e.getKey()), List.of(
 						"<gray>Price: <gold>" + each + " <gray>each",
 						"",
 						"<#38E0FF>▶ Left <gray>1  <#38E0FF>▶ Right <gray>16  <#38E0FF>▶ Shift <gray>64"), false));
@@ -152,7 +153,7 @@ final class Market implements Listener, CommandExecutor {
 			return;
 		}
 		plugin.eco().withdrawPlayer(p, each * given);
-		p.sendActionBar(Spawners.mm("<#7CFF6B>Bought " + given + "× " + pretty(mat) + " <dark_gray>· <gold>-" + LagSkyblock.shards(each * given)));
+		p.sendActionBar(Spawners.mm("<#7CFF6B>Bought " + given + "× " + pretty(mat) + " <#9A9A9A>· <gold>-" + LagSkyblock.shards(each * given)));
 		p.playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.6f, 1.2f);
 	}
 
@@ -173,9 +174,8 @@ final class Market implements Listener, CommandExecutor {
 				return;
 			}
 		}
-		int idx = s - 9;
-		if (idx < 0 || idx >= m.shown.size()) return;
-		Material mat = m.shown.get(idx);
+		Material mat = m.shown.get(s);
+		if (mat == null) return;
 		var cats = new ArrayList<>(categories().values());
 		if (m.tab >= cats.size()) return;
 		Double each = cats.get(m.tab).get(mat);
