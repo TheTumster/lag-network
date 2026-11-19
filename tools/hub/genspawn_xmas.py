@@ -27,6 +27,22 @@ import genspawn_v4 as V
 from genspawn_v4 import put, get, h, vnoise, CX, CZ, FLOOR, R, PLAZA, TERRACE_Y, TERRACE_Z0, PORTAL_Z, PORTALS
 
 B = V.blocks
+_PK = {}
+for (x, y, z), b in B.items():
+    if 54 <= math.hypot(x - CX, z - CZ) <= 62 and FLOOR <= y <= 40:
+        _PK.setdefault((x, z), []).append(y)
+
+
+def parkour_keepout(x, y, z):
+    """True where a new block would get in the parkour's way (its blocks and the air players jump through)."""
+    for dx in (-1, 0, 1):
+        for dz in (-1, 0, 1):
+            for py in _PK.get((x + dx, z + dz), ()):
+                if py - 1 <= y <= py + 3:
+                    return True
+    return False
+
+
 OUT = os.path.join(V.RES, "hub-spawn-christmas.txt.gz")
 LEAF = "[distance=1,persistent=true,waterlogged=false]"
 SPRUCE = "spruce_leaves" + LEAF
@@ -151,22 +167,15 @@ for (x, y, z), b in list(B.items()):
         put(x + dx, y, z + dz, "lantern[hanging=true,waterlogged=false]")
     NO_SNOW.add((x, y + 2, z)); NO_SNOW.add((x + dx, y + 2, z + dz))
 
-# wreaths round each gate's medallion, with a red bow at the bottom
-y0g = TERRACE_Y + 1
+# the four gates become themed portal houses (tools/hub/xmas_houses.py)
+import xmas_houses
 for realm, px in PORTALS:
-    my = y0g + 14
-    for dx in range(-4, 5):
-        for dy in range(-4, 5):
-            d = math.hypot(dx, dy)
-            if 2.45 <= d <= 3.45:
-                x, y, z = px + dx, my + dy, PORTAL_Z + 1
-                b = "red_concrete" if h(x, y, 71) < 0.13 else "ochre_froglight" if h(x, y, 72) < 0.08 else SPRUCE
-                put(x, y, z, b)
-                put(x, y, z + 1, "light[level=10,waterlogged=false]", force=False)
-    for dx in (-1, 0, 1):                       # the bow sits on the wreath itself, so the gate's label in front stays clear
-        put(px + dx, my - 3, PORTAL_Z + 1, "red_wool")
-    put(px - 1, my - 4, PORTAL_Z + 1, "red_wool")
-    put(px + 1, my - 4, PORTAL_Z + 1, "red_wool")
+    y0g = TERRACE_Y + 1
+    keep = {(px + dx, y0g, PORTAL_Z - 3 + dz) for dx in (-1, 0, 1) for dz in (-1, 0, 1)}
+    for k in [k for k in B if abs(k[0] - px) <= 9 and PORTAL_Z - 7 <= k[2] <= PORTAL_Z + 2 and y0g <= k[1] <= y0g + 40
+              and k not in keep and not (k[1] == y0g and k[2] >= PORTAL_Z + 1 and abs(k[0] - px) <= 3)]:
+        del B[k]
+    xmas_houses.build(V, realm, px, NO_SNOW)
 
 # garland on the colonnade (the back wall between the gates)
 for (x, y, z), b in list(B.items()):
@@ -184,16 +193,16 @@ def turn_gate(realm, px):
     t = math.radians(xmas_paths.TILT[realm])
     bz = PORTAL_Z - 3
     keep = {(px + dx, TERRACE_Y + 1, bz + dz) for dx in (-1, 0, 1) for dz in (-1, 0, 1)}   # beacon beam glass stays on its beacon
-    y0, y1 = TERRACE_Y + 1, TERRACE_Y + 24
+    y0, y1 = TERRACE_Y + 1, TERRACE_Y + 45
     src = {}
-    for k in [k for k in B if abs(k[0] - px) <= 9 and PORTAL_Z - 5 <= k[2] <= PORTAL_Z + 8 and y0 <= k[1] <= y1 and k not in keep]:
+    for k in [k for k in B if abs(k[0] - px) <= 13 and PORTAL_Z - 8 <= k[2] <= PORTAL_Z + 8 and y0 <= k[1] <= y1 and k not in keep]:
         b = B.pop(k)
         if name(b) != "air":
             src[(k[0] - px, k[1], k[2] - PORTAL_Z)] = b
     ct, st = math.cos(t), math.sin(t)
     subs = [(i / 3 - 1 / 3, j / 3 - 1 / 3) for i in range(3) for j in range(3)]
-    for x in range(px - 11, px + 12):
-        for z in range(PORTAL_Z - 8, PORTAL_Z + 11):
+    for x in range(px - 16, px + 17):
+        for z in range(PORTAL_Z - 12, PORTAL_Z + 12):
             for y in range(y0, y1 + 1):
                 hits = {}
                 for (sx, sz) in subs:
@@ -298,12 +307,12 @@ def snowy_island(cx, cz, r, depth, top, seed):
                 put(cx + x, top - 1, cz + z, "dirt")
 
 
-snowy_island(TX, TZ, 20, 34, TTOP, 77)
+snowy_island(TX, TZ, 31, 40, TTOP, 77)
 # the rim: a ring of packed ice with snow banks
-for x in range(-26, 27):
-    for z in range(-26, 27):
+for x in range(-37, 38):
+    for z in range(-37, 38):
         d = math.hypot(x, z)
-        e = V.edge_r(x, z, 20, 77, 4)
+        e = V.edge_r(x, z, 31, 77, 4)
         if e - 1.5 < d <= e and get(TX + x, TTOP, TZ + z):
             put(TX + x, TTOP, TZ + z, "packed_ice" if h(x, z, 4) < 0.5 else "snow_block")
 
@@ -460,6 +469,12 @@ for sx in (-1, 1):
     put(bx + sx * -1, TTOP + 8, bz - 1, "light[level=13,waterlogged=false]", force=False)
 
 
+# ======================================================================= the Ice Palace round the tree, and the bridge to it
+import xmas_palace
+GZ = xmas_palace.build(V, TX, TZ, TTOP, NO_SNOW, parkour_keepout)
+xmas_palace.bridge(V, -39, GZ - 3, TERRACE_Y, TTOP, NO_SNOW, parkour_keepout)
+print("ice palace: gate at z", GZ)
+
 # ======================================================================= the snowmen
 def snowman(cx, cz, base_y, wave, seed):
     fx, fz = CX - cx, (CZ - 4) - cz
@@ -583,10 +598,9 @@ for sx in (-1, 1):
 # the dark logo slab goes: the logo floats over the Great Tree's star now (laGCore hub.christmas.logo), and the
 # gap frames the tree. A small pile of presents sits where the slab stood.
 y0g = TERRACE_Y + 1
-for k in [k for k in B if -5 <= k[0] <= 5 and -41 <= k[2] <= -38 and y0g <= k[1] <= y0g + 14]:
+for k in [k for k in B if -3 <= k[0] <= 3 and -41 <= k[2] <= -38 and y0g <= k[1] <= y0g + 14]:
     del B[k]
-for (dx, dz, sz_) in ((-3, -40, 2), (1, -40, 3), (-1, -38, 1), (3, -38, 1), (-4, -38, 1)):
-    present(dx, y0g, dz, sz_, 777 + dx * 3 + dz)
+# (the gap is the way onto the ice bridge now: no presents in it)
 
 # ======================================================================= depth in the plaza
 # 1) the rink sinks: a skating bowl two blocks down, half-step rings to walk in, a raised causeway across it
@@ -759,11 +773,11 @@ for realm, a, b in SEGS:
 # ======================================================================= string lights between the gates
 # a garland of spruce with a bulb every other block: continuous, so it reads as a strand and not floating cubes
 BULB = ["shroomlight", "ochre_froglight", "pearlescent_froglight", "sea_lantern"]
-ys = TERRACE_Y + 1 + 13
+ys = TERRACE_Y + 1 + xmas_houses.ANCHOR[1]
 pins = []
 for realm, px in PORTALS:
-    for sx in (-6, 6):
-        pins.append(xmas_paths.rot(px + sx, PORTAL_Z + 1, px, realm))
+    for sx in (-xmas_houses.ANCHOR[0], xmas_houses.ANCHOR[0]):
+        pins.append(xmas_paths.rot(px + sx, PORTAL_Z + xmas_houses.ANCHOR[2], px, realm))
 pins.sort()
 for i in range(1, len(pins) - 1, 2):
     (xa, za), (xb, zb) = pins[i], pins[i + 1]
