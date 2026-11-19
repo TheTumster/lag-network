@@ -260,6 +260,7 @@ final class HubBuild implements Listener {
 		boolean bad = live.isEmpty() && !plugin.getConfig().getMapList(base + ".holograms").isEmpty();
 		for (TextDisplay d : live.keySet()) bad |= !d.isValid();
 		for (var d : spinners.keySet()) bad |= !d.isValid();
+		for (Entity n : npcs) bad |= !n.isValid();
 		if (bad) holograms();
 	}
 
@@ -278,7 +279,13 @@ final class HubBuild implements Listener {
 		live.clear();
 		liveScale.clear();
 		spinners.clear();
-		List<Map<?, ?>> list = plugin.getConfig().getMapList(base + ".holograms");
+		List<Map<?, ?>> list = new java.util.ArrayList<>(plugin.getConfig().getMapList(base + ".holograms"));
+		if (christmas()) {
+			// the logo + "walk through a gate" line move (they stood in front of the middle gap); the theme adds its own
+			List<?> hide = plugin.getConfig().getList(base + ".christmas.hide", List.of("{logo}", "walk through a gate"));
+			list.removeIf(m -> hide.stream().anyMatch(hs -> String.valueOf(m.get("text")).contains(String.valueOf(hs))));
+			list.addAll(plugin.getConfig().getMapList(base + ".christmas.holograms"));
+		}
 		for (Map<?, ?> m : list) {
 			List<?> off = (List<?>) m.get("offset");
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
@@ -288,6 +295,7 @@ final class HubBuild implements Listener {
 			if (m.containsKey("yaw")) at.setYaw((float) num(m.get("yaw")));
 			text(at, text, scale, m);
 		}
+		spawnNpcs(o);
 		// parkour start (leaderboard) + finish
 		if (plugin.parkour != null) {
 			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram(), pb = plugin.parkour.boardHologram();
@@ -410,6 +418,7 @@ final class HubBuild implements Listener {
 		final org.bukkit.Color background = bg;
 		final int width = opt.containsKey("width") ? (int) num(opt.get("width")) : 400;
 		final boolean seeThrough = Boolean.TRUE.equals(opt.get("see-through"));
+		final float viewRange = opt.containsKey("view-range") ? (float) num(opt.get("view-range")) : 4f;
 		TextDisplay d = at.getWorld().spawn(at, TextDisplay.class, t -> {
 			t.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
 			t.setPersistent(false);
@@ -420,8 +429,8 @@ final class HubBuild implements Listener {
 			t.setBackgroundColor(background);
 			t.setLineWidth(width);
 			t.setAlignment(TextDisplay.TextAlignment.CENTER);
-			if (background.getAlpha() > 0) t.setBrightness(new Display.Brightness(15, 15)); // panels stay readable at night
-			t.setViewRange(4f);
+			if (background.getAlpha() > 0 || Boolean.TRUE.equals(opt.get("glow"))) t.setBrightness(new Display.Brightness(15, 15)); // panels stay readable at night
+			t.setViewRange(viewRange);
 			t.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(scale, scale, scale), new AxisAngle4f()));
 		});
 		live.put(d, text);
@@ -498,18 +507,7 @@ final class HubBuild implements Listener {
 		}
 		if (best == null) return;
 		portalCooldown.put(p.getUniqueId(), now);
-		var realmSec = plugin.section("realms");
-		var realm = realmSec == null ? null : realmSec.getConfigurationSection(best);
-		if (realm != null && realm.getBoolean("coming-soon", false)) {
-			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + best.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
-			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
-			Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(spawnPoint() != null ? spawnPoint() : plugin.spawn()); }, 20L);
-			return;
-		}
-		String server = realm != null ? realm.getString("server", best) : best;
-		p.playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.25f, 1.6f);
-		p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF>Sending you to <bold>" + best.toUpperCase() + "</bold>...</gradient>"));
-		plugin.send(p, server);
+		if (!sendToRealm(p, best)) return;
 		// bounce them back out so they don't stand in the portal if the server is offline
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (p.isOnline() && p.getWorld().equals(o.getWorld())) {
@@ -517,5 +515,127 @@ final class HubBuild implements Listener {
 				if (s.distanceSquared(p.getLocation()) > 25) p.teleport(s);
 			}
 		}, 40L);
+	}
+
+	/** Send a player to a realm by its key (skyblock, factions ...). False if it's coming soon (they're told why). */
+	boolean sendToRealm(Player p, String key) {
+		var realmSec = plugin.section("realms");
+		var realm = realmSec == null ? null : realmSec.getConfigurationSection(key);
+		if (realm != null && realm.getBoolean("coming-soon", false)) {
+			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + key.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
+			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
+			Location o = origin();
+			if (o != null && p.getWorld().equals(o.getWorld()) && near(p.getLocation(), 60) && p.getLocation().getBlock().getType() == org.bukkit.Material.NETHER_PORTAL)
+				Bukkit.getScheduler().runTaskLater(plugin, () -> { if (p.isOnline()) p.teleport(spawnPoint() != null ? spawnPoint() : plugin.spawn()); }, 20L);
+			return false;
+		}
+		String server = realm != null ? realm.getString("server", key) : key;
+		p.playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.25f, 1.6f);
+		p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF>Sending you to <bold>" + key.toUpperCase() + "</bold>...</gradient>"));
+		plugin.send(p, server);
+		return true;
+	}
+
+	// ---------------------------------------------------------------- Christmas: NPCs (hub.christmas.npcs)
+
+	private final NamespacedKey npcKey = new NamespacedKey("lagcore", "npc");
+	private final java.util.List<Entity> npcs = new java.util.ArrayList<>();
+	private final Map<UUID, Long> npcCooldown = new HashMap<>();
+
+	boolean christmas() {
+		return hub && "christmas".equals(theme());
+	}
+
+	/** Santa (a mannequin wearing the pack's santa skin) by spawn, a snow golem at every gate. Click = play. */
+	private void spawnNpcs(Location o) {
+		npcs.clear();
+		if (!christmas()) return;
+		for (Map<?, ?> m : plugin.getConfig().getMapList(base + ".christmas.npcs")) {
+			List<?> off = (List<?>) m.get("offset");
+			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
+			at.setYaw(m.containsKey("yaw") ? (float) num(m.get("yaw")) : 0f);
+			String type = String.valueOf(m.get("type"));
+			String action = m.containsKey("realm") ? String.valueOf(m.get("realm")) : "menu";
+			at.getChunk().load();
+			try {
+				Entity e;
+				if ("santa".equalsIgnoreCase(type)) {
+					String skin = m.containsKey("skin") ? String.valueOf(m.get("skin")) : "relapsed:entity/santa";
+					e = at.getWorld().spawn(at, org.bukkit.entity.Mannequin.class, n -> {
+						n.setProfile(io.papermc.paper.datacomponent.item.ResolvableProfile.resolvableProfile()
+								.skinPatch(sp -> sp.body(net.kyori.adventure.key.Key.key(skin)).model(org.bukkit.profile.PlayerTextures.SkinModel.CLASSIC))
+								.build());
+						n.setImmovable(true);
+						n.setDescription(LagCore.mm("<#F4C542>Click to play"));
+						n.customName(LagCore.mm("<#FF4D4D><bold>Santa</bold>"));
+						n.setCustomNameVisible(true);
+						npcBase(n, action);
+					});
+				} else {
+					e = at.getWorld().spawn(at, org.bukkit.entity.Snowman.class, n -> {
+						n.setDerp(false);
+						npcBase(n, action);
+					});
+				}
+				npcs.add(e);
+			} catch (Throwable t) {
+				plugin.getLogger().warning("Couldn't spawn the " + type + " NPC: " + t);
+			}
+		}
+	}
+
+	private void npcBase(org.bukkit.entity.LivingEntity n, String action) {
+		n.getPersistentDataContainer().set(holoKey, PersistentDataType.BYTE, (byte) 1);
+		n.getPersistentDataContainer().set(npcKey, PersistentDataType.STRING, action);
+		n.setPersistent(false);
+		n.setAI(false);
+		n.setGravity(false);
+		n.setInvulnerable(true);
+		n.setSilent(true);
+		n.setCollidable(false);
+		n.setRemoveWhenFarAway(false);
+	}
+
+	private void npcClick(Player p, Entity e) {
+		String action = e.getPersistentDataContainer().get(npcKey, PersistentDataType.STRING);
+		if (action == null) return;
+		long now = System.currentTimeMillis();
+		Long last = npcCooldown.get(p.getUniqueId());
+		if (last != null && now - last < 1500) return;
+		npcCooldown.put(p.getUniqueId(), now);
+		if ("menu".equals(action)) {
+			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.8f, 1.4f);
+			Selector.open(plugin, p);
+		} else {
+			sendToRealm(p, action);
+		}
+	}
+
+	@EventHandler
+	public void onNpcInteract(org.bukkit.event.player.PlayerInteractEntityEvent e) {
+		if (!e.getRightClicked().getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) return;
+		e.setCancelled(true);
+		if (e.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) npcClick(e.getPlayer(), e.getRightClicked());
+	}
+
+	@EventHandler
+	public void onNpcHit(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+		if (!e.getEntity().getPersistentDataContainer().has(npcKey, PersistentDataType.STRING)) return;
+		e.setCancelled(true);
+		if (e.getDamager() instanceof Player p) npcClick(p, e.getEntity());
+	}
+
+	/** Santa says hello when you arrive in the Christmas hub. */
+	@EventHandler
+	public void onJoinGreet(org.bukkit.event.player.PlayerJoinEvent e) {
+		if (!christmas() || !plugin.optBool(base + ".christmas.greet", true)) return;
+		Player p = e.getPlayer();
+		Bukkit.getScheduler().runTaskLater(plugin, () -> {
+			if (!p.isOnline()) return;
+			String msg = String.valueOf(plugin.opt(base + ".christmas.greeting",
+					"<#FF4D4D><bold>Santa</bold> <dark_gray>» <white>Ho ho ho, <#F4C542>{player}<white>! Merry Christmas from <gradient:#38E0FF:#B040FF><bold>RelapsedMC</bold></gradient><white>. Follow a runner to a gate, or click me to pick a realm."));
+			p.sendMessage(LagCore.mm(msg.replace("{player}", p.getName())));
+			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.7f, 1.2f);
+		}, 50L);
 	}
 }

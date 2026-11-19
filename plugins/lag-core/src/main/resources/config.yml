@@ -273,6 +273,56 @@ hub:
   theme: christmas
   # Christmas only: snow falling round players in the hub.
   snow: true
+  # Christmas only: what the theme adds on top of the normal hub (all off again with theme: default).
+  christmas:
+    greet: true
+    # holograms from the list above whose text contains one of these are left out (they move, see below)
+    hide: ["{logo}", "walk through a gate"]
+    holograms:
+      # the logo crowns the Great Tree, above its star
+      - offset: [0.5, 107, -102.5]
+        scale: 13
+        bob: false
+        glow: true
+        view-range: 10
+        text: "{logo}"
+      # the gap between the middle gates (where the logo slab stood)
+      - offset: [0.5, 6.3, -38.5]
+        scale: 1.8
+        bob: false
+        text: "<gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#C9B8E8>from <gradient:#38E0FF:#B040FF><bold>RelapsedMC</bold></gradient>"
+      - offset: [0.5, 5.5, -38.5]
+        scale: 1.2
+        bob: false
+        text: "<white>{online} <#C9B8E8>online  <#6A5A80>|  <#C9B8E8>follow a runner to a gate"
+      # Santa's speech bubble
+      - offset: [4.5, 3.0, -2.5]
+        scale: 1.1
+        text: "<#FFFFFF>Ho ho ho!"
+      # the snowmen at the gates
+      - offset: [-25.5, 4.45, -33.5]
+        scale: 1.25
+        bob: false
+        text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>\n<white>{skyblock} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+      - offset: [-7.5, 4.45, -33.5]
+        scale: 1.25
+        bob: false
+        text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>\n<white>{factions} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+      - offset: [8.5, 4.45, -33.5]
+        scale: 1.25
+        bob: false
+        text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>\n<white>{cannons} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+      - offset: [26.5, 4.45, -33.5]
+        scale: 1.25
+        bob: false
+        text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>\n<white>{smp} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+    # click any of them: Santa opens the realm menu, a snowman sends you to its realm
+    npcs:
+      - {type: santa, offset: [4.5, 0, -2.5], yaw: 53}
+      - {type: snowman, realm: skyblock, offset: [-25.5, 2, -33.5], yaw: 0}
+      - {type: snowman, realm: factions, offset: [-7.5, 2, -33.5], yaw: 0}
+      - {type: snowman, realm: cannons, offset: [8.5, 2, -33.5], yaw: 0}
+      - {type: snowman, realm: smp, offset: [26.5, 2, -33.5], yaw: 0}
   night: true
   time: 18000
   # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre (spawn faces north = -z).

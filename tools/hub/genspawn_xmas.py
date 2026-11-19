@@ -529,6 +529,90 @@ for sx in (-1, 1):
     present(cx + (-6 if sx > 0 else 4), 9, -40, 2, 450 + sx)
     present(cx + (-3 if sx > 0 else 2), 9, -41, 1, 460 + sx)
 
+# ======================================================================= the gap between the middle gates
+# the dark logo slab goes: the logo floats over the Great Tree's star now (laGCore hub.christmas.logo), and the
+# gap frames the tree. A small pile of presents sits where the slab stood.
+y0g = TERRACE_Y + 1
+for k in [k for k in B if -5 <= k[0] <= 5 and -41 <= k[2] <= -38 and y0g <= k[1] <= y0g + 14]:
+    del B[k]
+for (dx, dz, sz_) in ((-3, -40, 2), (1, -40, 3), (-1, -38, 1), (3, -38, 1), (-4, -38, 1)):
+    present(dx, y0g, dz, sz_, 777 + dx * 3 + dz)
+
+# ======================================================================= realm runners: rink -> each gate
+import xmas_paths
+SEGS = xmas_paths.segments()
+for realm, a, b in SEGS:
+    c = xmas_paths.COLOR[realm]
+    lx0, lx1 = int(min(a[0], b[0])) - 4, int(max(a[0], b[0])) + 5
+    lz0, lz1 = int(min(a[1], b[1])) - 4, int(max(a[1], b[1])) + 5
+    L = math.hypot(b[0] - a[0], b[1] - a[1])
+    for x in range(lx0, lx1):
+        for z in range(lz0, lz1):
+            d, t = xmas_paths.seg_d(x + 0.5, z + 0.5, a, b)
+            if d > 2.7 or math.hypot(x + 0.5 - CX, z + 0.5 - CZ) < 6.4:
+                continue
+            dn, rn, _ = xmas_paths.nearest(x + 0.5, z + 0.5)
+            if rn != realm:
+                continue
+            # clear the corridor (lamps, hedges, drifts) above the floor
+            for y in range(FLOOR + 1, FLOOR + 16):
+                if (x, y, z) in B and not name(B[(x, y, z)]).startswith(("polished_deepslate_stairs", "polished_blackstone_brick_stairs")):
+                    del B[(x, y, z)]
+            on_rink_wall = 6.4 < math.hypot(x - CX, z - CZ) <= 7.6
+            put(x, FLOOR, z, "polished_blackstone_bricks" if on_rink_wall else "polished_deepslate" if d <= 1.3 else "polished_blackstone_bricks")
+            if d <= 1.3:
+                put(x, FLOOR + 1, z, f"{c}_carpet")
+                NO_SNOW.add((x, FLOOR + 1, z))
+            elif d <= 2.7:
+                along = t * L
+                if int(along) % 4 == 2 and 2.0 < d and along > 3:
+                    put(x, FLOOR + 1, z, "lantern[hanging=false,waterlogged=false]")
+                else:
+                    put(x, FLOOR + 1, z, "snow[layers=%d]" % (2 + (h(x, z, 91) < 0.4)))
+                NO_SNOW.add((x, FLOOR + 1, z))
+    # candy-cane posts where the runner meets the gate's steps, either side, hooks curling over the runner
+    vx, vz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
+    px_, pz_ = -vz, vx
+    for s_ in (-1, 1):
+        cx_, cz_ = round(b[0] - vx * 1.0 + px_ * 3.0 * s_), round(b[1] - vz * 1.0 + pz_ * 3.0 * s_)
+        if xmas_paths.nearest(cx_ + 0.5, cz_ + 0.5)[0] < 2.6:
+            continue                                         # would stand on the neighbouring runner
+        for y in range(FLOOR + 1, FLOOR + 8):
+            if (cx_, y, cz_) in B:
+                del B[(cx_, y, cz_)]
+        for i, y in enumerate(range(FLOOR + 1, FLOOR + 5)):
+            put(cx_, y, cz_, "red_concrete" if i % 2 else "white_concrete")
+        hx, hz = round(cx_ - px_ * s_), round(cz_ - pz_ * s_)
+        put(hx, FLOOR + 5, hz, "red_concrete")
+        put(hx, FLOOR + 4, hz, "white_concrete")
+        put(hx, FLOOR + 3, hz, "lantern[hanging=true,waterlogged=false]")
+        NO_SNOW.update({(cx_, FLOOR + 4, cz_), (hx, FLOOR + 5, hz)})
+
+# ======================================================================= string lights between the gates
+BULB = ["shroomlight", "ochre_froglight", "verdant_froglight", "pearlescent_froglight", "sea_lantern"]
+ys = TERRACE_Y + 1 + 14
+xs_ = sorted([px - 6 for _, px in PORTALS] + [px + 6 for _, px in PORTALS])
+spans = [(xs_[i], xs_[i + 1]) for i in range(1, len(xs_) - 1, 2)]
+for (xa, xb) in spans:
+    span = xb - xa
+    sag = 1.6 + span * 0.18
+    for x in range(xa + 1, xb):
+        u = (x - xa) / span
+        y = round(ys - sag * (1 - (2 * u - 1) ** 2))
+        b = BULB[(x - xa) % len(BULB)] if (x - xa) % 2 == 0 else "iron_chain[axis=x,waterlogged=false]"
+        put(x, y, PORTAL_Z + 1, b)
+        NO_SNOW.add((x, y, PORTAL_Z + 1))
+
+# ======================================================================= Santa's spot beside the spawn dais
+SX, SZ = 4, -3
+for dx in range(-2, 3):
+    for dz in range(-2, 3):
+        if dx * dx + dz * dz <= 5 and get(SX + dx, FLOOR + 1, SZ + dz) is None:
+            put(SX + dx, FLOOR + 1, SZ + dz, "red_carpet" if dx * dx + dz * dz <= 2 else "white_carpet")
+            NO_SNOW.add((SX + dx, FLOOR + 1, SZ + dz))
+present(SX + 2, FLOOR + 1, SZ - 2, 1, 991)
+present(SX + 2, FLOOR + 1, SZ + 1, 1, 992)
+
 # ======================================================================= snow over everything
 WALKWAY_Y = {FLOOR, TERRACE_Y}
 NOT_UNDER = ("glass", "slab", "stairs", "_wall", "fence", "lantern", "end_rod", "chain", "carpet", "pane", "bars", "tulip",

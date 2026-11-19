@@ -6,6 +6,7 @@ parkour arch); the ground only rises away from them, so players walk through a v
 streets instead of across a flat disc.
 """
 import heapq, math
+import xmas_paths
 
 ROCK = [("stone", 0.34), ("andesite", 0.18), ("tuff", 0.12), ("cobblestone", 0.12), ("calcite", 0.12), ("packed_ice", 0.05), ("diorite", 0.07)]
 
@@ -68,6 +69,8 @@ def build(V, NO_SNOW, SPRUCE, present):
         if math.hypot(x, (z - LZ) * 1.2) <= 6.8:
             return True
         if x >= 36 and abs(z - CZ) <= 5:
+            return True
+        if xmas_paths.nearest(x, z)[0] <= 3.6:      # the realm runners cut through the snowbanks
             return True
         return False
 
