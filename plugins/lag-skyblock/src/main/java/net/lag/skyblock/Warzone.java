@@ -317,6 +317,7 @@ final class Warzone implements Listener, CommandExecutor {
 		Player p = e.getPlayer();
 		removeEnvoy(e.getClickedBlock());
 		reward(p, "warzone.envoy." + rarity);
+		if (plugin.crates != null && !rarity.equals("common")) plugin.crates.give(p.getUniqueId(), rarity.equals("legendary") ? "relic" : "shard", 1);
 		p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.7f, 1.4f);
 		if (!rarity.equals("common")) {
 			Bukkit.broadcast(Spawners.mm("<dark_gray>» <white>" + p.getName() + " <gray>looted a " + (rarity.equals("legendary")
@@ -426,6 +427,7 @@ final class Warzone implements Listener, CommandExecutor {
 		if (winner == null) return;
 		double s = plugin.getConfig().getDouble("warzone.koth.shards", 750000);
 		if (s > 0 && plugin.eco() != null) plugin.eco().depositPlayer(winner, s);
+		if (plugin.crates != null) plugin.crates.give(winner.getUniqueId(), "relic", 1);
 		for (String c : plugin.getConfig().getStringList("warzone.koth.commands")) Bukkit.dispatchCommand(Bukkit.getConsoleSender(), c.replace("{player}", winner.getName()));
 		Bukkit.broadcast(Spawners.mm("<dark_gray>» <white>" + winner.getName() + " <gray>captured the <gradient:#FF4D6D:#B040FF><bold>KOTH</bold></gradient>"
 				+ (s > 0 ? " <gray>and took <gold>" + LagSkyblock.shards(s) : "")));
