@@ -236,7 +236,7 @@ final class ChristmasFx {
 
 	// ------------------------------------------------------------------ the animation (called every 2 ticks)
 
-	void tick(int t) {
+	void tick(long t) {
 		if (o == null) return;
 		ThreadLocalRandom r = ThreadLocalRandom.current();
 		if (t % 4 == 0 && sleigh != null) {
