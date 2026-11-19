@@ -41,7 +41,7 @@ final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
-	static final int CHRISTMAS_REV = 4; // 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
+	static final int CHRISTMAS_REV = 5; // 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();

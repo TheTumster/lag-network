@@ -39,7 +39,7 @@ def nearest(x, z):
 
 
 # The two outer gates turn in toward the plaza by this much (degrees). + turns a gate's face toward +x.
-TILT = {"skyblock": 18.0, "smp": -18.0}
+TILT = {"skyblock": 32.0, "smp": -32.0}
 PORTAL_Z = -38
 
 

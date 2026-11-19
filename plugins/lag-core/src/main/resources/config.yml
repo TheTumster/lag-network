@@ -298,16 +298,16 @@ hub:
         bob: false
         text: "<white>{online} <#C9B8E8>online  <#6A5A80>|  <#C9B8E8>follow a runner to a gate"
       # the two outer gates are turned in 18 degrees: their name + count follow the gate
-      - {offset: [-28.97, 12.75, -35.88], scale: 2.6, billboard: fixed, yaw: -18, bob: false, text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"}
-      - {offset: [-28.97, 12.0, -35.88], scale: 1.3, billboard: fixed, yaw: -18, bob: false, text: "<white>{skyblock} <#B9A8D8>playing"}
-      - {offset: [29.97, 12.75, -35.88], scale: 2.6, billboard: fixed, yaw: 18, bob: false, text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"}
-      - {offset: [29.97, 12.0, -35.88], scale: 1.3, billboard: fixed, yaw: 18, bob: false, text: "<white>{smp} <#B9A8D8>playing"}
+      - {offset: [-28.6, 12.75, -36.06], scale: 2.6, billboard: fixed, yaw: -32, bob: false, text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"}
+      - {offset: [-28.6, 12.0, -36.06], scale: 1.3, billboard: fixed, yaw: -32, bob: false, text: "<white>{skyblock} <#B9A8D8>playing"}
+      - {offset: [29.6, 12.75, -36.06], scale: 2.6, billboard: fixed, yaw: 32, bob: false, text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"}
+      - {offset: [29.6, 12.0, -36.06], scale: 1.3, billboard: fixed, yaw: 32, bob: false, text: "<white>{smp} <#B9A8D8>playing"}
       # Santa's speech bubble
       - offset: [4.5, 3.0, -2.5]
         scale: 1.1
         text: "<#FFFFFF>Ho ho ho!"
       # the snowmen at the gates
-      - offset: [-23.84, 4.45, -33.03]
+      - offset: [-22.93, 4.45, -34.53]
         scale: 1.25
         bob: false
         text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>\n<white>{skyblock} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
@@ -319,17 +319,17 @@ hub:
         scale: 1.25
         bob: false
         text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>\n<white>{cannons} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
-      - offset: [24.84, 4.45, -33.03]
+      - offset: [23.93, 4.45, -34.53]
         scale: 1.25
         bob: false
         text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>\n<white>{smp} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
     # click any of them: Santa opens the realm menu, a snowman sends you to its realm
     npcs:
       - {type: santa, offset: [4.5, 0, -2.5], yaw: 53}
-      - {type: snowman, realm: skyblock, offset: [-23.84, 2, -33.03], yaw: -18}
+      - {type: snowman, realm: skyblock, offset: [-22.93, 2, -34.53], yaw: -32}
       - {type: snowman, realm: factions, offset: [-7.5, 2, -31.5], yaw: 0}
       - {type: snowman, realm: cannons, offset: [8.5, 2, -31.5], yaw: 0}
-      - {type: snowman, realm: smp, offset: [24.84, 2, -33.03], yaw: 18}
+      - {type: snowman, realm: smp, offset: [23.93, 2, -34.53], yaw: 32}
   night: true
   time: 18000
   # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre (spawn faces north = -z).

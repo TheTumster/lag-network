@@ -590,7 +590,7 @@ for (dx, dz, sz_) in ((-3, -40, 2), (1, -40, 3), (-1, -38, 1), (3, -38, 1), (-4,
 
 # ======================================================================= depth in the plaza
 # 1) the rink sinks: a skating bowl two blocks down, half-step rings to walk in, a raised causeway across it
-#    on the spawn axis, and a frozen fountain on an island in the middle (kept low: it never covers the gates)
+#    on the spawn axis, and a flat island in the middle
 RIM = 8.4
 for k in [k for k in B if math.hypot(k[0] - CX, k[2] - CZ) <= RIM and FLOOR - 5 <= k[1] <= FLOOR + 4]:
     del B[k]
@@ -630,18 +630,10 @@ for z in range(CZ - 8, CZ + 9):
         if 2.6 < d <= 7.5:
             put(x, FLOOR - 1, z, "polished_blackstone_bricks")
             put(x, FLOOR, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
-# frozen fountain on the centre island: tiers of ice, glowing core, a star of blue ice (top stays at y 2)
-for x in range(CX - 2, CX + 3):
-    for z in range(CZ - 2, CZ + 3):
-        d = math.hypot(x - CX, z - CZ)
-        if 1.5 < d <= 2.3 and abs(x - CX) != 0 and abs(z - CZ) != 0 or (1.5 < d <= 2.3 and abs(x - CX) == 2 and z == CZ) or (1.5 < d <= 2.3 and abs(z - CZ) == 2 and x == CX):
-            put(x, FLOOR + 1, z, "packed_ice")
-put(CX, FLOOR + 1, CZ, "sea_lantern")
-put(CX, FLOOR + 2, CZ, "blue_ice")
+# the centre island stays flat: just a glowing inlay, nothing standing up
+put(CX, FLOOR, CZ, "pearlescent_froglight")
 for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-    put(CX + dx, FLOOR + 1, CZ + dz, "ice")
-    put(CX + dx, FLOOR + 2, CZ + dz, "light[level=15,waterlogged=false]")
-put(CX, FLOOR + 3, CZ, "end_rod[facing=up]")
+    put(CX + dx, FLOOR, CZ + dz, "amethyst_block")
 for i in range(8):
     a = i / 8 * 2 * math.pi
     put(round(CX + math.cos(a) * 6.6), FLOOR + 1, round(CZ + math.sin(a) * 6.6), "light[level=14,waterlogged=false]", force=False)
