@@ -40,6 +40,8 @@ import org.joml.Vector3f;
 final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
+	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
+	static final int CHRISTMAS_REV = 3; // 3: valley + village, runners, string lights, NPC spots, no logo slab
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -69,7 +71,7 @@ final class HubBuild implements Listener {
 	void start() {
 		World w = Bukkit.getWorlds().get(0);
 		// hub theme: "christmas" swaps in the dressed-up build; changing it rebuilds once on the next start
-		boolean themeChanged = hub && !theme().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
+		boolean themeChanged = hub && !themeStamp().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
 		if ((plugin.getConfig().getInt(base + ".build-version", 0) < version() || themeChanged) && plugin.optBool(base + ".auto-build", true)) {
 			String ys = String.valueOf(plugin.opt(base + ".y", 100));
 			Location old = origin();
@@ -87,6 +89,10 @@ final class HubBuild implements Listener {
 		if (!hub) return "default";
 		String t = String.valueOf(plugin.opt(base + ".theme", "christmas")).toLowerCase(java.util.Locale.ROOT);
 		return t.equals("christmas") ? t : "default";
+	}
+
+	private String themeStamp() {
+		return "christmas".equals(theme()) ? "christmas:" + CHRISTMAS_REV : "default";
 	}
 
 	/** The build file in the jar for this spawn (the hub's depends on its theme). */
@@ -220,7 +226,7 @@ final class HubBuild implements Listener {
 		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + standY) + "," + (oz + 0.5) + ",180.0,0.0");
 		c.set(base + ".void-y", oy - 60);
 		c.set(base + ".build-version", version());
-		if (hub) c.set(base + ".build-theme", theme());
+		if (hub) c.set(base + ".build-theme", themeStamp());
 		plugin.saveConfig();
 		w.setSpawnLocation(ox, oy + (int) standY, oz);
 		plugin.getLogger().info("Built the " + base + " spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
