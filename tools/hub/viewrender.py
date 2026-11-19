@@ -64,7 +64,7 @@ def load(path):
     return out
 
 
-def render(blocks, out, eye=(0.5, 2.62, 0.5), yaw=180.0, pitch=0.0, night=True, W=640, H=360, fov=75, far=200):
+def render(blocks, out, eye=(0.5, 2.62, 0.5), yaw=180.0, pitch=0.0, night=True, W=800, H=450, fov=75, far=200):
     names = sorted({b.replace("minecraft:", "") for b in blocks.values()})
     nid = {n: i + 1 for i, n in enumerate(names)}
     xs = [k[0] for k in blocks]; ys = [k[1] for k in blocks]; zs = [k[2] for k in blocks]
@@ -76,6 +76,27 @@ def render(blocks, out, eye=(0.5, 2.62, 0.5), yaw=180.0, pitch=0.0, night=True, 
     nemit = np.zeros(len(names) + 1, np.float32)
     solid = np.zeros(len(names) + 1, bool)       # hit by rays
     opaque = np.zeros(len(names) + 1, np.int8)   # light cost: 15 = blocks, 1 = leaves, 0 = clear
+    # shape: 0 full, 1 post (walls/fences/rods/chains/bars/panes), 2 lantern, 3 carpet, 4 snow layer (height in sh),
+    #        5 bottom slab, 6 plant (thin cross), 7 top slab
+    shp = np.zeros(len(names) + 1, np.int8)
+    sh = np.ones(len(names) + 1, np.float32)
+    for n, i in nid.items():
+        b = n.split("[")[0]
+        if b.endswith(("_wall", "_fence", "end_rod", "chain", "_bars", "_pane")) or b == "iron_chain":
+            shp[i] = 1
+        elif b.endswith("lantern"):
+            shp[i] = 2
+        elif b.endswith("carpet") or b.endswith("pressure_plate") or b.endswith("petals"):
+            shp[i] = 3
+        elif b == "snow":
+            shp[i] = 4
+            sh[i] = int(n.split("layers=")[1][0]) / 8 if "layers=" in n else 0.125
+        elif b.endswith("_slab") and "type=bottom" in n:
+            shp[i] = 5
+        elif b.endswith("_slab") and "type=top" in n:
+            shp[i] = 7
+        elif b.endswith(("tulip", "sapling", "allium", "bluet", "cornflower", "grass", "fern", "cluster", "_bud", "campfire", "candle")):
+            shp[i] = 6
     for n, i in nid.items():
         ncol[i] = color(n)
         nemit[i] = emit(n)
@@ -109,7 +130,7 @@ def render(blocks, out, eye=(0.5, 2.62, 0.5), yaw=180.0, pitch=0.0, night=True, 
     dist = np.full(N, far, np.float32)
     lit = np.zeros(N, np.float32)
     alive = np.arange(N)
-    step = 0.3
+    step = 0.15
     prev = np.floor(pos).astype(np.int64)
     for k in range(int(far / step)):
         if alive.size == 0:
@@ -121,6 +142,13 @@ def render(blocks, out, eye=(0.5, 2.62, 0.5), yaw=180.0, pitch=0.0, night=True, 
         idv = np.zeros(alive.size, np.int32)
         idv[inb] = G[gx[inb], gy[inb], gz[inb]]
         h = solid[idv] & (idv > 0)
+        fr = p - c
+        sp = shp[idv]
+        cxz = np.maximum(np.abs(fr[:, 0] - 0.5), np.abs(fr[:, 2] - 0.5))
+        thin_ok = np.where(sp == 1, cxz < 0.2, np.where(sp == 2, (cxz < 0.22) & (fr[:, 1] < 0.55), np.where(sp == 3, fr[:, 1] < 0.08,
+                  np.where(sp == 4, fr[:, 1] < sh[idv], np.where(sp == 5, fr[:, 1] < 0.5, np.where(sp == 6, cxz < 0.18,
+                  np.where(sp == 7, fr[:, 1] > 0.5, True)))))))
+        h = h & thin_ok
         if h.any():
             a = alive[h]
             hit[a] = idv[h]

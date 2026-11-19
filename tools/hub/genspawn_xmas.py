@@ -123,6 +123,8 @@ for (x, y, z), b in list(B.items()):
         continue
     if not (name(get(x, y - 1, z)).startswith("polished_blackstone_wall") and name(get(x, y - 2, z)).startswith("polished_blackstone_wall")):
         continue
+    if (abs(z - CZ) == 3 and abs(x) >= 15) or (abs(x) == 3 and z >= 14):
+        continue                                    # the village lanes keep plain lanterns: canes only round the plaza
     # hook points toward the nearest walkway (along the bigger offset from the plaza centre)
     vx, vz = CX - x, CZ - z
     if abs(x) <= 4 and z > 10:                      # south walk: hook over the walk
@@ -223,8 +225,13 @@ def little_tree(x0, z0, y0, size, seed):
             present(px, y0, pz, 1, seed * 7 + i)
 
 
+# the valley: hills, cliffs, pine forest and the village (tools/hub/xmas_valley.py)
+import xmas_valley
+N_TREES, N_HOUSES = xmas_valley.build(V, NO_SNOW, SPRUCE, present)
+print(f"valley: {N_TREES} pines, {N_HOUSES} cottages")
+
 for i, (x, y, z) in enumerate(cherry_bases):
-    if math.hypot(x - 62, z + 48) < 12 or math.hypot(x + 62, z + 48) < 12:
+    if abs(z - 58) > 14:          # only the little south islet keeps a decorated tree; the lawns are forest now
         continue
     little_tree(x, z, y, 2 if abs(x) > 30 or (abs(x) == 7 and z == 18) or abs(x) == 20 else 1, 300 + i * 13)
 
