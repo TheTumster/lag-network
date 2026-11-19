@@ -268,6 +268,11 @@ hub:
   join-title: true
   # Spawn island (tools/hub/genspawn_v4.py). Built once at y=100 on first start; /lagcore rebuildhub places it again.
   auto-build: true
+  # Seasonal hub: "christmas" (tools/hub/genspawn_xmas.py: the Great Tree, snowmen, snow, candy canes) or "default".
+  # Change it and restart (or /lc reload then /lagcore rebuildhub): the hub is cleared and rebuilt in that theme.
+  theme: christmas
+  # Christmas only: snow falling round players in the hub.
+  snow: true
   night: true
   time: 18000
   # Walk into a portal = join that realm. [x, y, z] from the spawn floor centre (spawn faces north = -z).

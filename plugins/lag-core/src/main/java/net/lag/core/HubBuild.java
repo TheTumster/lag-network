@@ -38,7 +38,7 @@ import org.joml.Vector3f;
  * spawn floor centre (base + ".origin").
  */
 final class HubBuild implements Listener {
-	static final int BUILD_VERSION = 14; // v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
+	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
@@ -68,7 +68,9 @@ final class HubBuild implements Listener {
 	/** Called on enable (one tick later, worlds loaded). */
 	void start() {
 		World w = Bukkit.getWorlds().get(0);
-		if (plugin.getConfig().getInt(base + ".build-version", 0) < version() && plugin.optBool(base + ".auto-build", true)) {
+		// hub theme: "christmas" swaps in the dressed-up build; changing it rebuilds once on the next start
+		boolean themeChanged = hub && !theme().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
+		if ((plugin.getConfig().getInt(base + ".build-version", 0) < version() || themeChanged) && plugin.optBool(base + ".auto-build", true)) {
 			String ys = String.valueOf(plugin.opt(base + ".y", 100));
 			Location old = origin();
 			// a rebuild keeps the old floor height (on terrain, the highest block at 0,0 is the old build itself)
@@ -78,6 +80,18 @@ final class HubBuild implements Listener {
 		atmosphere(w);
 		holograms();
 		Bukkit.getScheduler().runTaskTimer(plugin, this::animate, 2L, 2L);
+	}
+
+	/** The hub's seasonal theme ("default" or "christmas"), from config hub.theme. */
+	String theme() {
+		if (!hub) return "default";
+		String t = String.valueOf(plugin.opt(base + ".theme", "christmas")).toLowerCase(java.util.Locale.ROOT);
+		return t.equals("christmas") ? t : "default";
+	}
+
+	/** The build file in the jar for this spawn (the hub's depends on its theme). */
+	private String resource() {
+		return hub && "christmas".equals(theme()) ? "hub-spawn-christmas.txt.gz" : file;
 	}
 
 	private int version() {
@@ -162,6 +176,7 @@ final class HubBuild implements Listener {
 			}
 			plugin.getLogger().info("Cleared the old hub spawn (" + cleared + " blocks)");
 		}
+		String file = resource();
 		try (InputStream in = plugin.getResource(file)) {
 			if (in == null) {
 				plugin.getLogger().warning(file + " missing from the plugin jar");
@@ -205,6 +220,7 @@ final class HubBuild implements Listener {
 		c.set(base + ".spawn", w.getName() + "," + (ox + 0.5) + "," + (oy + standY) + "," + (oz + 0.5) + ",180.0,0.0");
 		c.set(base + ".void-y", oy - 60);
 		c.set(base + ".build-version", version());
+		if (hub) c.set(base + ".build-theme", theme());
 		plugin.saveConfig();
 		w.setSpawnLocation(ox, oy + (int) standY, oz);
 		plugin.getLogger().info("Built the " + base + " spawn: " + n + " blocks in " + (System.currentTimeMillis() - t0) + " ms");
@@ -312,6 +328,7 @@ final class HubBuild implements Listener {
 		tick += 2;
 		refresh();
 		if ("spawns.factions".equals(base) && tick % 4 == 0) faultFx();
+		if (hub && tick % 4 == 0 && "christmas".equals(theme()) && plugin.optBool(base + ".snow", true)) snowFx();
 		if (tick % 40 != 0) return;
 		boolean up = (tick / 40) % 2 == 0;
 		for (var en : liveScale.entrySet()) {
@@ -332,6 +349,22 @@ final class HubBuild implements Listener {
 			d.setInterpolationDuration(40);
 			d.setTransformation(new Transformation(new Vector3f(0, up ? 0.15f : -0.15f, 0), new AxisAngle4f(angle, 0, 1, 0),
 					new Vector3f(sc, sc, sc), new AxisAngle4f()));
+		}
+	}
+
+	/** Christmas hub: snow drifting down round every player near the spawn (sent to that player only). */
+	private void snowFx() {
+		Location o = origin();
+		if (o == null) return;
+		java.util.concurrent.ThreadLocalRandom r = java.util.concurrent.ThreadLocalRandom.current();
+		for (org.bukkit.entity.Player p : o.getWorld().getPlayers()) {
+			if (!near(p.getLocation(), 160)) continue;
+			Location l = p.getLocation();
+			for (int i = 0; i < 26; i++) {
+				Location at = l.clone().add(r.nextDouble(-22, 22), r.nextDouble(4, 20), r.nextDouble(-22, 22));
+				// count 0: the offsets are a direction, extra is the speed. Slow fall with a little wind.
+				p.spawnParticle(org.bukkit.Particle.SNOWFLAKE, at, 0, 0.15 + r.nextDouble(-0.05, 0.05), -1, 0.08, 0.05);
+			}
 		}
 	}
 

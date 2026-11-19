@@ -877,24 +877,28 @@ def sky_sign(out):
 # (sky sign removed in v14: the floating logo hologram is the brand now)
 
 # ======================================================================= write
-blocks = {k: v for k, v in blocks.items() if v != "minecraft:air"}
-json.dump(parkour, open(os.path.join(RES, "parkour.json"), "w"))
-palette, idx, lines = [], {}, []
-for (x, y, z), b in sorted(blocks.items(), key=lambda kv: (kv[0][1], kv[0][0], kv[0][2])):
-    if b not in idx:
-        idx[b] = len(palette)
-        palette.append(b)
-    lines.append(f"{x} {y} {z} {idx[b]}")
-with gzip.open(OUT, "wt") as f:
-    f.write("|".join(palette) + "\n" + "\n".join(lines) + "\n")
-xs = [k[0] for k in blocks]; ys = [k[1] for k in blocks]; zs = [k[2] for k in blocks]
-print(f"{len(lines)} blocks, {len(palette)} types, x {min(xs)}..{max(xs)} y {min(ys)}..{max(ys)} z {min(zs)}..{max(zs)} -> {os.path.getsize(OUT)//1024} KB")
-print("parkour:", parkour["start"], len(parkour["checkpoints"]), "checkpoints ->", parkour["finish"])
-print("discord pavilion:", DISCORD, " portals:", [(r, x, PORTAL_Z) for r, x in PORTALS])
+def write(blocks, out=OUT, preview_view="se"):
+    blocks = {k: v for k, v in blocks.items() if v != "minecraft:air"}
+    json.dump(parkour, open(os.path.join(RES, "parkour.json"), "w"))
+    palette, idx, lines = [], {}, []
+    for (x, y, z), b in sorted(blocks.items(), key=lambda kv: (kv[0][1], kv[0][0], kv[0][2])):
+        if b not in idx:
+            idx[b] = len(palette)
+            palette.append(b)
+        lines.append(f"{x} {y} {z} {idx[b]}")
+    with gzip.open(out, "wt") as f:
+        f.write("|".join(palette) + "\n" + "\n".join(lines) + "\n")
+    xs = [k[0] for k in blocks]; ys = [k[1] for k in blocks]; zs = [k[2] for k in blocks]
+    print(f"{len(lines)} blocks, {len(palette)} types, x {min(xs)}..{max(xs)} y {min(ys)}..{max(ys)} z {min(zs)}..{max(zs)} -> {os.path.getsize(out)//1024} KB")
+    print("parkour:", parkour["start"], len(parkour["checkpoints"]), "checkpoints ->", parkour["finish"])
+    if "--preview" in sys.argv:
+        sys.path.insert(0, os.path.dirname(__file__))
+        import isorender
+        o = sys.argv[sys.argv.index("--preview") + 1]
+        isorender.render(blocks, o, view=preview_view, S=4)
+        print("preview", o)
 
-if "--preview" in sys.argv:
-    sys.path.insert(0, os.path.dirname(__file__))
-    import isorender
-    out = sys.argv[sys.argv.index("--preview") + 1]
-    isorender.render(blocks, out, view="se", S=4)
-    print("preview", out)
+
+if __name__ == "__main__":
+    write(blocks)
+    print("discord pavilion:", DISCORD, " portals:", [(r, x, PORTAL_Z) for r, x in PORTALS])
