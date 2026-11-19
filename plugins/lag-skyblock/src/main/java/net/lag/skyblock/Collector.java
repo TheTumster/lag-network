@@ -34,7 +34,7 @@ final class Collector implements Listener, CommandExecutor {
 	/** tagged spawner loot: material -> [price, tier index] */
 	private final Map<Material, double[]> loot = new LinkedHashMap<>();
 	private final Map<Material, Double> ores = new LinkedHashMap<>(), crops = new LinkedHashMap<>();
-	private static final int TAB_LOOT = 2, TAB_ORES = 4, TAB_CROPS = 6, HAND = 48, ALL = 49, WORTH = 50, CLOSE = 53;
+	private static final int TAB_LOOT = 2, TAB_ORES = 4, TAB_CROPS = 6, HAND = 46, ALL = 48, WORTH = 50, CLOSE = 52;
 
 	private static final class Menu implements InventoryHolder {
 		Inventory inv;
@@ -116,12 +116,12 @@ final class Collector implements Listener, CommandExecutor {
 			p.getInventory().setStorageContents(inv);
 		}
 		if (count == 0) {
-			p.sendMessage(Spawners.mm("<gray>The Collector doesn't want anything you're carrying. <dark_gray>(/collector shows what he buys)"));
+			p.sendMessage(Spawners.mm("<gray>The Collector doesn't want anything you're carrying. <#9A9A9A>(/collector shows what he buys)"));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
 			return 0;
 		}
 		plugin.eco().depositPlayer(p, total);
-		p.sendMessage(Spawners.mm("<dark_gray>» <gray>The Collector took <white>" + String.format("%,d", count) + "</white> items for <gold><bold>" + LagSkyblock.shards(total)));
+		p.sendMessage(Spawners.mm("<#9A9A9A>» <gray>The Collector took <white>" + String.format("%,d", count) + "</white> items for <gold><bold>" + LagSkyblock.shards(total)));
 		p.sendActionBar(Spawners.mm("<gold>+" + LagSkyblock.shards(total)));
 		p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.3f);
 		return total;
@@ -131,7 +131,7 @@ final class Collector implements Listener, CommandExecutor {
 
 	void open(Player p) {
 		Menu m = new Menu();
-		m.inv = Bukkit.createInventory(m, 54, Spawners.mm("<gradient:#38E0FF:#B040FF><bold>THE COLLECTOR</bold></gradient> <dark_gray>· price list"));
+		m.inv = Bukkit.createInventory(m, 54, Gui.title("THE COLLECTOR", "price list", "#0E5C6B"));
 		draw(p, m);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 0.6f, 1.0f);
@@ -170,39 +170,39 @@ final class Collector implements Listener, CommandExecutor {
 
 	private void draw(Player p, Menu m) {
 		Inventory inv = m.inv;
-		for (int i = 0; i < 54; i++) inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) inv.setItem(i, pane(i % 2 == 0 ? Material.CYAN_STAINED_GLASS_PANE : Material.PURPLE_STAINED_GLASS_PANE));
+		Gui.frame(inv, Material.CYAN_STAINED_GLASS_PANE);
 		inv.setItem(TAB_LOOT, named(Material.SPAWNER, (m.tab == TAB_LOOT ? "<#38E0FF>▶ " : "<gray>") + "<bold>SPAWNER LOOT", List.of(
-				"<gray>Drops from your cages.", "<dark_gray>Only loot from cages sells at these prices."), m.tab == TAB_LOOT));
+				"<gray>Drops from your cages.", "<#9A9A9A>Only loot from cages sells at these prices."), m.tab == TAB_LOOT));
 		inv.setItem(TAB_ORES, named(Material.DIAMOND_ORE, (m.tab == TAB_ORES ? "<#38E0FF>▶ " : "<gray>") + "<bold>GEN ORES", List.of(
 				"<gray>What your ore generator makes."), m.tab == TAB_ORES));
 		inv.setItem(TAB_CROPS, named(Material.WHEAT, (m.tab == TAB_CROPS ? "<#38E0FF>▶ " : "<gray>") + "<bold>CROPS", List.of(
 				"<gray>Farm it, sell it."), m.tab == TAB_CROPS));
-		int slot = 9;
+		// what this tab lists, then laid out centred on the panel
+		List<ItemStack> items = new ArrayList<>();
 		if (m.tab == TAB_LOOT) {
 			for (LagSkyblock.Tier t : plugin.tiers) {
 				for (var e : t.loot().entrySet()) {
-					if (slot > 44) break;
-					inv.setItem(slot++, named(e.getKey(), "<color:" + t.color() + ">" + pretty(e.getKey()), List.of(
+					items.add(named(e.getKey(), "<color:" + t.color() + "><bold>" + pretty(e.getKey()), List.of(
 							"<gray>Pays: <gold>" + priceText(t.itemPrice()) + " <gray>each",
-							"<dark_gray>From " + t.name() + " cages (tier " + t.number() + ")"), false));
+							"<#9A9A9A>From " + t.name() + " cages (tier " + t.number() + ")"), false));
 				}
 			}
 		} else {
 			Map<Material, Double> list = m.tab == TAB_ORES ? ores : crops;
 			for (var e : list.entrySet()) {
-				if (slot > 44) break;
-				inv.setItem(slot++, named(e.getKey(), "<white>" + pretty(e.getKey()), List.of("<gray>Pays: <gold>" + priceText(e.getValue()) + " <gray>each"), false));
+				items.add(named(e.getKey(), "<white><bold>" + pretty(e.getKey()), List.of("<gray>Pays: <gold>" + priceText(e.getValue()) + " <gray>each"), false));
 			}
 		}
+		List<Integer> slots = Gui.balanced(1, 4, items.size());
+		for (int i = 0; i < items.size() && i < slots.size(); i++) inv.setItem(slots.get(i), items.get(i));
 		double hand = price(p.getInventory().getItemInMainHand()) * p.getInventory().getItemInMainHand().getAmount();
 		double all = worth(p);
 		inv.setItem(HAND, named(Material.HOPPER, "<#38E0FF><bold>SELL HAND", List.of(
-				hand > 0 ? "<gray>Your hand is worth <gold>" + LagSkyblock.shards(hand) : "<dark_gray>He doesn't want what's in your hand.",
-				"", "<dark_gray>/sell hand"), false));
+				hand > 0 ? "<gray>Your hand is worth <gold>" + LagSkyblock.shards(hand) : "<#9A9A9A>He doesn't want what's in your hand.",
+				"", "<#9A9A9A>/sell hand"), false));
 		inv.setItem(ALL, named(Material.GOLD_BLOCK, "<gold><bold>SELL EVERYTHING", List.of(
-				all > 0 ? "<gray>Everything sellable you carry: <gold><bold>" + LagSkyblock.shards(all) : "<dark_gray>Nothing to sell.",
-				"", all > 0 ? "<#7CFF6B>▶ Click to sell" : "<dark_gray>Grind, mine or farm first.", "<dark_gray>/sell"), all > 0));
+				all > 0 ? "<gray>Everything sellable you carry: <gold><bold>" + LagSkyblock.shards(all) : "<#9A9A9A>Nothing to sell.",
+				"", all > 0 ? "<#7CFF6B>▶ Click to sell" : "<#9A9A9A>Grind, mine or farm first.", "<#9A9A9A>/sell"), all > 0));
 		inv.setItem(WORTH, named(Material.BOOK, "<#B040FF><bold>WHO IS HE?", List.of(
 				"<gray>He's putting the old world back",
 				"<gray>together, piece by piece. He buys",

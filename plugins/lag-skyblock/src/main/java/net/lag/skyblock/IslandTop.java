@@ -54,7 +54,7 @@ final class IslandTop implements Listener, CommandExecutor {
 	private static final DecimalFormat MONEY = new DecimalFormat("#,##0");
 	// podium: #1 top centre, #2/#3 either side below, #4-#10 across the next row
 	private static final int[] SLOTS = {13, 21, 23, 28, 29, 30, 31, 32, 33, 34};
-	private static final int INFO = 45, YOURS = 49, CLOSE = 53;
+	private static final int INFO = 47, YOURS = 49, CLOSE = 51;
 
 	private final LagSkyblock plugin;
 	private volatile List<Entry> ranking = List.of();
@@ -235,7 +235,7 @@ final class IslandTop implements Listener, CommandExecutor {
 	void open(Player p) {
 		Menu m = new Menu();
 		int season = plugin.season == null ? 1 : plugin.season.number();
-		m.inv = Bukkit.createInventory(m, 54, Spawners.mm("<gradient:#FFD84D:#FF8A3D><bold>ISLAND TOP</bold></gradient> <dark_gray>· Season " + season));
+		m.inv = Bukkit.createInventory(m, 54, Gui.title("ISLAND TOP", "Season " + season, "#7A4A00"));
 		draw(p, m.inv);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.4f, 1.4f);
@@ -296,10 +296,10 @@ final class IslandTop implements Listener, CommandExecutor {
 		int shown = 0;
 		for (var m : e.byMob().entrySet()) {
 			if (shown++ == 4) break;
-			lore.add("<dark_gray>▸ " + mobName(m.getKey()) + " <dark_gray>× <white>" + MONEY.format(m.getValue()));
+			lore.add("<#9A9A9A>▸ " + mobName(m.getKey()) + " <#9A9A9A>× <white>" + MONEY.format(m.getValue()));
 		}
 		lore.add("");
-		lore.add("<gray>Team: " + String.join("<dark_gray>, ", members(e)));
+		lore.add("<gray>Team: " + String.join("<#9A9A9A>, ", members(e)));
 		List<Component> l = new ArrayList<>();
 		for (String s : lore) l.add(Spawners.mm(s));
 		sm.lore(l);
@@ -313,13 +313,12 @@ final class IslandTop implements Listener, CommandExecutor {
 	}
 
 	private void draw(Player p, Inventory inv) {
-		for (int i = 0; i < 54; i++) inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) inv.setItem(i, pane(i % 2 == 0 ? Material.ORANGE_STAINED_GLASS_PANE : Material.YELLOW_STAINED_GLASS_PANE));
+		Gui.frame(inv, Material.ORANGE_STAINED_GLASS_PANE);
 		List<Entry> r = ranking;
 		for (int i = 0; i < SLOTS.length; i++) {
 			if (i < r.size()) inv.setItem(SLOTS[i], islandItem(r.get(i), i + 1));
-			else inv.setItem(SLOTS[i], named(Material.GRAY_STAINED_GLASS_PANE, place(i + 1) + " <dark_gray>Unclaimed", List.of(
-					"<dark_gray>Place spawners on your island", "<dark_gray>to take this spot.")));
+			else inv.setItem(SLOTS[i], named(Material.GRAY_STAINED_GLASS_PANE, place(i + 1) + " <#9A9A9A>Unclaimed", List.of(
+					"<#9A9A9A>Place spawners on your island", "<#9A9A9A>to take this spot.")));
 		}
 		long ago = updated == 0 ? -1 : (System.currentTimeMillis() - updated) / 1000;
 		inv.setItem(INFO, named(Material.BOOK, "<#38E0FF><bold>HOW IT WORKS", List.of(
@@ -330,13 +329,13 @@ final class IslandTop implements Listener, CommandExecutor {
 				"<gray>Top islands at the end of the season",
 				"<gray>win <gold>store credit</gold> and a <gradient:#FFD84D:#FF8A3D><bold>CHAMPION</bold></gradient> title.",
 				"",
-				"<dark_gray>Updated " + (ago < 0 ? "soon" : ago + "s ago"))));
+				"<#9A9A9A>Updated " + (ago < 0 ? "soon" : ago + "s ago"))));
 		int rank = rankOf(p.getUniqueId());
 		if (rank > 0) {
 			Entry e = r.get(rank - 1);
 			String gap = rank == 1 ? "<gradient:#FFD84D:#FF8A3D>You're in first.</gradient>"
 					: "<gray>Next place: <white>" + money(r.get(rank - 2).value() - e.value()) + " <gray>behind";
-			inv.setItem(YOURS, named(Material.GRASS_BLOCK, "<#7CFF6B><bold>YOUR ISLAND</bold> <dark_gray>· " + place(rank), List.of(
+			inv.setItem(YOURS, named(Material.GRASS_BLOCK, "<#7CFF6B><bold>YOUR ISLAND</bold> <#9A9A9A>· " + place(rank), List.of(
 					"<gray>Value: <gold><bold>" + money(e.value()),
 					"<gray>Spawners: <white>" + MONEY.format(e.spawners()),
 					"",

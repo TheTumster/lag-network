@@ -36,8 +36,7 @@ import net.lag.skyblock.LagSkyblock.Tier;
  * the heads as items. With someone nearby the cage spawns real mobs into the grinder as normal, so it's never both.
  */
 final class Vault implements Listener, CommandExecutor {
-	private static final int SELL = 39, HEADS = 41, CLOSE = 44, INFO = 4;
-	private static final int[] ROW = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34};
+	private static final int SELL = 38, CLOSE = 40, HEADS = 42, INFO = 4;
 
 	private final LagSkyblock plugin;
 	private final File file;
@@ -177,9 +176,7 @@ final class Vault implements Listener, CommandExecutor {
 		}
 		Menu m = new Menu();
 		m.island = id;
-		m.inv = Bukkit.createInventory(m, 45, Spawners.mm(welcome
-				? "<gradient:#38E0FF:#B040FF><bold>WHILE YOU WERE AWAY</bold></gradient>"
-				: "<gradient:#38E0FF:#B040FF><bold>OFFLINE VAULT</bold></gradient>"));
+		m.inv = Bukkit.createInventory(m, 45, welcome ? Gui.title("WHILE YOU WERE AWAY", null, "#4B1E8C") : Gui.title("OFFLINE VAULT", null, "#4B1E8C"));
 		draw(m);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.5f, 1.3f);
@@ -205,15 +202,19 @@ final class Vault implements Listener, CommandExecutor {
 	}
 
 	private void draw(Menu m) {
-		for (int i = 0; i < 45; i++) m.inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) m.inv.setItem(i, pane(i % 2 == 0 ? Material.CYAN_STAINED_GLASS_PANE : Material.PURPLE_STAINED_GLASS_PANE));
+		Gui.frame(m.inv, Material.PURPLE_STAINED_GLASS_PANE);
 		double[][] b = banks.get(m.island);
+		List<Tier> show = new ArrayList<>();
+		if (b != null) for (Tier t : plugin.tiers) {
+			double[] r = b[t.index()];
+			if (r[0] >= 1 || r[1] > 0 || r[2] >= 1) show.add(t);
+		}
+		List<Integer> slots = Gui.balanced(1, 3, show.size());
 		int slot = 0;
 		if (b != null) {
-			for (Tier t : plugin.tiers) {
+			for (Tier t : show) {
 				double[] r = b[t.index()];
-				if (r[0] < 1 && r[1] <= 0 && r[2] < 1) continue;
-				if (slot >= ROW.length) break;
+				if (slot >= slots.size()) break;
 				ItemStack it;
 				try {
 					it = Bukkit.getItemFactory().createItemStack(plugin.headSpec(t, false));
@@ -227,12 +228,12 @@ final class Vault implements Listener, CommandExecutor {
 						Spawners.mm("<gray>Loot worth: <gold>" + LagSkyblock.shards(r[1])),
 						Spawners.mm("<gray>Heads: <white>" + (long) Math.floor(r[2]))));
 				it.setItemMeta(im);
-				m.inv.setItem(ROW[slot++], it);
+				m.inv.setItem(slots.get(slot++), it);
 			}
 		}
 		if (slot == 0) {
-			m.inv.setItem(22, named(Material.GRAY_DYE, "<gray>Nothing banked yet", List.of(
-					"<dark_gray>Your cages bank loot here while", "<dark_gray>nobody is near them.")));
+			m.inv.setItem(22, named(Material.GLASS_BOTTLE, "<white>Nothing banked yet", List.of(
+					"<#9A9A9A>Your cages bank loot here while", "<#9A9A9A>nobody is near them.")));
 		}
 		m.inv.setItem(INFO, named(Material.CLOCK, "<#38E0FF><bold>YOUR CAGES NEVER STOP", List.of(
 				"<gray>When nobody's near your cages they keep",
@@ -240,18 +241,18 @@ final class Vault implements Listener, CommandExecutor {
 				"<gray>When you're there, real mobs spawn",
 				"<gray>into your grinder as normal.",
 				"",
-				"<dark_gray>Shared with your whole island.")));
+				"<#9A9A9A>Shared with your whole island.")));
 		double shards = total(m.island, 1);
 		long heads = (long) total(m.island, 2);
 		m.inv.setItem(SELL, named(shards > 0 ? Material.GOLD_BLOCK : Material.GRAY_DYE, "<gold><bold>SELL ALL", List.of(
 				"<gray>The Collector pays <gold>" + LagSkyblock.shards(shards),
 				"",
-				shards > 0 ? "<#7CFF6B>▶ Click to sell" : "<dark_gray>Nothing to sell")));
+				shards > 0 ? "<#7CFF6B>▶ Click to sell" : "<#9A9A9A>Nothing to sell")));
 		m.inv.setItem(HEADS, named(heads > 0 ? Material.SKELETON_SKULL : Material.GRAY_DYE, "<#FFB020><bold>CLAIM HEADS", List.of(
 				"<gray>Heads banked: <white>" + heads,
 				"<gray>Proof for the next cage <white>(/spawners)",
 				"",
-				heads > 0 ? "<#7CFF6B>▶ Click to take them" : "<dark_gray>No heads yet")));
+				heads > 0 ? "<#7CFF6B>▶ Click to take them" : "<#9A9A9A>No heads yet")));
 		m.inv.setItem(CLOSE, named(Material.BARRIER, "<red>Close", List.of()));
 	}
 
@@ -293,7 +294,7 @@ final class Vault implements Listener, CommandExecutor {
 		dirty = true;
 		save();
 		plugin.eco().depositPlayer(p, shards);
-		p.sendMessage(Spawners.mm("<dark_gray>» <gray>The Collector bought your cages' loot for <gold><bold>" + LagSkyblock.shards(shards)));
+		p.sendMessage(Spawners.mm("<#9A9A9A>» <gray>The Collector bought your cages' loot for <gold><bold>" + LagSkyblock.shards(shards)));
 		p.sendActionBar(Spawners.mm("<gold>+" + LagSkyblock.shards(shards)));
 		p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.3f);
 	}
@@ -329,7 +330,7 @@ final class Vault implements Listener, CommandExecutor {
 		if (given > 0) {
 			dirty = true;
 			save();
-			p.sendMessage(Spawners.mm("<dark_gray>» <gray>Took <white>" + given + "</white> heads from the vault."));
+			p.sendMessage(Spawners.mm("<#9A9A9A>» <gray>Took <white>" + given + "</white> heads from the vault."));
 			p.playSound(p.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.7f, 1.0f);
 		}
 		if (full) p.sendMessage(Spawners.mm("<red>Your inventory is full - the rest stay in the vault."));
@@ -348,7 +349,7 @@ final class Vault implements Listener, CommandExecutor {
 			double shards = total(id, 1);
 			long heads = (long) total(id, 2);
 			if (shards < 1 && heads < 1) return;
-			p.sendMessage(Spawners.mm("<dark_gray>» <gray>While you were away your cages banked <gold>" + LagSkyblock.shards(shards)
+			p.sendMessage(Spawners.mm("<#9A9A9A>» <gray>While you were away your cages banked <gold>" + LagSkyblock.shards(shards)
 					+ "</gold> <gray>and <white>" + heads + "</white> heads. <#38E0FF><click:run_command:'/vault'><hover:show_text:'Open the vault'>[OPEN VAULT]</hover></click>"));
 			if (p.getOpenInventory().getTopInventory().getHolder() == null || p.getOpenInventory().getType() == org.bukkit.event.inventory.InventoryType.CRAFTING) {
 				open(p, true);

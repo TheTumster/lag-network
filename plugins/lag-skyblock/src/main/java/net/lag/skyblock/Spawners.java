@@ -38,8 +38,8 @@ import net.lag.skyblock.LagSkyblock.Tier;
  */
 final class Spawners implements Listener, CommandExecutor {
 	// the path through the menu: across the top row, down the right, back along the bottom row
-	private static final int[] PATH = {10, 11, 12, 13, 14, 15, 16, 34, 33, 32, 31, 30, 29, 28};
-	private static final int LINK = 25; // connects 16 and 34
+	// a pyramid up to the top cage: 7 across, then 5, then the crown in the middle
+	private static final int[] PATH = {10, 11, 12, 13, 14, 15, 16, 20, 21, 22, 23, 24, 31};
 	private static final int INFO = 47, PROOF = 49, CLOSE = 51;
 
 	private final LagSkyblock plugin;
@@ -168,7 +168,7 @@ final class Spawners implements Listener, CommandExecutor {
 
 	void open(Player p) {
 		Menu m = new Menu();
-		m.inv = Bukkit.createInventory(m, 54, mm("<gradient:#B040FF:#38E0FF><bold>SPAWNERS</bold></gradient> <dark_gray>· tier " + top(p) + "/" + plugin.tiers.size()));
+		m.inv = Bukkit.createInventory(m, 54, Gui.title("SPAWNERS", "tier " + top(p) + "/" + plugin.tiers.size(), "#4B1E8C"));
 		draw(p, m.inv);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.BLOCK_ENDER_CHEST_OPEN, 0.4f, 1.4f);
@@ -195,12 +195,9 @@ final class Spawners implements Listener, CommandExecutor {
 
 	private void draw(Player p, Inventory inv) {
 		int top = top(p);
-		for (int i = 0; i < 54; i++) inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) inv.setItem(i, pane(i % 2 == 0 ? Material.PURPLE_STAINED_GLASS_PANE : Material.MAGENTA_STAINED_GLASS_PANE));
+		Gui.frame(inv, Material.PURPLE_STAINED_GLASS_PANE);
 		List<Tier> tiers = plugin.tiers;
 		for (int i = 0; i < tiers.size() && i < PATH.length; i++) inv.setItem(PATH[i], tierItem(p, tiers.get(i), top));
-		if (tiers.size() > 7) inv.setItem(LINK, pane(top >= 8 ? Material.LIME_STAINED_GLASS_PANE : Material.GRAY_STAINED_GLASS_PANE));
-		// unused path slots stay dark
 		inv.setItem(INFO, named(Material.BOOK, "<#38E0FF><bold>HOW IT WORKS", List.of(
 				"<gray>Cages spawn real mobs that stack up.",
 				"<gray>Build a <white>grinder</white>: drop or burn the stack",
@@ -211,19 +208,19 @@ final class Spawners implements Listener, CommandExecutor {
 				"<gray>1 in 100 mobs drops its <white>head</white>: proof.",
 				"<gray>Trade heads in to unlock the <white>next cage</white>.",
 				"",
-				"<dark_gray>Stack spawners by placing them on each other.")));
+				"<#9A9A9A>Stack spawners by placing them on each other.")));
 		// next unlock progress
 		if (top < plugin.tiers.size()) {
 			Tier next = plugin.tiers.get(top), cur = plugin.tiers.get(top - 1);
 			int have = countHeads(p, cur);
 			int pct = (int) Math.min(100, have * 100L / Math.max(1, next.unlock()));
-			String bar = "<#7CFF6B>" + "|".repeat(pct / 5) + "<dark_gray>" + "|".repeat(20 - pct / 5);
+			String bar = "<#7CFF6B>" + "|".repeat(pct / 5) + "<#9A9A9A>" + "|".repeat(20 - pct / 5);
 			inv.setItem(PROOF, named(Material.SKELETON_SKULL, "<#FFB020><bold>NEXT CAGE: " + next.name().toUpperCase(), List.of(
 					"<gray>Proof needed: <white>" + next.unlock() + "× " + cur.name() + " Head",
 					"<gray>You carry: <white>" + have,
 					bar + " <gray>" + pct + "%",
 					"",
-					"<dark_gray>Heads drop from " + cur.name() + " cages.")));
+					"<#9A9A9A>Heads drop from " + cur.name() + " cages.")));
 		} else {
 			inv.setItem(PROOF, named(Material.NETHER_STAR, "<gradient:#FFD84D:#FF8A3D><bold>EVERY CAGE UNLOCKED", List.of(
 					"<gray>You've mastered the whole ladder.", "<gray>Now stack them: <white>/is top")));
@@ -237,13 +234,13 @@ final class Spawners implements Listener, CommandExecutor {
 		if (n <= top) {
 			ItemStack it = Bukkit.getItemFactory().createItemStack(plugin.headSpec(t, false));
 			ItemMeta im = it.getItemMeta();
-			im.displayName(mm(head + "<bold>" + t.name().toUpperCase() + "</bold> <dark_gray>· <gray>Tier " + n));
+			im.displayName(mm(head + "<bold>" + t.name().toUpperCase() + "</bold> <#9A9A9A>· <gray>Tier " + n));
 			im.lore(lore(List.of(
 					"<#7CFF6B>✔ Unlocked",
 					"",
 					"<gray>Next cage: <white>" + money(cost(p, t, 1)),
 					"<gray>8 more: <white>" + money(cost(p, t, 8)),
-					"<gray>Bought this season: <white>" + owned(p, t) + " <dark_gray>(+" + trim(step() * 100) + "% each)",
+					"<gray>Bought this season: <white>" + owned(p, t) + " <#9A9A9A>(+" + trim(step() * 100) + "% each)",
 					"<gray>Loot: <gold>" + money(t.value() * perHour()) + "<gray>/hour per cage",
 					"",
 					"<#38E0FF>▶ Left-click <gray>buy 1",
@@ -258,7 +255,7 @@ final class Spawners implements Listener, CommandExecutor {
 			boolean ready = have >= t.unlock();
 			ItemStack it = Bukkit.getItemFactory().createItemStack(plugin.headSpec(t, false));
 			ItemMeta im = it.getItemMeta();
-			im.displayName(mm(head + "<bold>" + t.name().toUpperCase() + "</bold> <dark_gray>· <gray>Tier " + n));
+			im.displayName(mm(head + "<bold>" + t.name().toUpperCase() + "</bold> <#9A9A9A>· <gray>Tier " + n));
 			im.lore(lore(List.of(
 					"<#FFB020>🔒 Locked",
 					"",
@@ -268,12 +265,12 @@ final class Spawners implements Listener, CommandExecutor {
 					"<gray>Cage: <white>" + money(t.price()),
 					"<gray>Loot: <gold>" + money(t.value() * perHour()) + "<gray>/hour per cage",
 					"",
-					ready ? "<#7CFF6B>▶ Click to unlock" : "<dark_gray>Collect more " + prev.name() + " heads")));
+					ready ? "<#7CFF6B>▶ Click to unlock" : "<#9A9A9A>Collect more " + prev.name() + " heads")));
 			it.setItemMeta(im);
 			return it;
 		}
-		return named(Material.GRAY_DYE, "<dark_gray><bold>???</bold> <dark_gray>· Tier " + n, List.of(
-				"<dark_gray>Unlock the tier before this first."));
+		return named(Material.IRON_BARS, "<gray><bold>LOCKED CAGE</bold> <#9A9A9A>· Tier " + n, List.of(
+				"<#9A9A9A>Unlock the tier before this first."));
 	}
 
 	private double perHour() {
@@ -330,7 +327,7 @@ final class Spawners implements Listener, CommandExecutor {
 		Bukkit.getScheduler().runTask(plugin, () -> {
 			// stacking onto an existing spawner cancels the place; RoseStacker shows the new stack size then
 			if (e.getBlockPlaced().getType() == Material.SPAWNER) {
-				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>it runs 24/7. Near it: real mobs for your grinder. Away: loot banks in /vault."));
+				p.sendActionBar(mm("<#7CFF6B>Spawner placed <#9A9A9A>· <gray>it runs 24/7. Near it: real mobs for your grinder. Away: loot banks in /vault."));
 			}
 		});
 	}
@@ -353,7 +350,7 @@ final class Spawners implements Listener, CommandExecutor {
 		p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.7f, 1.2f);
 		p.showTitle(net.kyori.adventure.title.Title.title(mm("<color:" + t.color() + "><bold>" + t.name().toUpperCase() + " UNLOCKED"),
 				mm("<gray>Tier " + t.number() + " spawners are now for sale")));
-		Bukkit.broadcast(mm("<dark_gray>» <white>" + p.getName() + " <gray>unlocked <color:" + t.color() + "><bold>" + t.name() + "</bold> <gray>spawners <dark_gray>(tier " + t.number() + ")"));
+		Bukkit.broadcast(mm("<#9A9A9A>» <white>" + p.getName() + " <gray>unlocked <color:" + t.color() + "><bold>" + t.name() + "</bold> <gray>spawners <#9A9A9A>(tier " + t.number() + ")"));
 	}
 
 	private int spawnerCount(Player p) {

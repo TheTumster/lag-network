@@ -37,7 +37,7 @@ import net.kyori.adventure.text.Component;
 final class Generators implements Listener, CommandExecutor {
 	record GenTier(int number, String name, String color, Material icon, double price, LinkedHashMap<Material, Double> chances) { }
 
-	private static final int[] SLOTS = {10, 11, 12, 13, 14, 15, 16, 22, 31};
+	private static final int[] SLOTS = {11, 12, 13, 14, 15, 21, 22, 23}; // 5 across, then 3, centred
 	private static final DecimalFormat MONEY = new DecimalFormat("#,##0");
 	private final LagSkyblock plugin;
 	private final List<GenTier> tiers = new ArrayList<>();
@@ -145,7 +145,7 @@ final class Generators implements Listener, CommandExecutor {
 		}
 		Menu m = new Menu();
 		m.island = island;
-		m.inv = Bukkit.createInventory(m, 45, Spawners.mm("<gradient:#38E0FF:#7CFF6B><bold>ORE GENERATOR</bold></gradient> <dark_gray>· tier " + tierOf(island) + "/" + tiers.size()));
+		m.inv = Bukkit.createInventory(m, 45, Gui.title("ORE GENERATOR", "tier " + tierOf(island) + "/" + tiers.size(), "#0E5C6B"));
 		draw(m);
 		p.openInventory(m.inv);
 		p.playSound(p.getLocation(), Sound.BLOCK_FURNACE_FIRE_CRACKLE, 0.8f, 1.2f);
@@ -161,17 +161,16 @@ final class Generators implements Listener, CommandExecutor {
 
 	private void draw(Menu m) {
 		int cur = tierOf(m.island);
-		for (int i = 0; i < 45; i++) m.inv.setItem(i, pane(Material.BLACK_STAINED_GLASS_PANE));
-		for (int i = 0; i < 9; i++) m.inv.setItem(i, pane(i % 2 == 0 ? Material.CYAN_STAINED_GLASS_PANE : Material.LIGHT_BLUE_STAINED_GLASS_PANE));
+		Gui.frame(m.inv, Material.CYAN_STAINED_GLASS_PANE);
 		for (int i = 0; i < tiers.size() && i < SLOTS.length; i++) {
 			GenTier t = tiers.get(i);
 			boolean owned = t.number() <= cur, next = t.number() == cur + 1;
-			ItemStack it = new ItemStack(owned || next ? t.icon() : Material.GRAY_DYE);
+			ItemStack it = new ItemStack(owned || next ? t.icon() : Material.IRON_BARS);
 			ItemMeta im = it.getItemMeta();
-			String head = owned || next ? "<color:" + t.color() + "><bold>" + t.name().toUpperCase() + "</bold>" : "<dark_gray><bold>???</bold>";
-			im.displayName(Spawners.mm(head + " <dark_gray>· <gray>Tier " + t.number()));
+			String head = owned || next ? "<color:" + t.color() + "><bold>" + t.name().toUpperCase() + "</bold>" : "<gray><bold>LOCKED</bold>";
+			im.displayName(Spawners.mm(head + " <#9A9A9A>· <gray>Tier " + t.number()));
 			List<Component> lore = new ArrayList<>();
-			lore.add(Spawners.mm(t.number() == cur ? "<#7CFF6B>● Active" : owned ? "<#7CFF6B>✔ Owned" : next ? "<#FFB020>🔒 Next upgrade" : "<dark_gray>🔒 Locked"));
+			lore.add(Spawners.mm(t.number() == cur ? "<#7CFF6B>● Active" : owned ? "<#7CFF6B>✔ Owned" : next ? "<#FFB020>🔒 Next upgrade" : "<#9A9A9A>🔒 Locked"));
 			lore.add(Component.empty());
 			if (owned || next) {
 				double total = t.chances().values().stream().mapToDouble(Double::doubleValue).sum();
@@ -184,7 +183,7 @@ final class Generators implements Listener, CommandExecutor {
 					lore.add(Spawners.mm("<#7CFF6B>▶ Click to upgrade"));
 				}
 			} else {
-				lore.add(Spawners.mm("<dark_gray>Upgrade the tier before this first."));
+				lore.add(Spawners.mm("<#9A9A9A>Upgrade the tier before this first."));
 			}
 			im.lore(lore);
 			if (t.number() == cur) im.setEnchantmentGlintOverride(true);
@@ -196,7 +195,7 @@ final class Generators implements Listener, CommandExecutor {
 		im.displayName(Spawners.mm("<#38E0FF><bold>HOW IT WORKS"));
 		im.lore(List.of(Spawners.mm("<gray>Build a cobblestone generator"), Spawners.mm("<gray>(lava next to water) on your island."),
 				Spawners.mm(""), Spawners.mm("<gray>Instead of cobble it makes <white>ores</white>,"), Spawners.mm("<gray>better ones every tier."),
-				Spawners.mm(""), Spawners.mm("<dark_gray>Upgrades are island-wide.")));
+				Spawners.mm(""), Spawners.mm("<#9A9A9A>Upgrades are island-wide.")));
 		info.setItemMeta(im);
 		m.inv.setItem(40, info);
 	}
