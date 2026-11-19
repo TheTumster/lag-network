@@ -151,8 +151,7 @@
       "loader": "paper"
     },
     {
-      "modrinth": "nuvotifier",
-      "loader": "paper",
+      "github": "NuVotifier/NuVotifier",
       "optional": true
     },
     {
