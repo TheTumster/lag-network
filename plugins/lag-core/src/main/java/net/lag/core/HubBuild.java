@@ -329,7 +329,9 @@ final class HubBuild implements Listener {
 			if (ps != null) text(ps, "<gold><bold>START</bold>\n<gray>Step on the plate", 1.2f);
 			if (pf != null) text(pf, "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>FINISH</bold></gradient>", 2f);
 		}
-		for (Map<?, ?> m : plugin.getConfig().getMapList(base + ".displays")) {
+		// Christmas brings its own floating items (icons in front of the portal houses, no crystal star)
+		String dispPath = christmas() && plugin.getConfig().isList(base + ".christmas.displays") ? base + ".christmas.displays" : base + ".displays";
+		for (Map<?, ?> m : plugin.getConfig().getMapList(dispPath)) {
 			List<?> off = (List<?>) m.get("offset");
 			Location at = o.clone().add(num(off.get(0)), num(off.get(1)), num(off.get(2)));
 			org.bukkit.Material mat = org.bukkit.Material.matchMaterial(String.valueOf(m.get("item")));
