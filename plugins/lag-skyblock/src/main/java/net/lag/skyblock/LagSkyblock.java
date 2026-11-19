@@ -21,7 +21,7 @@ import net.milkbowl.vault.economy.Economy;
  * loot, the Collector buys it, Shards buy more cages, heads unlock the next tier, placed cages are island value.
  */
 public final class LagSkyblock extends JavaPlugin {
-	static final int CONFIG_VERSION = 3;
+	static final int CONFIG_VERSION = 4;
 
 	/** One rung of the ladder. index 0 = tier 1. value = Shards per mob's loot; loot = fixed drops per mob. */
 	record Tier(int index, String mob, String name, String color, double price, int unlock, double value,
@@ -67,6 +67,7 @@ public final class LagSkyblock extends JavaPlugin {
 	Market market;
 	Stations stations;
 	Warzone warzone;
+	Vault vault;
 
 	@Override
 	public void onLoad() {
@@ -127,6 +128,9 @@ public final class LagSkyblock extends JavaPlugin {
 		warzone = new Warzone(this);
 		getServer().getPluginManager().registerEvents(warzone, this);
 		getCommand("warzone").setExecutor(warzone);
+		vault = new Vault(this);
+		getServer().getPluginManager().registerEvents(vault, this);
+		getCommand("vault").setExecutor(vault);
 		stations = new Stations(this);
 		getServer().getPluginManager().registerEvents(stations, this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -179,6 +183,7 @@ public final class LagSkyblock extends JavaPlugin {
 		if (spawners != null) spawners.save();
 		if (top != null) top.save();
 		if (generators != null) generators.save();
+		if (vault != null) vault.save();
 	}
 
 	// ---------------------------------------------------------------- tiers

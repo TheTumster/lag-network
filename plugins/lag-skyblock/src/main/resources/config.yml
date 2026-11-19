@@ -4,7 +4,7 @@
 # Design doc: "RelapsedMC Skyblock - Economy" in the RelapsedMC project.
 
 # Bumped when the economy changes: an older config.yml is moved to config-old-<n>.yml and replaced with this one.
-config-version: 3
+config-version: 4
 
 # Shards: the currency. Written into Essentials on start (symbol + what a new player starts with).
 shards:
@@ -33,6 +33,16 @@ tiers:
   - {mob: blaze, name: Blaze,      color: "#FFB020", price:  40000000, unlock:  768, value: 3631.08, loot: {BLAZE_ROD: 1}}
   - {mob: enderman, name: Enderman,   color: "#B040FF", price: 100000000, unlock: 1024, value: 8669.72, loot: {ENDER_PEARL: 1}}
   - {mob: iron_golem, name: Iron Golem, color: "#E8E8E8", price: 250000000, unlock: 1536, value: 20742.07, loot: {IRON_INGOT: 3, POPPY: 1}}
+# Each cage of a tier costs this % more than the last one your island bought this season (1st Iron Golem 250M,
+# 100th ~680M, 300th ~5B). Keeps stacking from running away. The cage menu shows the next price.
+cage-price-step: 1.0
+
+# Cages run 24/7: while nobody is near a cage, the mobs it would have made are counted at `rate` x the normal speed
+# and their loot value + heads go into the island's Offline Vault (/vault, opens on login). Nobody needs an alt.
+offline-cages:
+  enabled: true
+  rate: 1.0
+
 # RoseStacker (real mobs, stacked): written into its config on start.
 # A cage makes spawn-count mobs every spawn-delay ticks (2 every 400 = 360 an hour) while an island member is
 # within player-activation-range. kill-entire-stack-on: damage that kills a WHOLE stack at once (the AFK grinders).
@@ -48,7 +58,7 @@ rosestacker:
 # The Collector buys everything (/sell, /sell hand, the Collector at spawn). Spawner loot is priced from the tiers
 # above. These are untagged items: gen ore drops and crops. Anything not listed can't be sold.
 collector:
-  ores: {COBBLESTONE: 1.0, COAL: 4, RAW_IRON: 7, RAW_COPPER: 2.5, RAW_GOLD: 10, REDSTONE: 3, LAPIS_LAZULI: 2.5, DIAMOND: 30, EMERALD: 40, ANCIENT_DEBRIS: 150}
+  ores: {COBBLESTONE: 2, COAL: 10, RAW_IRON: 20, RAW_COPPER: 6, RAW_GOLD: 30, REDSTONE: 8, LAPIS_LAZULI: 6, DIAMOND: 100, EMERALD: 140, ANCIENT_DEBRIS: 500}
   crops: {WHEAT: 1.2, CARROT: 0.8, POTATO: 0.8, BEETROOT: 1.0, SUGAR_CANE: 1.2, CACTUS: 1.2, MELON_SLICE: 0.5, PUMPKIN: 3, NETHER_WART: 1.5, COCOA_BEANS: 1.0, BAMBOO: 0.3}
 
 # The Market (/market, the Merchant at spawn): buy-only basics. Shards each.
@@ -62,13 +72,13 @@ market:
 # Weights are relative (they don't need to add to 100). Upgrades are island-wide, bought in /gen (the Gen Smith).
 generator-tiers:
   - {name: Cobble,   color: "#9AA3AD", icon: COBBLESTONE,    price: 0,       ores: {COBBLESTONE: 90, COAL_ORE: 10}}
-  - {name: Coal,     color: "#5A5A5A", icon: COAL_ORE,       price: 10000,   ores: {COBBLESTONE: 75, COAL_ORE: 18, IRON_ORE: 7}}
-  - {name: Iron,     color: "#D8AF93", icon: IRON_ORE,       price: 40000,   ores: {COBBLESTONE: 65, COAL_ORE: 18, IRON_ORE: 12, COPPER_ORE: 5}}
-  - {name: Gold,     color: "#FFD84D", icon: GOLD_ORE,       price: 120000,  ores: {COBBLESTONE: 55, COAL_ORE: 15, IRON_ORE: 15, GOLD_ORE: 10, COPPER_ORE: 5}}
-  - {name: Lapis,    color: "#3C6EE0", icon: LAPIS_ORE,      price: 350000,  ores: {COBBLESTONE: 48, COAL_ORE: 12, IRON_ORE: 15, GOLD_ORE: 12, REDSTONE_ORE: 8, LAPIS_ORE: 5}}
-  - {name: Diamond,  color: "#5BE3E3", icon: DIAMOND_ORE,    price: 1000000, ores: {COBBLESTONE: 42, COAL_ORE: 10, IRON_ORE: 15, GOLD_ORE: 14, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 5}}
-  - {name: Emerald,  color: "#3CDB6E", icon: EMERALD_ORE,    price: 3000000, ores: {COBBLESTONE: 36, COAL_ORE: 8, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 8, EMERALD_ORE: 5}}
-  - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 8000000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
+  - {name: Coal,     color: "#5A5A5A", icon: COAL_ORE,       price: 3000,    ores: {COBBLESTONE: 75, COAL_ORE: 18, IRON_ORE: 7}}
+  - {name: Iron,     color: "#D8AF93", icon: IRON_ORE,       price: 12000,   ores: {COBBLESTONE: 65, COAL_ORE: 18, IRON_ORE: 12, COPPER_ORE: 5}}
+  - {name: Gold,     color: "#FFD84D", icon: GOLD_ORE,       price: 40000,   ores: {COBBLESTONE: 55, COAL_ORE: 15, IRON_ORE: 15, GOLD_ORE: 10, COPPER_ORE: 5}}
+  - {name: Lapis,    color: "#3C6EE0", icon: LAPIS_ORE,      price: 120000,  ores: {COBBLESTONE: 48, COAL_ORE: 12, IRON_ORE: 15, GOLD_ORE: 12, REDSTONE_ORE: 8, LAPIS_ORE: 5}}
+  - {name: Diamond,  color: "#5BE3E3", icon: DIAMOND_ORE,    price: 350000,  ores: {COBBLESTONE: 42, COAL_ORE: 10, IRON_ORE: 15, GOLD_ORE: 14, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 5}}
+  - {name: Emerald,  color: "#3CDB6E", icon: EMERALD_ORE,    price: 1000000, ores: {COBBLESTONE: 36, COAL_ORE: 8, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 8, EMERALD_ORE: 5}}
+  - {name: Ancient,  color: "#B07A5A", icon: ANCIENT_DEBRIS, price: 2500000, ores: {COBBLESTONE: 30, COAL_ORE: 6, IRON_ORE: 14, GOLD_ORE: 15, REDSTONE_ORE: 8, LAPIS_ORE: 6, DIAMOND_ORE: 10, EMERALD_ORE: 8, ANCIENT_DEBRIS: 2}}
 
 # Spawn (the Shattered World, built by laGCore). Positions are [x, y, z] from the spawn floor centre (origin).
 spawn:
@@ -102,7 +112,7 @@ warzone:
     chests: 8
     despawn-minutes: 10
     # rewards per rarity: shards [min, max], items {MATERIAL: amount}, commands ("{player}" = who opened it)
-    common:    {weight: 70, shards: [3000, 15000], items: {HOPPER: 4, MAGMA_BLOCK: 16, EXPERIENCE_BOTTLE: 8}}
+    common:    {weight: 70, shards: [10000, 40000], items: {HOPPER: 4, MAGMA_BLOCK: 16, EXPERIENCE_BOTTLE: 8}}
     rare:      {weight: 25, shards: [40000, 150000], items: {HOPPER: 16, EXPERIENCE_BOTTLE: 32}}
     legendary: {weight: 5,  shards: [400000, 1500000], commands: []}
   koth:
