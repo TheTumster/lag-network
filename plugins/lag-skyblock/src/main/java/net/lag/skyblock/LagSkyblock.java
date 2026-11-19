@@ -331,7 +331,7 @@ public final class LagSkyblock extends JavaPlugin {
 				  "uniqueId": "relapsed",
 				  "icon": "GRASS_BLOCK",
 				  "displayName": "&a&lRelapsed Island",
-				  "description": ["&7A big starter island with a tree,", "&7a sand beach and a starter chest."],
+				  "description": ["&7A shard of the old world: a tree,", "&7an ore generator and a starter chest."],
 				  "requirePermission": false,
 				  "blueprints": {"NORMAL": "relapsed", "NETHER": "nether-island", "THE_END": "end-island"},
 				  "slot": 0
