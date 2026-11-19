@@ -98,13 +98,18 @@ final class IslandTop implements Listener, CommandExecutor {
 	// ---------------------------------------------------------------- spawner ledger (RoseStacker, by reflection)
 
 	/** A spawner we know about: where, what mob, how many stacked. */
-	private record Rec(String world, int x, int y, int z, String mob, int stack) {
+	record Rec(String world, int x, int y, int z, String mob, int stack) {
 		String key() {
 			return world + ";" + x + ";" + y + ";" + z;
 		}
 	}
 
 	private final Map<String, Rec> ledger = new HashMap<>();
+
+	/** Every spawner we know about (loaded or not). */
+	java.util.Collection<Rec> spawners() {
+		return List.copyOf(ledger.values());
+	}
 	private java.io.File ledgerFile;
 	private boolean dirty;
 	private Method getStackSize;

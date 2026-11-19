@@ -46,6 +46,9 @@ final class Spawners implements Listener, CommandExecutor {
 	private final NamespacedKey headKey;
 	private final Map<UUID, Integer> highest = new HashMap<>(); // highest unlocked tier number (1-based)
 	private final File file;
+	/** Cages bought this season, per island (or player with no island) per mob: each one costs cage-price-step more. */
+	private final Map<String, Map<String, Integer>> bought = new HashMap<>();
+	private final File boughtFile;
 
 	private static final class Menu implements InventoryHolder {
 		Inventory inv;
@@ -60,7 +63,16 @@ final class Spawners implements Listener, CommandExecutor {
 		this.plugin = plugin;
 		this.headKey = NamespacedKey.fromString(LagSkyblock.HEAD_KEY);
 		this.file = new File(plugin.getDataFolder(), "unlocks.yml");
+		this.boughtFile = new File(plugin.getDataFolder(), "cages-bought.yml");
 		load();
+		YamlConfiguration b = YamlConfiguration.loadConfiguration(boughtFile);
+		for (String k : b.getKeys(false)) {
+			var sec = b.getConfigurationSection(k);
+			if (sec == null) continue;
+			Map<String, Integer> m = new HashMap<>();
+			for (String mob : sec.getKeys(false)) m.put(mob, sec.getInt(mob));
+			bought.put(k, m);
+		}
 	}
 
 	static Component mm(String s) {
@@ -80,11 +92,38 @@ final class Spawners implements Listener, CommandExecutor {
 	void save() {
 		YamlConfiguration y = new YamlConfiguration();
 		highest.forEach((k, v) -> y.set(k.toString(), v));
+		YamlConfiguration b = new YamlConfiguration();
+		bought.forEach((k, m) -> m.forEach((mob, n) -> b.set(k + "." + mob, n)));
 		try {
 			y.save(file);
+			b.save(boughtFile);
 		} catch (Exception e) {
-			plugin.getLogger().warning("Could not save unlocks.yml: " + e);
+			plugin.getLogger().warning("Could not save unlocks.yml / cages-bought.yml: " + e);
 		}
+	}
+
+	// ---------------------------------------------------------------- price: each cage of a tier costs a bit more
+
+	private double step() {
+		return Math.max(0, plugin.getConfig().getDouble("cage-price-step", 1.0) / 100.0);
+	}
+
+	/** Whose purchases count together: the player's island (so a team shares the curve), else the player. */
+	private String buyer(Player p) {
+		org.bukkit.World w = Islands.islandWorld();
+		String id = Islands.id(w == null ? null : Islands.of(w, p.getUniqueId()));
+		return id != null ? id : p.getUniqueId().toString();
+	}
+
+	private int owned(Player p, Tier t) {
+		Map<String, Integer> m = bought.get(buyer(p));
+		return m == null ? 0 : m.getOrDefault(t.mob(), 0);
+	}
+
+	/** What the next `amount` cages of this tier cost this player in total. */
+	double cost(Player p, Tier t, int amount) {
+		double g = step(), p0 = t.price() * Math.pow(1 + g, owned(p, t));
+		return g <= 0 ? p0 * amount : p0 * (Math.pow(1 + g, amount) - 1) / g;
 	}
 
 	private int top(Player p) {
@@ -167,6 +206,7 @@ final class Spawners implements Listener, CommandExecutor {
 				"<gray>Build a <white>grinder</white>: drop or burn the stack",
 				"<gray>and the whole stack dies into your hoppers.",
 				"<gray>Sell the loot to <white>the Collector</white> (/sell).",
+				"<gray>Away? Cages keep going: <white>/vault</white>.",
 				"",
 				"<gray>1 in 100 mobs drops its <white>head</white>: proof.",
 				"<gray>Trade heads in to unlock the <white>next cage</white>.",
@@ -201,8 +241,10 @@ final class Spawners implements Listener, CommandExecutor {
 			im.lore(lore(List.of(
 					"<#7CFF6B>✔ Unlocked",
 					"",
-					"<gray>Cage: <white>" + money(t.price()),
-					"<gray>Loot: <gold>" + money(t.value() * 360) + "<gray>/hour per cage",
+					"<gray>Next cage: <white>" + money(cost(p, t, 1)),
+					"<gray>8 more: <white>" + money(cost(p, t, 8)),
+					"<gray>Bought this season: <white>" + owned(p, t) + " <dark_gray>(+" + trim(step() * 100) + "% each)",
+					"<gray>Loot: <gold>" + money(t.value() * perHour()) + "<gray>/hour per cage",
 					"",
 					"<#38E0FF>▶ Left-click <gray>buy 1",
 					"<#38E0FF>▶ Right-click <gray>buy 8")));
@@ -224,7 +266,7 @@ final class Spawners implements Listener, CommandExecutor {
 					"<gray>You have: " + (ready ? "<#7CFF6B>" : "<red>") + have + "<gray>/" + t.unlock(),
 					"",
 					"<gray>Cage: <white>" + money(t.price()),
-					"<gray>Loot: <gold>" + money(t.value() * 360) + "<gray>/hour per cage",
+					"<gray>Loot: <gold>" + money(t.value() * perHour()) + "<gray>/hour per cage",
 					"",
 					ready ? "<#7CFF6B>▶ Click to unlock" : "<dark_gray>Collect more " + prev.name() + " heads")));
 			it.setItemMeta(im);
@@ -232,6 +274,15 @@ final class Spawners implements Listener, CommandExecutor {
 		}
 		return named(Material.GRAY_DYE, "<dark_gray><bold>???</bold> <dark_gray>· Tier " + n, List.of(
 				"<dark_gray>Unlock the tier before this first."));
+	}
+
+	private double perHour() {
+		double delay = Math.max(20, plugin.getConfig().getDouble("rosestacker.spawn-delay", 400));
+		return plugin.getConfig().getDouble("rosestacker.spawn-count", 2) * 72000.0 / delay;
+	}
+
+	private static String trim(double d) {
+		return d == Math.floor(d) ? String.valueOf((long) d) : String.valueOf(d);
 	}
 
 	private static List<Component> lore(List<String> lines) {
@@ -279,7 +330,7 @@ final class Spawners implements Listener, CommandExecutor {
 		Bukkit.getScheduler().runTask(plugin, () -> {
 			// stacking onto an existing spawner cancels the place; RoseStacker shows the new stack size then
 			if (e.getBlockPlaced().getType() == Material.SPAWNER) {
-				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>mobs spawn while you're nearby. Build a grinder: drop them, burn them."));
+				p.sendActionBar(mm("<#7CFF6B>Spawner placed <dark_gray>· <gray>it runs 24/7. Near it: real mobs for your grinder. Away: loot banks in /vault."));
 			}
 		});
 	}
@@ -316,7 +367,7 @@ final class Spawners implements Listener, CommandExecutor {
 			p.sendMessage(mm("<red>The economy isn't running right now."));
 			return;
 		}
-		double cost = t.price() * amount;
+		double cost = cost(p, t, amount);
 		if (!plugin.eco().has(p, cost)) {
 			p.sendMessage(mm("<red>You need <white>" + money(cost) + "</white> for " + amount + "× " + t.name() + " spawner."));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.7f);
@@ -335,6 +386,8 @@ final class Spawners implements Listener, CommandExecutor {
 			return;
 		}
 		plugin.eco().withdrawPlayer(p, cost);
+		bought.computeIfAbsent(buyer(p), k -> new HashMap<>()).merge(t.mob(), amount, Integer::sum);
+		save();
 		p.sendMessage(mm("<#7CFF6B>Bought <white>" + amount + "× <color:" + t.color() + ">" + t.name() + " Spawner</color></white> for <gold>" + money(cost)));
 		p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.2f);
 	}

@@ -32,6 +32,9 @@ commands:
   warzone:
     description: The Warzone - the PvP arena under spawn (envoys, KOTH)
     aliases: [pit, wz, arena, koth, envoy, envoys]
+  vault:
+    description: Your Offline Vault - what your cages banked while nobody was near them
+    aliases: [offline, away, cagevault]
   lagskyblock:
     description: laG Skyblock admin
     aliases: [lsb]

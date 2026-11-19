@@ -254,7 +254,7 @@ final class Season implements CommandExecutor {
 				new File(root, "bskyblock_world"), new File(root, "bskyblock_world_nether"), new File(root, "bskyblock_world_the_end"),
 				new File(plugins, "BentoBox/database"),
 				new File(dataFolder, "island-spawners.yml"),
-				new File(dataFolder, "generators.yml"), new File(dataFolder, "unlocks.yml")));
+				new File(dataFolder, "generators.yml"), new File(dataFolder, "unlocks.yml"), new File(dataFolder, "vault.yml"), new File(dataFolder, "cages-bought.yml")));
 		// inventories, ender chests, positions
 		File pd = new File(new File(root, level), "playerdata");
 		File[] dats = pd.listFiles((d, n) -> n.endsWith(".dat") || n.endsWith(".dat_old"));
