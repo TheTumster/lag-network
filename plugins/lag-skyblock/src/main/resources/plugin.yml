@@ -2,7 +2,7 @@ name: laGSkyblock
 version: '${version}'
 main: net.lag.skyblock.LagSkyblock
 api-version: '1.21'
-softdepend: [Vault, Essentials, RoseStacker, BentoBox]
+softdepend: [Vault, Essentials, RoseStacker, BentoBox, Votifier]
 description: RelapsedMC Skyblock - Shards economy, cage ladder, the Collector, Market, gens, island top, Warzone, seasons
 commands:
   spawners:
@@ -35,6 +35,15 @@ commands:
   vault:
     description: Your Offline Vault - what your cages banked while nobody was near them
     aliases: [offline, away, cagevault]
+  ah:
+    description: The auction house - /ah to browse, /ah sell <price> to list what you're holding
+    aliases: [auction, auctionhouse, auctions]
+  crate:
+    description: Crates - your keys; admins and the store give keys with /crate give <player> <crate> [amount]
+    aliases: [crates]
+  keys:
+    description: Your crate keys
+    aliases: [key]
   lagskyblock:
     description: laG Skyblock admin
     aliases: [lsb]

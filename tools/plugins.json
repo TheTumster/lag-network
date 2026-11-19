@@ -151,6 +151,11 @@
       "loader": "paper"
     },
     {
+      "modrinth": "nuvotifier",
+      "loader": "paper",
+      "optional": true
+    },
+    {
       "local": "laGSkyblock"
     },
     {

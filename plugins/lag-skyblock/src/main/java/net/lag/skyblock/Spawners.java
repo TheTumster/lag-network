@@ -389,6 +389,12 @@ final class Spawners implements Listener, CommandExecutor {
 		p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.2f);
 	}
 
+	/** Crate reward: n cages of the best tier this player has unlocked (free, and off the price curve). */
+	void giveCages(Player p, int amount) {
+		Tier t = plugin.tiers.get(Math.min(plugin.tiers.size(), top(p)) - 1);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "rs give spawner " + p.getName() + " " + t.mob() + " 1 " + amount);
+	}
+
 	@Override
 	public boolean onCommand(CommandSender s, Command cmd, String label, String[] args) {
 		if (!(s instanceof Player p)) {

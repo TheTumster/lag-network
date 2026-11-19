@@ -68,6 +68,8 @@ public final class LagSkyblock extends JavaPlugin {
 	Stations stations;
 	Warzone warzone;
 	Vault vault;
+	Crates crates;
+	Auction auction;
 
 	@Override
 	public void onLoad() {
@@ -131,6 +133,13 @@ public final class LagSkyblock extends JavaPlugin {
 		vault = new Vault(this);
 		getServer().getPluginManager().registerEvents(vault, this);
 		getCommand("vault").setExecutor(vault);
+		crates = new Crates(this);
+		getServer().getPluginManager().registerEvents(crates, this);
+		getCommand("crate").setExecutor(crates);
+		getCommand("keys").setExecutor(crates);
+		auction = new Auction(this);
+		getServer().getPluginManager().registerEvents(auction, this);
+		getCommand("ah").setExecutor(auction);
 		stations = new Stations(this);
 		getServer().getPluginManager().registerEvents(stations, this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -184,6 +193,11 @@ public final class LagSkyblock extends JavaPlugin {
 		if (top != null) top.save();
 		if (generators != null) generators.save();
 		if (vault != null) vault.save();
+		if (auction != null) auction.save();
+		if (crates != null) {
+			crates.save();
+			crates.shutdown();
+		}
 	}
 
 	// ---------------------------------------------------------------- tiers

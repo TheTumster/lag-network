@@ -1,0 +1,64 @@
+# RelapsedMC Skyblock crates. They stand on the Crate Vaults island at spawn (at: offset from the spawn floor centre).
+# Every key opens the same crate with the same odds, however it was earned:
+#   crate give <player> <crate> [amount]      (console: the store, vote plugins, events)
+#   crate giveall <crate> [amount]
+# Where keys come from: vote = every vote (NuVotifier) · shard = rare envoys, vote crate · relic = legendary envoys,
+# KOTH, shard crate · monthly = the store, and a rare pull from the relic crate.
+# A reward is ONE of: shards [min, max] | item + amount | cages (n of the player's best unlocked cage) | key + amount |
+# commands ({player}). Optional: label, icon. weight = its share of the odds (shown to players as a %).
+# After editing: /crate reload
+crates:
+  vote:
+    name: "Vote Crate"
+    color: "#7CFF6B"
+    at: [37, 2, 37]
+    rewards:
+      - {weight: 34, shards: [5000, 15000]}
+      - {weight: 20, shards: [15000, 40000]}
+      - {weight: 12, item: HOPPER, amount: 4}
+      - {weight: 10, item: OAK_SAPLING, amount: 8}
+      - {weight: 8, item: BONE_MEAL, amount: 32}
+      - {weight: 6, item: LAVA_BUCKET, amount: 1}
+      - {weight: 5, shards: [75000, 150000]}
+      - {weight: 4, key: shard, amount: 1}
+      - {weight: 1, cages: 1}
+  shard:
+    name: "Shard Crate"
+    color: "#38E0FF"
+    at: [45, 2, 37]
+    rewards:
+      - {weight: 30, shards: [40000, 100000]}
+      - {weight: 22, shards: [100000, 250000]}
+      - {weight: 14, item: HOPPER, amount: 16}
+      - {weight: 10, item: DIAMOND_PICKAXE, amount: 1}
+      - {weight: 9, cages: 1}
+      - {weight: 7, shards: [400000, 800000]}
+      - {weight: 5, key: vote, amount: 3}
+      - {weight: 2, key: relic, amount: 1}
+      - {weight: 1, cages: 3}
+  relic:
+    name: "Relic Crate"
+    color: "#B040FF"
+    at: [37, 2, 45]
+    rewards:
+      - {weight: 28, shards: [250000, 600000]}
+      - {weight: 22, shards: [600000, 1500000]}
+      - {weight: 16, cages: 2}
+      - {weight: 12, item: NETHERITE_PICKAXE, amount: 1}
+      - {weight: 9, key: shard, amount: 3}
+      - {weight: 7, cages: 5}
+      - {weight: 4, shards: [3000000, 6000000]}
+      - {weight: 2, key: monthly, amount: 1}
+  monthly:
+    name: "Frostfall Crate"   # the monthly crate: rename it and swap the rewards each month
+    color: "#FFB020"
+    at: [45, 2, 45]
+    rewards:
+      - {weight: 26, shards: [1000000, 2500000]}
+      - {weight: 20, cages: 4}
+      - {weight: 16, key: relic, amount: 2}
+      - {weight: 14, shards: [2500000, 6000000]}
+      - {weight: 12, cages: 8}
+      - {weight: 8, item: ELYTRA, amount: 1}
+      - {weight: 3, shards: [10000000, 20000000]}
+      - {weight: 1, cages: 20}
