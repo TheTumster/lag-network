@@ -3,7 +3,7 @@ Shared by xmas_valley.py (keeps the ground flat along them) and genspawn_xmas.py
 import math
 
 RINK = (0, -12)          # the Well, frozen
-RINK_R = 7.0             # runners start on the rink's wall ring
+RINK_R = 8.0             # runners start on the sunken rink's rim
 STEP_Z = -27             # last row before each gate's stairs
 COLOR = {"skyblock": "lime", "factions": "red", "cannons": "orange", "smp": "light_blue"}
 # realm, gate x, angle the runner leaves the rink at (degrees from straight north, + = east)
@@ -36,3 +36,15 @@ def nearest(x, z):
         if d < best[0]:
             best = (d, realm, t)
     return best
+
+
+# The two outer gates turn in toward the plaza by this much (degrees). + turns a gate's face toward +x.
+TILT = {"skyblock": 18.0, "smp": -18.0}
+PORTAL_Z = -38
+
+
+def rot(x, z, px, realm):
+    """Where a point that belonged to an unturned gate at px ends up once the gate is turned (block centres)."""
+    t = math.radians(TILT.get(realm, 0.0))
+    lx, lz = x - px, z - PORTAL_Z
+    return px + lx * math.cos(t) + lz * math.sin(t), PORTAL_Z - lx * math.sin(t) + lz * math.cos(t)

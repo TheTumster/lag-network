@@ -117,6 +117,12 @@ for x in range(-40, 41):
     if name(get(x, TERRACE_Y, TERRACE_Z0 - 1)).endswith("stained_glass"):
         put(x, TERRACE_Y, TERRACE_Z0 - 1, BULBS[(x // 2) % 4])
 
+# each gate's inner lamp makes way for the gate's snowman NPC (it stood right in front of him)
+for realm, px in PORTALS:
+    lx = px + (4 if px < 0 else -4)
+    for y in range(TERRACE_Y + 1, TERRACE_Y + 6):
+        B.pop((lx, y, PORTAL_Z + 6), None)
+
 # lamp posts -> candy canes, lantern hanging from the hook
 for (x, y, z), b in list(B.items()):
     if name(b) != "lantern[hanging=false,waterlogged=false]":
@@ -157,10 +163,10 @@ for realm, px in PORTALS:
                 b = "red_concrete" if h(x, y, 71) < 0.13 else "ochre_froglight" if h(x, y, 72) < 0.08 else SPRUCE
                 put(x, y, z, b)
                 put(x, y, z + 1, "light[level=10,waterlogged=false]", force=False)
-    for dx in (-1, 0, 1):
-        put(px + dx, my - 3, PORTAL_Z + 2, "red_wool")
-    put(px - 1, my - 4, PORTAL_Z + 2, "red_wool")
-    put(px + 1, my - 4, PORTAL_Z + 2, "red_wool")
+    for dx in (-1, 0, 1):                       # the bow sits on the wreath itself, so the gate's label in front stays clear
+        put(px + dx, my - 3, PORTAL_Z + 1, "red_wool")
+    put(px - 1, my - 4, PORTAL_Z + 1, "red_wool")
+    put(px + 1, my - 4, PORTAL_Z + 1, "red_wool")
 
 # garland on the colonnade (the back wall between the gates)
 for (x, y, z), b in list(B.items()):
@@ -168,6 +174,50 @@ for (x, y, z), b in list(B.items()):
         put(x, y, z, SPRUCE)
         if x % 4 == 2:
             put(x, y, z + 1, ["red_concrete", "ochre_froglight"][(x // 4) % 2])
+
+
+# ======================================================================= the outer gates turn in toward the plaza
+import xmas_paths
+
+
+def turn_gate(realm, px):
+    t = math.radians(xmas_paths.TILT[realm])
+    bz = PORTAL_Z - 3
+    keep = {(px + dx, TERRACE_Y + 1, bz + dz) for dx in (-1, 0, 1) for dz in (-1, 0, 1)}   # beacon beam glass stays on its beacon
+    y0, y1 = TERRACE_Y + 1, TERRACE_Y + 24
+    src = {}
+    for k in [k for k in B if abs(k[0] - px) <= 9 and PORTAL_Z - 5 <= k[2] <= PORTAL_Z + 8 and y0 <= k[1] <= y1 and k not in keep]:
+        b = B.pop(k)
+        if name(b) != "air":
+            src[(k[0] - px, k[1], k[2] - PORTAL_Z)] = b
+    ct, st = math.cos(t), math.sin(t)
+    subs = [(i / 3 - 1 / 3, j / 3 - 1 / 3) for i in range(3) for j in range(3)]
+    for x in range(px - 11, px + 12):
+        for z in range(PORTAL_Z - 8, PORTAL_Z + 11):
+            for y in range(y0, y1 + 1):
+                hits = {}
+                for (sx, sz) in subs:
+                    wx, wz = x - px + sx, z - PORTAL_Z + sz
+                    lx, lz = wx * ct - wz * st, wx * st + wz * ct          # inverse of the turn
+                    b = src.get((round(lx), y, round(lz)))
+                    if b:
+                        hits[b] = hits.get(b, 0) + 1
+                if not hits:
+                    continue
+                portal = [b for b in hits if "nether_portal" in b]
+                if portal:
+                    best = portal[0]                                      # the portal sheet never gets holes
+                else:
+                    best, n = max(hits.items(), key=lambda kv: kv[1])
+                    if n < 3:
+                        continue
+                if (x, y, z) not in B or "light[" in name(B[(x, y, z)]):
+                    B[(x, y, z)] = best
+
+
+for realm, px in PORTALS:
+    if realm in xmas_paths.TILT:
+        turn_gate(realm, px)
 
 # ======================================================================= small decorated spruces (where the cherries were)
 ORN = ["red_concrete", "gold_block", "red_concrete", "light_blue_concrete", "white_concrete"]
@@ -538,6 +588,133 @@ for k in [k for k in B if -5 <= k[0] <= 5 and -41 <= k[2] <= -38 and y0g <= k[1]
 for (dx, dz, sz_) in ((-3, -40, 2), (1, -40, 3), (-1, -38, 1), (3, -38, 1), (-4, -38, 1)):
     present(dx, y0g, dz, sz_, 777 + dx * 3 + dz)
 
+# ======================================================================= depth in the plaza
+# 1) the rink sinks: a skating bowl two blocks down, half-step rings to walk in, a raised causeway across it
+#    on the spawn axis, and a frozen fountain on an island in the middle (kept low: it never covers the gates)
+RIM = 8.4
+for k in [k for k in B if math.hypot(k[0] - CX, k[2] - CZ) <= RIM and FLOOR - 5 <= k[1] <= FLOOR + 4]:
+    del B[k]
+for x in range(CX - 9, CX + 10):
+    for z in range(CZ - 9, CZ + 10):
+        d = math.hypot(x - CX, z - CZ)
+        if d > RIM:
+            continue
+        put(x, FLOOR - 5, z, "deepslate")
+        causeway = abs(x - CX) <= 1
+        if causeway or d <= 2.6:
+            for y in range(FLOOR - 4, FLOOR):
+                put(x, y, z, "polished_blackstone_bricks" if y == FLOOR - 1 else "deepslate_bricks")
+            put(x, FLOOR, z, "deepslate_tiles" if d <= 2.6 and not causeway else "polished_blackstone_bricks" if abs(x - CX) == 1 else "polished_deepslate")
+            continue
+        for y in range(FLOOR - 4, FLOOR - 2):
+            put(x, y, z, "deepslate_bricks")
+        if d <= 5.25:
+            put(x, FLOOR - 3, z, "sea_lantern" if (x * 3 + z) % 4 == 0 else "packed_ice")
+            put(x, FLOOR - 2, z, "ice")
+        elif d <= 6.0:
+            put(x, FLOOR - 2, z, "deepslate_bricks")
+            put(x, FLOOR - 1, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+        elif d <= 6.75:
+            put(x, FLOOR - 2, z, "deepslate_bricks")
+            put(x, FLOOR - 1, z, "polished_blackstone_bricks")
+        elif d <= 7.5:
+            put(x, FLOOR - 2, z, "deepslate_bricks"); put(x, FLOOR - 1, z, "deepslate_bricks")
+            put(x, FLOOR, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+        else:
+            put(x, FLOOR - 2, z, "deepslate_bricks"); put(x, FLOOR - 1, z, "deepslate_bricks")
+            put(x, FLOOR, z, "polished_blackstone_bricks")
+# the causeway's edges get a low slab kerb where it crosses the ice
+for z in range(CZ - 8, CZ + 9):
+    for x in (CX - 2, CX + 2):
+        d = math.hypot(x - CX, z - CZ)
+        if 2.6 < d <= 7.5:
+            put(x, FLOOR - 1, z, "polished_blackstone_bricks")
+            put(x, FLOOR, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+# frozen fountain on the centre island: tiers of ice, glowing core, a star of blue ice (top stays at y 2)
+for x in range(CX - 2, CX + 3):
+    for z in range(CZ - 2, CZ + 3):
+        d = math.hypot(x - CX, z - CZ)
+        if 1.5 < d <= 2.3 and abs(x - CX) != 0 and abs(z - CZ) != 0 or (1.5 < d <= 2.3 and abs(x - CX) == 2 and z == CZ) or (1.5 < d <= 2.3 and abs(z - CZ) == 2 and x == CX):
+            put(x, FLOOR + 1, z, "packed_ice")
+put(CX, FLOOR + 1, CZ, "sea_lantern")
+put(CX, FLOOR + 2, CZ, "blue_ice")
+for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+    put(CX + dx, FLOOR + 1, CZ + dz, "ice")
+    put(CX + dx, FLOOR + 2, CZ + dz, "light[level=15,waterlogged=false]")
+put(CX, FLOOR + 3, CZ, "end_rod[facing=up]")
+for i in range(8):
+    a = i / 8 * 2 * math.pi
+    put(round(CX + math.cos(a) * 6.6), FLOOR + 1, round(CZ + math.sin(a) * 6.6), "light[level=14,waterlogged=false]", force=False)
+
+# 2) raised garden beds between the walks: low (1-2) in front of the gates so they never hide a portal,
+#    up to 3 high round the sides and behind spawn with a decorated spruce on the biggest
+import heapq as _hq
+
+
+def walk_cell(x, z):
+    if math.hypot(x - CX, z - CZ) <= RIM + 0.8 or math.hypot(x, z) <= 4.8 or math.hypot(x - 4, z + 3) <= 3.0:
+        return True
+    if abs(x - CX) <= 2.6:
+        return True                                    # spawn <-> causeway <-> centre stairs / south walk
+    if abs(z - CZ) <= 3.6 and abs(x - CX) >= 10:
+        return True                                    # the east / west lanes
+    if xmas_paths.nearest(x + 0.5, z + 0.5)[0] <= 3.3:
+        return True                                    # the realm runners
+    if z <= V.TERRACE_Z0 + 1:
+        return True                                    # the terrace steps
+    return math.hypot(x - CX, z - CZ) > PLAZA + 0.6
+
+
+bed = [(x, z) for x in range(CX - PLAZA - 1, CX + PLAZA + 2) for z in range(CZ - PLAZA - 1, CZ + PLAZA + 2) if not walk_cell(x, z)]
+bedset = set(bed)
+DB = {c: 1e9 for c in bed}
+pq = []
+for (x, z) in bed:
+    if any((x + dx, z + dz) not in bedset for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+        DB[(x, z)] = 0.0
+        pq.append((0.0, (x, z)))
+_hq.heapify(pq)
+while pq:
+    dd, (x, z) = _hq.heappop(pq)
+    if dd > DB[(x, z)]:
+        continue
+    for dx, dz, w in ((1, 0, 1), (-1, 0, 1), (0, 1, 1), (0, -1, 1), (1, 1, 1.41), (1, -1, 1.41), (-1, 1, 1.41), (-1, -1, 1.41)):
+        n = (x + dx, z + dz)
+        if n in bedset and dd + w < DB[n]:
+            DB[n] = dd + w
+            _hq.heappush(pq, (dd + w, n))
+for (x, z) in bed:
+    for y in range(FLOOR + 1, FLOOR + 10):
+        B.pop((x, y, z), None)
+for (x, z) in bed:
+    front = z < CZ - 2                                 # between the runners, in front of the gates
+    hmax = 1 if front else 3
+    hb = int(min(hmax, 1 + DB[(x, z)] * 0.75))
+    for y in range(FLOOR + 1, FLOOR + hb + 1):
+        edge = DB[(x, z)] < 0.5
+        put(x, y, z, ("polished_blackstone_bricks" if y < FLOOR + hb else "polished_deepslate") if edge else ("snow_block" if y == FLOOR + hb else "dirt"))
+    if DB[(x, z)] < 0.5 and h(x, z, 41) < 0.12:
+        put(x, FLOOR + hb + 1, z, "lantern[hanging=false,waterlogged=false]")
+        NO_SNOW.add((x, FLOOR + hb + 1, z))
+    elif DB[(x, z)] >= 1.5 and front and h(x, z, 42) < 0.3:
+        put(x, FLOOR + hb + 1, z, SPRUCE)               # low evergreen shrubs
+    elif DB[(x, z)] >= 1.5 and not front and h(x, z, 43) < 0.12:
+        put(x, FLOOR + hb + 1, z, SPRUCE)
+        if h(x, z, 44) < 0.5:
+            put(x, FLOOR + hb + 2, z, SPRUCE)
+# a decorated spruce on the deepest part of each big bed (round the sides / behind spawn)
+spots = sorted([c for c in bed if c[1] >= CZ - 2 and DB[c] >= 3.0], key=lambda c: -DB[c])
+placed = []
+for (x, z) in spots:
+    if all(math.hypot(x - a, z - b) > 9 for a, b in placed) and len(placed) < 4:
+        y = FLOOR + 4
+        for dx in range(-2, 3):
+            for dz in range(-2, 3):
+                B.pop((x + dx, y, z + dz), None); B.pop((x + dx, y + 1, z + dz), None)
+        little_tree(x, z, y, 1, 1300 + len(placed) * 7)
+        placed.append((x, z))
+print("plaza beds:", len(bed), "cells,", len(placed), "trees")
+
 # ======================================================================= realm runners: rink -> each gate
 import xmas_paths
 SEGS = xmas_paths.segments()
@@ -549,7 +726,7 @@ for realm, a, b in SEGS:
     for x in range(lx0, lx1):
         for z in range(lz0, lz1):
             d, t = xmas_paths.seg_d(x + 0.5, z + 0.5, a, b)
-            if d > 2.7 or math.hypot(x + 0.5 - CX, z + 0.5 - CZ) < 6.4:
+            if d > 2.7 or math.hypot(x - CX, z - CZ) < 7.6:
                 continue
             dn, rn, _ = xmas_paths.nearest(x + 0.5, z + 0.5)
             if rn != realm:
@@ -558,8 +735,7 @@ for realm, a, b in SEGS:
             for y in range(FLOOR + 1, FLOOR + 16):
                 if (x, y, z) in B and not name(B[(x, y, z)]).startswith(("polished_deepslate_stairs", "polished_blackstone_brick_stairs")):
                     del B[(x, y, z)]
-            on_rink_wall = 6.4 < math.hypot(x - CX, z - CZ) <= 7.6
-            put(x, FLOOR, z, "polished_blackstone_bricks" if on_rink_wall else "polished_deepslate" if d <= 1.3 else "polished_blackstone_bricks")
+            put(x, FLOOR, z, "polished_deepslate" if d <= 1.3 else "polished_blackstone_bricks")
             if d <= 1.3:
                 put(x, FLOOR + 1, z, f"{c}_carpet")
                 NO_SNOW.add((x, FLOOR + 1, z))
@@ -568,7 +744,7 @@ for realm, a, b in SEGS:
                 if int(along) % 4 == 2 and 2.0 < d and along > 3:
                     put(x, FLOOR + 1, z, "lantern[hanging=false,waterlogged=false]")
                 else:
-                    put(x, FLOOR + 1, z, "snow[layers=%d]" % (2 + (h(x, z, 91) < 0.4)))
+                    put(x, FLOOR + 1, z, "snow[layers=1]")
                 NO_SNOW.add((x, FLOOR + 1, z))
     # candy-cane posts where the runner meets the gate's steps, either side, hooks curling over the runner
     vx, vz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
@@ -589,19 +765,32 @@ for realm, a, b in SEGS:
         NO_SNOW.update({(cx_, FLOOR + 4, cz_), (hx, FLOOR + 5, hz)})
 
 # ======================================================================= string lights between the gates
-BULB = ["shroomlight", "ochre_froglight", "verdant_froglight", "pearlescent_froglight", "sea_lantern"]
-ys = TERRACE_Y + 1 + 14
-xs_ = sorted([px - 6 for _, px in PORTALS] + [px + 6 for _, px in PORTALS])
-spans = [(xs_[i], xs_[i + 1]) for i in range(1, len(xs_) - 1, 2)]
-for (xa, xb) in spans:
-    span = xb - xa
-    sag = 1.6 + span * 0.18
-    for x in range(xa + 1, xb):
-        u = (x - xa) / span
-        y = round(ys - sag * (1 - (2 * u - 1) ** 2))
-        b = BULB[(x - xa) % len(BULB)] if (x - xa) % 2 == 0 else "iron_chain[axis=x,waterlogged=false]"
-        put(x, y, PORTAL_Z + 1, b)
-        NO_SNOW.add((x, y, PORTAL_Z + 1))
+# a garland of spruce with a bulb every other block: continuous, so it reads as a strand and not floating cubes
+BULB = ["shroomlight", "ochre_froglight", "pearlescent_froglight", "sea_lantern"]
+ys = TERRACE_Y + 1 + 13
+pins = []
+for realm, px in PORTALS:
+    for sx in (-6, 6):
+        pins.append(xmas_paths.rot(px + sx, PORTAL_Z + 1, px, realm))
+pins.sort()
+for i in range(1, len(pins) - 1, 2):
+    (xa, za), (xb, zb) = pins[i], pins[i + 1]
+    span = math.hypot(xb - xa, zb - za)
+    sag = 1.4 + span * 0.16
+    n = max(2, int(span * 3))
+    last = None
+    cells = []
+    for k in range(1, n):
+        u = k / n
+        c = (round(xa + (xb - xa) * u), round(ys - sag * (1 - (2 * u - 1) ** 2)), round(za + (zb - za) * u))
+        if c != last:
+            if last and abs(c[1] - last[1]) == 1 and (c[0], c[2]) != (last[0], last[2]):
+                cells.append((c[0], last[1], c[2]) if c[1] > last[1] else (last[0], c[1], last[2]))
+            cells.append(c)
+            last = c
+    for j, c in enumerate(cells):
+        put(*c, BULB[(j // 2) % len(BULB)] if j % 2 else SPRUCE)
+        NO_SNOW.add(c)
 
 # ======================================================================= Santa's spot beside the spawn dais
 SX, SZ = 4, -3
@@ -629,6 +818,8 @@ def walkway(x, y, z):
     return math.hypot(x - CX, z - CZ) > R + 6 and y < 40 and not (math.hypot(abs(x) - 62, z + 48) < 12 or math.hypot(x - TX, z - TZ) < 30 or (abs(x) < 4 and abs(z - 58) < 14))
 
 
+for k in [k for k, b in B.items() if name(b) == "air"]:
+    del B[k]
 tops = {}
 for (x, y, z) in B:
     if y > tops.get((x, z), -999):
@@ -640,10 +831,8 @@ for (x, z), y in tops.items():
     if math.hypot(x - CX, z - CZ) > R + 6 and not (math.hypot(abs(x) - 62, z + 48) < 12 or math.hypot(x - TX, z - TZ) < 30
                                                     or (abs(x) < 12 and abs(z - 58) < 14) or (math.hypot(abs(x) - 62, z + 48) < 14)):
         continue                                    # parkour and anything else out in the void stays clear
-    if walkway(x, y, z):
-        if h(x, z, 81) < 0.07 and math.hypot(x, z) > 4.5:
-            put(x, y + 1, z, "snow[layers=1]")       # a light dusting on the paving
-        continue
+    if walkway(x, y, z) or (math.hypot(x - CX, z - CZ) <= PLAZA + 1 and y <= FLOOR + 1) or math.hypot(x, z) <= 4.5:
+        continue                                    # paving, the rink and the spawn dais stay clean
     layers = 1 + (h(x, z, 82) < 0.35) + (h(x, z, 83) < 0.12 and "leaves" not in n)
     put(x, y + 1, z, f"snow[layers={layers}]")
 

@@ -41,7 +41,7 @@ final class HubBuild implements Listener {
 	static final int BUILD_VERSION = 14; // themes: hub.theme picks hub-spawn.txt.gz or hub-spawn-christmas.txt.gz. v14: grand gates, gem crystal + halo, no sky sign, minimal holograms (lore moved to the Codex)
 	static final int SPAWN_VERSION = 1;
 	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
-	static final int CHRISTMAS_REV = 3; // 3: valley + village, runners, string lights, NPC spots, no logo slab
+	static final int CHRISTMAS_REV = 4; // 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();
@@ -289,7 +289,10 @@ final class HubBuild implements Listener {
 		if (christmas()) {
 			// the logo + "walk through a gate" line move (they stood in front of the middle gap); the theme adds its own
 			List<?> hide = plugin.getConfig().getList(base + ".christmas.hide", List.of("{logo}", "walk through a gate"));
-			list.removeIf(m -> hide.stream().anyMatch(hs -> String.valueOf(m.get("text")).contains(String.valueOf(hs))));
+			list.removeIf(m -> hide.stream().anyMatch(h -> {
+				String hs = String.valueOf(h), t = String.valueOf(m.get("text"));
+				return hs.startsWith("=") ? t.equals(hs.substring(1)) : t.contains(hs);
+			}));
 			list.addAll(plugin.getConfig().getMapList(base + ".christmas.holograms"));
 		}
 		for (Map<?, ?> m : list) {
