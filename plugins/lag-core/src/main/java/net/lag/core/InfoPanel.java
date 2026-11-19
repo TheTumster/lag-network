@@ -392,6 +392,8 @@ final class InfoPanel implements Listener {
 	}
 
 	private void drop(UUID id) {
+		Player gone = Bukkit.getPlayer(id);
+		if (gone != null) reach(gone, false);
 		queue.remove(id);
 		View v = views.remove(id);
 		if (v != null) v.ents.forEach(Entity::remove);
@@ -399,6 +401,7 @@ final class InfoPanel implements Listener {
 
 	private void hover(Player p, View v) {
 		Hit found = aim(p, v);
+		reach(p, found != null);
 		if (found == v.hovered) return;
 		if (v.hovered != null && v.hovered.face.isValid()) v.hovered.face.setGlowing(false);
 		v.hovered = found;
@@ -407,6 +410,44 @@ final class InfoPanel implements Listener {
 			found.face.setGlowing(true);
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.25f, 1.9f);
 		}
+	}
+
+	/**
+	 * Entity reach is only ~3 blocks, so cards above you or further back light up but can't be hit. While the crosshair
+	 * is on a card the player's entity reach is stretched to 14 blocks so the click lands on the board from anywhere.
+	 * Transient (never saved), removed as soon as they look away, and hits on players/mobs are blocked while it's on.
+	 */
+	private static final org.bukkit.NamespacedKey REACH = new org.bukkit.NamespacedKey("lagcore", "board_reach");
+
+	private static void reach(Player p, boolean on) {
+		var inst = p.getAttribute(org.bukkit.attribute.Attribute.ENTITY_INTERACTION_RANGE);
+		if (inst == null) return;
+		boolean has = inst.getModifier(REACH) != null;
+		if (on && !has) {
+			inst.addTransientModifier(new org.bukkit.attribute.AttributeModifier(REACH, 11.0, org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER));
+		} else if (!on && has) {
+			inst.removeModifier(REACH);
+		}
+	}
+
+	private static boolean reaching(Player p) {
+		var inst = p.getAttribute(org.bukkit.attribute.Attribute.ENTITY_INTERACTION_RANGE);
+		return inst != null && inst.getModifier(REACH) != null;
+	}
+
+	@EventHandler(ignoreCancelled = true, priority = org.bukkit.event.EventPriority.LOWEST)
+	public void onReachHit(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+		if (e.getDamager() instanceof Player p && reaching(p)) e.setCancelled(true);
+	}
+
+	@EventHandler(ignoreCancelled = false)
+	public void onReachUse(PlayerInteractEntityEvent e) {
+		if (!(e.getRightClicked() instanceof Interaction) && reaching(e.getPlayer())) e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onJoinReach(org.bukkit.event.player.PlayerJoinEvent e) {
+		reach(e.getPlayer(), false);
 	}
 
 	/** The card under the player's crosshair, or null. */
@@ -489,7 +530,7 @@ final class InfoPanel implements Listener {
 	@EventHandler(ignoreCancelled = false, priority = org.bukkit.event.EventPriority.LOW)
 	public void onUse(org.bukkit.event.player.PlayerInteractEvent e) {
 		var a = e.getAction();
-		if (a != org.bukkit.event.block.Action.RIGHT_CLICK_AIR && a != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
+		if (a == org.bukkit.event.block.Action.PHYSICAL) return;
 		if (e.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
 		View v = views.get(e.getPlayer().getUniqueId());
 		if (v == null || !v.built || aim(e.getPlayer(), v) == null) return;

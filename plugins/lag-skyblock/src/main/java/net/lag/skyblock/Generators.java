@@ -133,9 +133,14 @@ final class Generators implements Listener, CommandExecutor {
 	}
 
 	void open(Player p) {
+		// Works from anywhere: use the island you're standing on if you're a member, otherwise your own island.
 		Object island = Islands.at(p.getLocation());
 		if (island == null || !Islands.member(island, p.getUniqueId())) {
-			p.sendMessage(Spawners.mm("<red>Stand on your own island to manage its generator. <gray>(/is)"));
+			org.bukkit.World w = Islands.islandWorld();
+			island = w == null ? null : Islands.of(w, p.getUniqueId());
+		}
+		if (island == null) {
+			p.sendMessage(Spawners.mm("<red>You don't have an island yet. <gray>(/is create)"));
 			return;
 		}
 		Menu m = new Menu();
