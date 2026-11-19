@@ -16,7 +16,8 @@ the Core, a cracked crystal still floating over what was the world's heart, with
   S  (0,48)     : the Rift - a hole down to the Warzone (y -44), a water pool catches the drop
   below         : the Warzone - shattered PvP arena under the core (centre (0,-44,20)), KOTH hill in the middle
 Everything stays inside z <= 60 (the old Pit at z 64..98 is removed by laGSkyblock) and |x| <= 76.
-Run: python3 tools/hub/genspawn_skyblock.py [--preview dir]
+Run: python3 tools/hub/genspawn_skyblock.py [--christmas] [--preview dir]
+  --christmas writes spawn-skyblock-christmas.txt.gz (laGCore spawns.skyblock.theme: christmas)
 """
 import gzip, math, os, sys
 
@@ -715,9 +716,263 @@ for (x, z) in wz_cols:
     if h(x, z, 931) < 0.008 and free(x, top_y + 1, z):
         put(x, top_y + 1, z, "soul_campfire[facing=north,lit=true,signal_fire=false,waterlogged=false]")
 
+# ====================================================================== CHRISTMAS (--christmas): the Shattered World in winter
+# Snow over the old world's grass and stone, frozen icicles under every island, decorated spruces where the cherries
+# stood, candy-cane lamp posts, a red-and-green inlay, a garland of lights spiralling round the crystal, presents in the
+# Crate Vaults, snowmen, and a Great Tree on its own island north of the hub portal (seen over the arch from spawn).
+XMAS = "--christmas" in sys.argv
+NO_SNOW = set()
+if XMAS:
+    OUT = OUT.replace("spawn-skyblock.txt.gz", "spawn-skyblock-christmas.txt.gz")
+    SPRUCE = "spruce_leaves[distance=1,persistent=true,waterlogged=false]"
+
+    def base(b):
+        return b.replace("minecraft:", "")
+
+    # -------- re-dress what's there
+    for k, b in list(B.items()):
+        n = base(b)
+        x, y, z = k
+        if n.startswith(("cherry_log", "cherry_leaves", "pink_petals", "short_grass", "allium", "azure_bluet", "cornflower", "azalea")):
+            del B[k]
+        elif n == GRASS:
+            B[k] = "minecraft:grass_block[snowy=true]"
+        elif n == "moss_carpet":
+            B[k] = "minecraft:snow[layers=1]"
+        elif n == "dripstone_block":
+            B[k] = "minecraft:packed_ice"
+        elif n.startswith("pointed_dripstone"):
+            B[k] = "minecraft:ice"
+        elif n == "cyan_terracotta":                     # inner inlay ring: candy stripes
+            a = (math.degrees(math.atan2(z, x)) + 360) % 360
+            B[k] = "minecraft:" + ("red_terracotta" if int(a / 9) % 2 else "white_terracotta")
+        elif n == "purple_terracotta":                   # outer ring: evergreen
+            B[k] = "minecraft:green_terracotta"
+        elif n in ("cyan_wool", "purple_wool") and math.hypot(x - MX, z - MZ) < 14:
+            B[k] = "minecraft:" + ("red_wool" if n == "cyan_wool" else "lime_wool")   # market awnings
+    # sculk and moss on island tops turn to snow (the undersides keep their corruption)
+    tops = {}
+    for (x, y, z) in B:
+        if y > tops.get((x, z), -999):
+            tops[(x, z)] = y
+    for (x, z), y in tops.items():
+        if y > -20 and base(B[(x, y, z)]) in ("sculk", "moss_block"):
+            B[(x, y, z)] = "minecraft:snow_block"
+
+    # -------- lamp posts -> candy canes (warm lantern on top)
+    for (x, y, z), b in list(B.items()):
+        if base(b) != SOUL_LANTERN or not get(x, y - 1, z).startswith("polished_blackstone_wall") or not get(x, y - 3, z).startswith("polished_blackstone_wall"):
+            continue
+        for i, yy in enumerate(range(y - 3, y)):
+            put(x, yy, z, "red_concrete" if i % 2 else "white_concrete")
+        put(x, y, z, LANTERN)
+        NO_SNOW.add((x, y - 1, z))
+
+    # -------- presents and decorated spruces
+    ORN = ["red_concrete", "gold_block", "red_concrete", "light_blue_concrete", "white_concrete"]
+
+    def present(x, y, z, size, seed):
+        c, r = [("red", "yellow"), ("lime", "red"), ("light_blue", "white"), ("purple", "yellow"), ("white", "red"),
+                ("green", "white"), ("magenta", "white")][int(h(seed, 1) * 7)]
+        mid = size // 2
+        for dx in range(size):
+            for dz in range(size):
+                for dy in range(size):
+                    rib = size >= 3 and (dx == mid or dz == mid)
+                    put(x + dx, y + dy, z + dz, f"{r}_concrete" if rib else f"{c}_wool")
+                    NO_SNOW.add((x + dx, y + dy, z + dz))
+        if size >= 3:
+            put(x + mid, y + size, z + mid, f"{r}_wool")
+            put(x + mid - 1, y + size, z + mid, f"{r}_carpet")
+            put(x + mid + 1, y + size, z + mid, f"{r}_carpet")
+        else:
+            put(x, y + size, z, f"{r}_carpet")
+
+    def clear_box(x0, x1, y0, y1, z0, z1):
+        return all(free(x, y, z) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1) for z in range(z0, z1 + 1))
+
+    def little_tree(x0, z0, y0, size, seed, presents=True):
+        hgt = 8 + size * 3
+        rmax = 2.6 + size * 0.9
+        put(x0, y0, z0, "spruce_log[axis=y]")
+        put(x0, y0 + 1, z0, "spruce_log[axis=y]")
+        for y in range(2, hgt):
+            u = (y - 2) / (hgt - 2)
+            tier = (u * (2 + size)) % 1
+            rr = rmax * (1 - u) * (0.7 + 0.3 * (1 - tier)) + 0.4
+            for dx in range(-5, 6):
+                for dz in range(-5, 6):
+                    d = math.hypot(dx, dz)
+                    if d > rr:
+                        continue
+                    x, z, yy = x0 + dx, z0 + dz, y0 + y
+                    if not free(x, yy, z) and not get(x, yy, z).startswith("spruce"):
+                        continue
+                    if d > rr - 1.1 and h(x, yy, z, seed) < 0.09:
+                        put(x, yy, z, ORN[int(h(x, yy, z, seed + 1) * len(ORN))])
+                    elif d > rr - 1.1 and h(x, yy, z, seed + 2) < 0.06:
+                        put(x, yy, z, "ochre_froglight")
+                    else:
+                        put(x, yy, z, SPRUCE)
+        put(x0, y0 + hgt, z0, "gold_block")
+        put(x0, y0 + hgt + 1, z0, ROD)
+        NO_SNOW.add((x0, y0 + hgt, z0))
+        if presents:
+            for i in range(2 + size):
+                a = h(seed, i, 3) * math.tau
+                px, pz = round(x0 + math.cos(a) * (rmax + 0.8)), round(z0 + math.sin(a) * (rmax + 0.8))
+                if free(px, y0, pz) and not free(px, y0 - 1, pz):
+                    present(px, y0, pz, 1, seed * 7 + i)
+
+    for k, a in enumerate((0.42, 1.95, 3.55, 5.05)):           # where the cherries stood round the plaza
+        little_tree(int(round(math.cos(a) * 22.5)), int(round(math.sin(a) * 22.5)), 1, 1 + k % 2, 300 + k * 13)
+    little_tree(MX, MZ, 1, 1, 360)                             # the market's tree
+
+    # presents spilling round the Crate Vaults' heavy core (crates are presents this month)
+    for i in range(8):
+        a = i / 8 * math.tau + 0.39
+        px, pz = VX + round(math.cos(a) * 2.2), VZ + round(math.sin(a) * 2.2)
+        if free(px, 1, pz) and not free(px, 0, pz):
+            present(px, 1, pz, 1, 500 + i)
+
+    # -------- a garland of lights spiralling round the crystal
+    BULB = ["shroomlight", "ochre_froglight", "pearlescent_froglight", "sea_lantern", "verdant_froglight"]
+    j = 0
+    steps = 420
+    for i in range(steps):
+        u = i / steps
+        y = CY0 + 1 + u * (CY1 - CY0 - 2)
+        t = 1 - abs(y - mid) / ((CY1 - CY0) / 2)
+        rad = 0.6 + t * 6.2 + 1.2
+        a = u * math.tau * 3.2
+        x, z = int(round(math.cos(a) * rad)), int(round(math.sin(a) * rad / 0.85))
+        yy = int(round(y))
+        if free(x, yy, z):
+            put(x, yy, z, BULB[(j // 2) % len(BULB)] if j % 2 else SPRUCE)
+            NO_SNOW.add((x, yy, z))
+            j += 1
+
+    # -------- snowmen (one by each of four district bridges, facing the core)
+    def snowman(x, z):
+        for y in (1, 2):
+            put(x, y, z, "snow_block")
+        dx, dz = -x, -z
+        face = ("east" if dx > 0 else "west") if abs(dx) >= abs(dz) else ("south" if dz > 0 else "north")
+        put(x, 3, z, f"carved_pumpkin[facing={face}]")
+        NO_SNOW.add((x, 3, z))
+
+    for name_, off in (("hub", (8, 6)), ("season", (5, -7)), ("crates", (-7, -5)), ("champions", (-7, 5))):
+        cx_, cz_ = DISTRICTS[name_]
+        for r_ in range(0, 4):
+            x, z = cx_ + off[0] + r_, cz_ + off[1]
+            if not free(x, 0, z) and clear_box(x, x, 1, 3, z, z):
+                snowman(x, z)
+                break
+
+    # -------- the Great Tree, on its own island north of the hub portal
+    TX, TZ = 0, -92
+    tcols = island(TX, 0, TZ, 12, 951, top="none", depth=14)
+    for (x, z) in tcols:
+        put(x, 0, z, "snow_block" if h(x, z, 952) < 0.8 else "packed_ice")
+    YB, YT, RMAX, TIERS = 3, 32, 9.5, 5
+    for y in range(1, YB + 1):
+        for dx in (0, 1):
+            for dz in (0, 1):
+                put(TX + dx - 1, y, TZ + dz - 1, "spruce_log[axis=y]")
+    for y in range(YB, YT + 1):
+        u = (y - YB) / (YT - YB)
+        k = min(TIERS - 1, int(u * TIERS))
+        f = u * TIERS - k
+        for x in range(-12, 13):
+            for z in range(-12, 13):
+                d = math.hypot(x + 0.5, z + 0.5)
+                ang = math.atan2(z, x)
+                rr = RMAX * (1 - u) ** 0.92 * (0.6 + 0.4 * (1 - f) ** 1.3) + 0.8 + (vn(ang * 7 + k * 5.3, y * 0.4, 1.0, 17) - 0.5) * (2.2 * (1 - u) + 0.5)
+                if d > rr:
+                    continue
+                X, Z = TX + x, TZ + z
+                if d > rr - 1.2:
+                    n = h(X, y, Z, 961)
+                    b = ORN[int(h(X, y, Z, 962) * len(ORN))] if n < 0.08 else ("ochre_froglight" if n < 0.13 else "glowstone" if n < 0.15 else SPRUCE)
+                else:
+                    b = SPRUCE if d > 1.5 else "spruce_log[axis=y]"
+                put(X, y, Z, b)
+    # garland bands round the tree
+    for band in range(4):
+        y0 = YB + 4 + band * 6
+        for i in range(160):
+            a = i / 160 * math.tau
+            y = y0 + math.sin(a * 2 + band) * 1.2
+            u = (y - YB) / (YT - YB)
+            rr = RMAX * (1 - u) ** 0.92 * 0.85 + 1.2
+            x, z, yy = TX + int(round(math.cos(a) * rr)), TZ + int(round(math.sin(a) * rr)), int(round(y))
+            if free(x, yy, z):
+                put(x, yy, z, ["red_concrete", "gold_block", "white_concrete"][band % 3] if i % 3 else "sea_lantern")
+    # the star (faces the core, and east-west too)
+    SY = YT + 5
+
+    def in_star(px, py, R_, r_):
+        a = math.atan2(px, py)
+        d = math.hypot(px, py)
+        seg = (a % (math.tau / 5)) / (math.tau / 5)
+        t = abs(seg - 0.5) * 2
+        edge = r_ + (R_ - r_) * t ** 1.6
+        return d <= edge, d, edge
+
+    for u in range(-7, 8):
+        for v in range(-7, 8):
+            ok, d, edge = in_star(u, v, 5.5, 2.4)
+            if not ok:
+                continue
+            b = "ochre_froglight" if d < 1.8 else "glowstone" if d > edge - 0.9 else "gold_block"
+            put(TX + u, SY + v, TZ, b)
+            put(TX, SY + v, TZ + u, b, force=False)
+            NO_SNOW.add((TX + u, SY + v, TZ)); NO_SNOW.add((TX, SY + v, TZ + u))
+    for y in range(YT - 1, SY - 2):
+        put(TX, y, TZ, "gold_block")
+    # presents round the base, two giant candy canes either side
+    pi_ = 0
+    for ring, count in ((10.5, 12),):
+        for i in range(count):
+            a = (i + h(i, 3)) / count * math.tau
+            px, pz = TX + round(math.cos(a) * ring), TZ + round(math.sin(a) * ring)
+            size = 2 if h(i, 4) < 0.45 else 1
+            if clear_box(px, px + size - 1, 1, size, pz, pz + size - 1) and all(not free(px + dx, 0, pz + dz) for dx in range(size) for dz in range(size)):
+                present(px, 1, pz, size, 900 + pi_)
+                pi_ += 1
+    for sx in (-1, 1):
+        bx, bz = TX + sx * 9, TZ + 6
+        top = 12
+        for y in range(1, top):
+            put(bx, y, bz, "red_concrete" if (y // 2) % 2 else "white_concrete")
+        for i, (hx, hy) in enumerate(((0, top), (-sx, top + 1), (-2 * sx, top + 1), (-3 * sx, top), (-3 * sx, top - 1))):
+            put(bx + hx, hy, bz, "red_concrete" if i % 2 else "white_concrete")
+    for i in range(10):
+        a = i / 10 * math.tau
+        put(TX + round(math.cos(a) * 11), 3, TZ + round(math.sin(a) * 11), "light[level=13,waterlogged=false]", force=False)
+
+    # -------- snow over the old world (natural tops only: floors, bridges and NPC spots stay clean)
+    SNOWS_ON = ("grass_block", "snow_block", "moss_block", "sculk", "deepslate", "cobbled_deepslate", "tuff", "blackstone",
+                "stone_bricks", "mossy_stone_bricks", "cracked_stone_bricks", "spruce_leaves", "red_wool", "lime_wool", "white_wool",
+                "packed_ice", "obsidian")
+    tops = {}
+    for (x, y, z) in B:
+        if y > tops.get((x, z), -999):
+            tops[(x, z)] = y
+    for (x, z), y in tops.items():
+        if y < -20 or (x, y, z) in NO_SNOW:
+            continue
+        n = get(x, y, z)
+        if n not in SNOWS_ON:
+            continue
+        if y == 0 and math.hypot(x, z) <= PLAZA_R + 0.6:
+            continue
+        layers = 1 + (h(x, z, 82) < 0.3 and n in ("grass_block", "snow_block"))
+        put(x, y + 1, z, f"snow[layers={layers}]")
+
 # ====================================================================== invisible light across walkable tops
 for x in range(-80, 81, 6):
-    for z in range(-75, 66, 6):
+    for z in range(-105, 66, 6):
         for y0 in (0, WY):
             if (x, y0, z) in B and free(x, y0 + 3, z) and free(x, y0 + 1, z) and free(x, y0 + 2, z):
                 put(x, y0 + 3, z, "light[level=13,waterlogged=false]")
