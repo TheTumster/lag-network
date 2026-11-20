@@ -289,6 +289,8 @@ public final class LagSkyblock extends JavaPlugin {
 			want.put("global-spawner-settings.silk-touch-required", false);
 			want.put("global-spawner-settings.spawn-player-activation-range", getConfig().getInt("rosestacker.player-activation-range", 24));
 			want.put("global-spawner-settings.disable-mob-ai", getConfig().getBoolean("rosestacker.disable-mob-ai", true));
+			// any cage mob that dies takes its whole stack with it, whatever killed it
+			want.put("global-spawner-settings.disable-mob-ai-options.kill-entire-stack-on-death", true);
 			// a fixed 360 mobs an hour per cage (2 every 400 ticks), so the economy's numbers hold
 			int delay = getConfig().getInt("rosestacker.spawn-delay", 400);
 			want.put("global-spawner-settings.spawn-delay-minimum", delay);
