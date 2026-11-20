@@ -305,7 +305,9 @@ final class HubFx implements Listener {
 	private void banner(Player p) {
 		Fresh.clear(p);
 		java.util.List<String> lines = plugin.getConfig().getStringList("fresh-chat.banner.hub");
-		if (lines.isEmpty()) lines = java.util.List.of("{logo}", "",
+		// Christmas: one festive line under the logo instead of a separate greeting
+		String season = build.christmas() ? "{c}<#F4C542>❄ <gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#F4C542>❄" : "";
+		if (lines.isEmpty()) lines = java.util.List.of("{logo}", season,
 				"{c}<gray>Welcome " + (p.hasPlayedBefore() ? "back, " : "") + "<white>{player}<gray>. <dark_gray>•</dark_gray> <white>{online}</white> <gray>online",
 				"", "{c}[[<#38E0FF><bold>▶ PLAY</bold>|/server|<gray>Pick a realm]]   [[<#B040FF><bold>✦ DISCORD</bold>|{discord}|<gray>Join the community]]   [[<#FFD24D><bold>⛃ STORE</bold>|{store}|<gray>Ranks and cosmetics]]", "");
 		Chat.banner(p, plugin, lines, "Hub");

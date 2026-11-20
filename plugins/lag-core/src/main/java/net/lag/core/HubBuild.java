@@ -299,8 +299,11 @@ final class HubBuild implements Listener {
 		List<Map<?, ?>> list = new java.util.ArrayList<>(plugin.getConfig().getMapList(base + ".holograms"));
 		if (christmas()) {
 			// the logo + "walk through a gate" line move (they stood in front of the middle gap); the theme adds its own
-			List<?> hide = plugin.getConfig().getList(base + ".christmas.hide", List.of("{logo}", "walk through a gate"));
-			list.removeIf(m -> hide.stream().anyMatch(h -> {
+			// getList(path) (no default argument) so the jar's config defaults apply; getList(path, def) skips them
+			List<?> hide = plugin.getConfig().getList(base + ".christmas.hide");
+			if (hide == null) hide = List.of("{logo}", "walk through a gate");
+			final List<?> hideF = hide;
+			list.removeIf(m -> hideF.stream().anyMatch(h -> {
 				String hs = String.valueOf(h), t = String.valueOf(m.get("text"));
 				return hs.startsWith("=") ? t.equals(hs.substring(1)) : t.contains(hs);
 			}));
@@ -660,7 +663,7 @@ final class HubBuild implements Listener {
 	/** Santa says hello when you arrive in the Christmas hub. */
 	@EventHandler
 	public void onJoinGreet(org.bukkit.event.player.PlayerJoinEvent e) {
-		if (!christmas() || !plugin.optBool(base + ".christmas.greet", true)) return;
+		if (!christmas() || !plugin.optBool(base + ".christmas.greet", false)) return;
 		Player p = e.getPlayer();
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;

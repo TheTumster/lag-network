@@ -281,7 +281,8 @@ hub:
   snow: true
   # Christmas only: what the theme adds on top of the normal hub (all off again with theme: default).
   christmas:
-    greet: true
+    # Santa's chat greeting on join (off: the welcome banner carries a Merry Christmas line instead)
+    greet: false
     # the moving set pieces (ChristmasFx): sleigh + reindeer circling, toy train round the tree, twinkling tree,
     # fireworks over the tree every 90 s, northern lights behind the palace
     fx: {sleigh: true, train: true, twinkle: true, fireworks: true, aurora: true}
