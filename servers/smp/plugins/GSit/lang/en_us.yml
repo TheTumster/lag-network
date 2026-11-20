@@ -1,0 +1,48 @@
+Plugin:
+  plugin-enabled: "[P]<#7CFF6B> The plugin was successfully enabled."
+  plugin-link: "[P]<#7CFF6B> Link with<#38E0FF> %Link%<gray> successful!"
+  plugin-update: "[P]<#7CFF6B> New version available:<#38E0FF> %NewVersion%<gray>! Current version:<#38E0FF> %Version%<gray>! Download the latest version:<#38E0FF> %Path%"
+  plugin-data: "[P]<#FF4D6D> A connection to the data storage could not be established. Please check the server console!"
+  plugin-version: "[P]<#FF4D6D> The plugin can't be used with this server version! (&b%Version%&c)"
+  plugin-reload: "[P]<#7CFF6B> The plugin was successfully reloaded."
+  plugin-disabled: "[P]<#7CFF6B> The plugin was successfully disabled."
+  plugin-prefix: "<dark_gray>[<#38E0FF>Sit</#38E0FF>]</dark_gray>"
+
+Messages:
+  command-permission-error: "[P]<#FF4D6D> You don't have permission to use this command!"
+  command-sender-error: "[P]<#FF4D6D> You can't run this command!"
+  command-version-error: "[P]<#FF4D6D> Outdated server version! (&b%Version%&c) Upgrade the server to use this feature!"
+
+  command-gsit-toggle-on: "[P]<#7CFF6B> You have enabled<#38E0FF> sit<gray> click-interactions."
+  command-gsit-toggle-off: "[P]<#7CFF6B> You have disabled<#38E0FF> sit<gray> click-interactions."
+  command-gsit-playertoggle-on: "[P]<#7CFF6B> You have enabled<#38E0FF> playersit<gray> click-interactions."
+  command-gsit-playertoggle-off: "[P]<#7CFF6B> You have disabled<#38E0FF> playersit<gray> click-interactions."
+  command-gcrawl-toggle-on: "[P]<#7CFF6B> You have enabled<#38E0FF> crawl<gray> double-sneak."
+  command-gcrawl-toggle-off: "[P]<#7CFF6B> You have disabled<#38E0FF> crawl<gray> double-sneak."
+
+  action-sit-now-error: "[P]<#FF4D6D> You can't sit right now!"
+  action-sit-world-error: "[P]<#FF4D6D> You can't sit in this world!"
+  action-sit-location-error: "[P]<#FF4D6D> You can't sit here!"
+  action-sit-safe-error: "[P]<#FF4D6D> It's not safe to sit here!"
+  action-sit-region-error: "[P]<#FF4D6D> You can't sit in this region!"
+  action-sit-kick-error: "[P]<#FF4D6D> Someone is already sitting here!"
+  action-sit-error: "[P]<#FF4D6D> Due to an error you can't sit here!"
+  action-sit-info: "<#38E0FF><lang:key.sneak></#38E0FF><gray> to get up"
+
+  action-playersit-info: "<#38E0FF><lang:key.sneak></#38E0FF><gray> to get up"
+
+  action-pose-now-error: "[P]<#FF4D6D> You can't pose right now!"
+  action-pose-world-error: "[P]<#FF4D6D> You can't pose in this world!"
+  action-pose-location-error: "[P]<#FF4D6D> You can't pose here!"
+  action-pose-safe-error: "[P]<#FF4D6D> It's not safe to pose here!"
+  action-pose-region-error: "[P]<#FF4D6D> You can't pose in this region!"
+  action-pose-kick-error: "[P]<#FF4D6D> Someone is already posing here!"
+  action-pose-error: "[P]<#FF4D6D> Due to an error you can't pose here!"
+  action-pose-info: "<#38E0FF><lang:key.sneak></#38E0FF><gray> to get up"
+
+  action-crawl-now-error: "[P]<#FF4D6D> You can't crawl right now!"
+  action-crawl-world-error: "[P]<#FF4D6D> You can't crawl in this world!"
+  action-crawl-region-error: "[P]<#FF4D6D> You can't crawl in this region!"
+  action-crawl-info: "<#38E0FF><lang:key.sneak></#38E0FF><gray> to get up"
+
+  action-blocked-error: "[P]<#FF4D6D> You are not allowed to run this command right now!"
