@@ -104,6 +104,32 @@
       "loader": "paper"
     },
     {
+      "modrinth": "griefpreventioneasygui",
+      "loader": "paper",
+      "optional": true
+    },
+    {
+      "github": "SuperRonanCraft/BetterRTP",
+      "match": "^BetterRTP-[0-9][0-9.]*\\.jar$"
+    },
+    {
+      "modrinth": "veinminer",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "gsit",
+      "loader": "paper"
+    },
+    {
+      "modrinth": "genius-shop",
+      "loader": "paper",
+      "version": "1.6.0"
+    },
+    {
+      "modrinth": "chestshop",
+      "loader": "paper"
+    },
+    {
       "local": "laGCore"
     }
   ],
