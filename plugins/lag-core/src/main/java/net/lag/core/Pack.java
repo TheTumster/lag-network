@@ -58,6 +58,12 @@ final class Pack implements Listener {
 
 	Pack(LagCore plugin) {
 		this.plugin = plugin;
+		// the RelapsedMC Client says "I have the pack" on this channel when it joins or switches server
+		try {
+			Bukkit.getMessenger().registerIncomingPluginChannel(plugin, CLIENT_PACK_CHANNEL, (ch, player, data) -> loaded.add(player.getUniqueId()));
+		} catch (Throwable t) {
+			plugin.getLogger().warning("Couldn't listen on " + CLIENT_PACK_CHANNEL + ": " + t);
+		}
 	}
 
 	String url() {
@@ -89,8 +95,11 @@ final class Pack implements Listener {
 	/** The RelapsedMC Client has the pack built in and advertises this channel: never prompt it. */
 	static final String CLIENT_PACK_CHANNEL = "relapsed:pack";
 
+	/** The RelapsedMC Client: it advertises the channel, and its brand reads "...+relapsed". */
 	static boolean builtIn(Player p) {
-		return p.getListeningPluginChannels().contains(CLIENT_PACK_CHANNEL);
+		if (p.getListeningPluginChannels().contains(CLIENT_PACK_CHANNEL)) return true;
+		String brand = p.getClientBrandName();
+		return brand != null && brand.toLowerCase(java.util.Locale.ROOT).contains("relapsed");
 	}
 
 	void send(Player p) {
@@ -104,7 +113,7 @@ final class Pack implements Listener {
 	}
 
 	boolean has(Player p) {
-		return p != null && loaded.contains(p.getUniqueId());
+		return p != null && (loaded.contains(p.getUniqueId()) || builtIn(p));
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)

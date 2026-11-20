@@ -6,7 +6,8 @@ font is untouched:
   \\uE000 logo, tall (tab header)        \\uE001 logo, line height (scoreboard / chat / boss bar)
   \\uE002 logo, title size                \\uE003 logo, hologram (big, high-res)
   \\uE010.. icons (8px): arrow, players, ping, tnt, sword, star, dot, bolt
-  \\uE100 selector menu panel (3 rows)    \\uE101 cosmetics menu panel (4 rows)
+  \\uE100 selector menu panel (5 rows: a strip per realm + a bottom bar)    \\uE101 cosmetics menu panel (4 rows)
+  items/blank.json: item model "relapsed:blank" draws nothing (invisible clickable slots over menu art)
   \\uF801 = -1px, \\uF808 = -8px, \\uF8B0 = -176px (negative space for the menu panels)
 Run: python3 tools/pack/genpack.py   (needs Pillow and the Inter font: /usr/share/fonts/opentype/inter)
 """
@@ -168,6 +169,107 @@ def panel(rows, highlight_slots, title):
     return im
 
 
+# ------------------------------------------------------------------ realm selector (5 rows)
+PIX = {  # 5x7 pixel letters for the menu art
+    "A": [" ### ", "#   #", "#   #", "#####", "#   #", "#   #", "#   #"],
+    "B": ["#### ", "#   #", "#   #", "#### ", "#   #", "#   #", "#### "],
+    "C": [" ####", "#    ", "#    ", "#    ", "#    ", "#    ", " ####"],
+    "F": ["#####", "#    ", "#    ", "#### ", "#    ", "#    ", "#    "],
+    "I": ["#####", "  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "#####"],
+    "K": ["#   #", "#  # ", "# #  ", "##   ", "# #  ", "#  # ", "#   #"],
+    "L": ["#    ", "#    ", "#    ", "#    ", "#    ", "#    ", "#####"],
+    "M": ["#   #", "## ##", "# # #", "# # #", "#   #", "#   #", "#   #"],
+    "N": ["#   #", "##  #", "# # #", "#  ##", "#   #", "#   #", "#   #"],
+    "O": [" ### ", "#   #", "#   #", "#   #", "#   #", "#   #", " ### "],
+    "P": ["#### ", "#   #", "#   #", "#### ", "#    ", "#    ", "#    "],
+    "S": [" ####", "#    ", "#    ", " ### ", "    #", "    #", "#### "],
+    "T": ["#####", "  #  ", "  #  ", "  #  ", "  #  ", "  #  ", "  #  "],
+    "Y": ["#   #", "#   #", " # # ", "  #  ", "  #  ", "  #  ", "  #  "],
+    ">": ["#    ", "##   ", "###  ", "#### ", "###  ", "##   ", "#    "],
+    " ": ["     "] * 7,
+}
+SELECTOR_REALMS = [("SKYBLOCK", (0x7C, 0xFF, 0x6B)), ("FACTIONS", (0xFF, 0x4D, 0x6D)), ("CANNONS", (0xFF, 0x9F, 0x4D)), ("SMP", (0x38, 0xE0, 0xFF))]
+
+
+def pix_text(px, x, y, text, col, bold=False, shadow=None):
+    for ch in text:
+        g = PIX.get(ch, PIX[" "])
+        for gy, row in enumerate(g):
+            for gx, c in enumerate(row):
+                if c != "#":
+                    continue
+                for bx in ((0, 1) if bold else (0,)):
+                    if shadow:
+                        px[x + gx + bx + 1, y + gy + 1] = shadow
+                for bx in ((0, 1) if bold else (0,)):
+                    px[x + gx + bx, y + gy] = col
+        x += (7 if bold else 6)
+    return x
+
+
+def selector_panel():
+    """5 rows: rows 0-3 are one strip per realm (icon slot, name, PLAY pill), row 4 a bar with Discord / Close / Store.
+    Drawn over the chest area; slot holes are left only where real items show (icons and the bar buttons)."""
+    rows = 5
+    W, H = 176, 17 + rows * 18 + 4
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    body = gradient(W, H, [(14, 9, 30), (24, 11, 44), (14, 9, 30)])
+    mask = Image.new("L", (W, H))
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, W - 1, H - 1), radius=5, fill=240)
+    im.paste(body, (0, 0), mask)
+    bm = Image.new("L", (W, H))
+    bd = ImageDraw.Draw(bm)
+    bd.rounded_rectangle((0, 0, W - 1, H - 1), radius=5, outline=255, width=2)
+    bd.line((8, 15, W - 9, 15), fill=170, width=1)
+    im.paste(gradient(W, H, [CYAN, PURPLE, PINK]), (0, 0), bm)
+    holes = []
+    for r, (name, col) in enumerate(SELECTOR_REALMS):
+        y0 = 17 + r * 18
+        x0, x1 = 7, 7 + 9 * 18 - 1
+        dark = (18, 11, 34)
+        strip = Image.new("RGBA", (x1 - x0 + 1, 16))
+        sp = strip.load()
+        for xx in range(strip.size[0]):
+            t = xx / (strip.size[0] - 1)
+            k = max(0.0, 1 - t / 0.62)
+            c = lerp(dark, lerp(dark, col, 0.55), k)
+            for yy in range(16):
+                sh = 1.1 - 0.25 * yy / 15
+                sp[xx, yy] = (min(255, int(c[0] * sh)), min(255, int(c[1] * sh)), min(255, int(c[2] * sh)), 255)
+        sm = Image.new("L", strip.size)
+        ImageDraw.Draw(sm).rounded_rectangle((0, 0, strip.size[0] - 1, 15), radius=3, fill=255)
+        im.paste(strip, (x0, y0 + 1), sm)
+        ImageDraw.Draw(im).rounded_rectangle((x0, y0 + 1, x1, y0 + 16), radius=3, outline=col + (255,), width=1)
+        # icon box (hole) with a glow frame
+        d = ImageDraw.Draw(im)
+        d.rectangle((x0 + 1, y0 + 1, x0 + 17, y0 + 16), outline=lerp(col, (255, 255, 255), 0.35) + (255,), width=1)
+        holes.append((x0 + 2, y0 + 2, x0 + 16, y0 + 15))
+        px = im.load()
+        shadow = lerp(col, (0, 0, 0), 0.65) + (255,)
+        pix_text(px, x0 + 24, y0 + 5, name, (255, 255, 255, 255), bold=True, shadow=shadow)
+        # PLAY pill on the right
+        pl, pr = x1 - 39, x1 - 3
+        d.rounded_rectangle((pl, y0 + 4, pr, y0 + 13), radius=4, fill=col + (255,))
+        tx = pix_text(px, pl + 4, y0 + 6 - 1, "PLAY", (20, 10, 30, 255))
+        pix_text(px, tx + 1, y0 + 5, ">", (20, 10, 30, 255))
+    # bottom bar: three button boxes (holes) and a fine line between
+    y0 = 17 + 4 * 18
+    d = ImageDraw.Draw(im)
+    d.line((26, y0 + 9, 7 + 4 * 18 - 3, y0 + 9), fill=(80, 60, 130, 255))
+    d.line((7 + 5 * 18 + 2, y0 + 9, 7 + 8 * 18 - 3, y0 + 9), fill=(80, 60, 130, 255))
+    for c, col in ((0, PURPLE), (4, (200, 70, 90)), (8, (0xFF, 0xD2, 0x4D))):
+        x = 7 + c * 18
+        d.rectangle((x, y0, x + 17, y0 + 17), outline=col + (255,), width=1)
+        holes.append((x + 2, y0 + 2, x + 15, y0 + 15))
+    px = im.load()
+    for (a, b, c2, e) in holes:
+        for yy in range(b, e + 1):
+            for xx in range(a, c2 + 1):
+                px[xx, yy] = (0, 0, 0, 0)
+    return im
+
+
 def main():
     logo = wordmark()
     for f in os.listdir(TEX):
@@ -186,7 +288,10 @@ def main():
         glyphs["logo_" + key] = "\uF801".join(chars)  # each glyph advances width+1; pull back 1px so tiles touch
     for name, rows in ICONS.items():
         icon(rows).save(os.path.join(TEX, f"icon_{name}.png"))
-    panel(3, {10, 12, 14, 16}, "Servers").save(os.path.join(TEX, "menu_selector.png"))
+    selector_panel().save(os.path.join(TEX, "menu_selector.png"))
+    idir = os.path.join(PACK, "assets", "relapsed", "items")
+    os.makedirs(idir, exist_ok=True)
+    json.dump({"model": {"type": "minecraft:empty"}}, open(os.path.join(idir, "blank.json"), "w"), indent=1)
     panel(4, {10, 11, 12, 13, 14, 15, 16, 20, 22, 24}, "Cosmetics").save(os.path.join(TEX, "menu_cosmetics.png"))
 
     providers = [
