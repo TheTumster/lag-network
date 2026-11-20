@@ -151,6 +151,14 @@ if (Test-Path $pw) {
     if ($n -ne $t) { Set-Content $pw $n -NoNewline; Say "Applied cannon settings (explosion optimizer, water doesn't push TNT)." Green }
 }
 
+# ---- Skyblock grinders: a hopper moves a whole stack at a time (vanilla's 1 item can't keep up with stacked cages)
+$ssp = "$Root\skyblock\spigot.yml"
+if (Test-Path $ssp) {
+    $t = Get-Content $ssp -Raw
+    $n = $t -replace 'hopper-amount:\s*\d+', 'hopper-amount: 64'
+    if ($n -ne $t) { Set-Content $ssp $n -NoNewline; Say "Skyblock hoppers now move a full stack at a time (grinders)." Green }
+}
+
 # ---- Cannons send a flood of client packets: raise ViaVersion's (proxy) and Paper's (factions) packet limits
 foreach ($pair in @(@("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(packet-limiter:\r?\n  enabled:) true', '$1 false'),
                     @("$Root\factions\config\paper-global.yml", '(?m)^(    max-packet-rate:) 500\.0\b', '$1 2000.0'))) {
