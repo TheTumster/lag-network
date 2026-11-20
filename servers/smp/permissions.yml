@@ -44,7 +44,9 @@ relapsedmc.smp.player:
     # /rtp (BetterRTP), /sit /lay /crawl (GSit), /shop (Genius-Shop), chest shops (ChestShop)
     betterrtp.use: true
     geniusshop.use: true
-    geniusshop.sell: true
+    # no /shop sell bulk menu: it prices a whole inventory at the start-of-sale price; selling per item from
+    # /shop lowers the price as you go
+    geniusshop.sell: false
     geniusshop.items.sellwand: false
     ChestShop.shop.create.buy: true
     ChestShop.shop.create.sell: true
