@@ -62,31 +62,78 @@ final class Grinder implements Listener {
 
 	private void scan() {
 		if (plugin.loot == null || !plugin.getConfig().getBoolean("grinder.enabled", true)) return;
-		double need = plugin.getConfig().getDouble("grinder.fall-height", 6);
+		double need = need();
 		Map<UUID, Double> next = new HashMap<>();
 		for (World w : Bukkit.getWorlds()) {
 			for (LivingEntity e : w.getLivingEntities()) {
 				if (e instanceof Player || e.isDead() || !plugin.loot.fromSpawner(e)) continue;
+				try {
+					Double p = step(e, need);
+					if (p != null) next.put(e.getUniqueId(), p);
+				} catch (Throwable t) {
+					if (!warned) {
+						warned = true;
+						plugin.getLogger().warning("Grinder check failed on a " + e.getType() + ": " + t);
+					}
+				}
+			}
+		}
+		peaks = next;
+	}
+
+	private boolean warned;
+
+	/** Mobs spawn up to a block below the cage, so a "6 block" drop is counted from 4.5. */
+	private double need() {
+		return plugin.getConfig().getDouble("grinder.fall-height", 4.5);
+	}
+
+	/** One cage mob, one check: returns its highest point since it last stood on ground, or null if it was killed. */
+	private Double step(LivingEntity e, double need) {
+		// "no AI" must not mean "no gravity": keep physics on, keep the brain off
+		if (e instanceof org.bukkit.entity.Mob m && !m.hasAI()) {
+			m.setAI(true);
+			m.setAware(false);
+		}
+		{
+			{
 				Location l = e.getLocation();
 				Material feet = l.getBlock().getType();
 				Material under = l.clone().subtract(0, 0.3, 0).getBlock().getType();
 				if (hot(feet) || hot(e.getEyeLocation().getBlock().getType()) || under == Material.MAGMA_BLOCK) {
 					kill(e);
-					continue;
+					return null;
 				}
 				double y = l.getY();
 				double peak = Math.max(peaks.getOrDefault(e.getUniqueId(), y), y);
 				if (e.isOnGround()) {
 					if (peak - y >= need) {
 						kill(e);
-						continue;
+						return null;
 					}
 					peak = y;
 				}
-				next.put(e.getUniqueId(), peak);
+				return peak;
 			}
 		}
-		peaks = next;
+	}
+
+	/** /lsb grinder: what the grinder rules see around this player (to debug a grinder that isn't killing). */
+	void debug(Player p) {
+		int all = 0, near = 0;
+		p.sendMessage(Spawners.mm("<#38E0FF><bold>GRINDER CHECK</bold> <gray>drop needed: <white>" + need() + " <gray>enabled: <white>" + plugin.getConfig().getBoolean("grinder.enabled", true)));
+		for (LivingEntity e : p.getWorld().getLivingEntities()) {
+			if (e instanceof Player) continue;
+			boolean cage = plugin.loot != null && plugin.loot.fromSpawner(e);
+			if (cage) all++;
+			if (e.getLocation().distanceSquared(p.getLocation()) > 20 * 20 || near >= 8) continue;
+			near++;
+			Double peak = peaks.get(e.getUniqueId());
+			p.sendMessage(Spawners.mm("<gray>" + e.getType().name().toLowerCase() + " <white>cage=" + cage + " ground=" + e.isOnGround()
+					+ " y=" + String.format("%.1f", e.getLocation().getY()) + " peak=" + (peak == null ? "-" : String.format("%.1f", peak))
+					+ " ai=" + (e instanceof org.bukkit.entity.Mob m ? m.hasAI() + "/" + m.isAware() : "-") + " reason=" + e.getEntitySpawnReason()));
+		}
+		p.sendMessage(Spawners.mm("<gray>Cage mobs in this world: <white>" + all + " <gray>· shown: <white>" + near + " <gray>within 20 blocks"));
 	}
 
 	/** Dies of "cramming": nothing is immune to it, and RoseStacker takes the whole stack with it (our config). */
