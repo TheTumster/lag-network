@@ -320,6 +320,9 @@ def patch_backend(name):
         yaml_set(lc, "tntfill.free-for-all", True)
         yaml_set(lc, "plots.enabled", True)
         log("  cannons: plots world, diamond protection everywhere, free /tntfill")
+    if name == "skyblock":
+        # grinders: a hopper moves a whole stack per transfer (stacked cages out-produce vanilla hoppers)
+        yaml_set(os.path.join(d, "spigot.yml"), "world-settings.default.hopper-amount", 64)
     if name == "factions":
         # CoreProtect: don't log dispenser/hopper item moves. Every cannon dispenser shot made a full block snapshot
         # (5% of the tick while cannoning, spark profile Nov 2026) and hopper farms do the same. Raids are the game here.
