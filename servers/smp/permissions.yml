@@ -1,0 +1,79 @@
+# RelapsedMC SMP: what every player can do, and what each rank adds (shipped by tools/bake.py from servers/smp/).
+# Bukkit reads this file on start. LuckPerms honours it: "relapsedmc.smp.player" is default:true, so every player
+# has its children; a rank is the LuckPerms group laGCore already uses (lp user <name> parent add vip), and
+# LuckPerms gives members "group.<rank>", whose children below apply. Edit here, not with lp, so it stays in git.
+
+relapsedmc.smp.player:
+  description: Everything a normal RelapsedMC SMP player can do
+  default: true
+  children:
+    # homes (3, see Essentials sethome-multiple), tpa, back after a teleport (not after death)
+    essentials.home: true
+    essentials.home.bed: true
+    essentials.sethome: true
+    essentials.sethome.bed: true
+    essentials.sethome.multiple: true
+    essentials.delhome: true
+    essentials.tpa: true
+    essentials.tpahere: true
+    essentials.tpaccept: true
+    essentials.tpdeny: true
+    essentials.tpacancel: true
+    essentials.tptoggle: true
+    essentials.back: true
+    # money (separate SMP economy) and the basics
+    essentials.balance: true
+    essentials.balance.others: true
+    essentials.balancetop: true
+    essentials.pay: true
+    essentials.msg: true
+    essentials.ignore: true
+    essentials.afk: true
+    essentials.list: true
+    essentials.motd: true
+    essentials.rules: true
+    essentials.help: true
+    essentials.mail: true
+    essentials.mail.send: true
+    essentials.seen: true
+    essentials.getpos: true
+    essentials.depth: true
+    essentials.compass: true
+    essentials.playtime: true
+    essentials.itemdb: true
+    # /rtp (BetterRTP), /sit /lay /crawl (GSit), /shop (Genius-Shop), chest shops (ChestShop)
+    betterrtp.use: true
+    geniusshop.use: true
+    geniusshop.sell: true
+    geniusshop.items.sellwand: false
+    ChestShop.shop.create.buy: true
+    ChestShop.shop.create.sell: true
+    ChestShop.shop.buy: true
+    ChestShop.shop.sell: true
+
+# Ranks (laGCore's ranks = LuckPerms groups). Home ranks are Essentials' sethome-multiple keys.
+group.vip:
+  description: VIP on the SMP
+  default: false
+  children:
+    essentials.sethome.multiple.vip: true
+group.media:
+  description: Media on the SMP
+  default: false
+  children:
+    essentials.sethome.multiple.staff: true
+group.mod:
+  description: Mod on the SMP
+  default: false
+  children:
+    essentials.sethome.multiple.staff: true
+group.admin:
+  description: Admin on the SMP
+  default: false
+  children:
+    essentials.sethome.multiple.staff: true
+group.owner:
+  description: Owner on the SMP
+  default: false
+  children:
+    essentials.sethome.multiple.unlimited: true

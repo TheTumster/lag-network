@@ -1,0 +1,64 @@
+# RelapsedMC SMP: GriefPrevention messages in the network style (shipped from servers/smp/ in the repo).
+# Only the messages players see most are here; GriefPrevention adds the rest with its defaults on start.
+# Colours use $ instead of & ($x$3$8$E$0$F$F = #38E0FF).
+Messages:
+  CreateClaimSuccess:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$7$C$F$F$6$BClaim created! $7Share it with $x$3$8$E$0$F$F/trust <player>$7 or $x$3$8$E$0$F$F/claimhelp$7.'
+  ClaimStart:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Corner set. Right-click the $x$3$8$E$0$F$Fopposite corner$7 with the shovel. Put the shovel away to cancel.'
+  CreateClaimInsufficientBlocks:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DNot enough claim blocks$7: you need $x$3$8$E$0$F$F{0}$7 more. You earn more every hour you play.'
+  NewClaimTooNarrow:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DToo small$7: a claim must be at least $x$3$8$E$0$F$F{0}$7 blocks wide.'
+  ClaimTooSmallForEntities:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThis claim is too small for that.$7 Try enlarging it.'
+  RemainingBlocks:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7You can claim $x$3$8$E$0$F$F{0}$7 more blocks.'
+  AbandonSuccess:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Claim abandoned. You now have $x$3$8$E$0$F$F{0}$7 claim blocks free.'
+  GrantPermissionConfirmation:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$7$C$F$F$6$BTrusted $x$3$8$E$0$F$F{0}$7 to {1} {2}.'
+  UntrustIndividualAllClaims:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Removed $x$3$8$E$0$F$F{0}$7 from $x$3$8$E$0$F$Fall$7 your claims. Stand inside one claim to change just that one.'
+  UntrustIndividualSingleClaim:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Removed $x$3$8$E$0$F$F{0}$7 from this claim. Stand outside your claims to change all of them.'
+  NoBuildPermission:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThis land is claimed by $x$3$8$E$0$F$F{0}$7. Ask them to $x$3$8$E$0$F$F/trust$7 you.'
+  NoAccessPermission:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DYou need $x$3$8$E$0$F$F{0}$7''s permission to use that.'
+  NoContainersPermission:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DYou need $x$3$8$E$0$F$F{0}$7''s permission to open that.'
+  BlockClaimed:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Claimed by $x$3$8$E$0$F$F{0}$7.'
+  BlockNotClaimed:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$7$C$F$F$6$BUnclaimed land.$7 Grab it with a golden shovel.'
+  ClaimResizeSuccess:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$7$C$F$F$6$BClaim resized.$7 $x$3$8$E$0$F$F{0}$7 claim blocks left.'
+  ResizeStart:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Resizing: right-click where this corner should go.'
+  AutomaticClaimNotification:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$7$C$F$F$6$BThis chest and the blocks around it are protected.$7 Use a golden shovel to claim more.'
+  UnprotectedChestWarning:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThis chest is NOT protected.$7 Use a golden shovel to claim the area.'
+  TrustListHeader:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Who''s trusted here:'
+  ClaimsListHeader:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Your claims:'
+  NotYourClaim:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThat isn''t your claim.'
+  CreateClaimFailOverlap:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThat overlaps your other claim.$7 Resize it from a corner, or $x$3$8$E$0$F$F/abandonclaim$7.'
+  CreateClaimFailOverlapOtherPlayer:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7$x$F$F$4$D$6$DThat overlaps $x$3$8$E$0$F$F{0}$7''s claim.'
+  ShovelBasicClaimMode:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Shovel back in normal claim mode.'
+  SurvivalBasicsVideo2:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Claims help: $x$3$8$E$0$F$F/claimhelp'
+  AbandonClaimMissing:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Stand in the claim you want to remove (or $x$3$8$E$0$F$F/abandonallclaims$7).'
+  DeleteClaimMissing:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7There''s no claim here.'
+  ClaimExplosivesAdvertisement:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7Explosions can''t break blocks here. Owners can change that with $x$3$8$E$0$F$F/claimexplosions$7.'
+  PvPImmunityStart:
+    Text: '$8[$x$3$8$E$0$F$FClaims$8] $7You can''t be attacked while your inventory is empty.'
