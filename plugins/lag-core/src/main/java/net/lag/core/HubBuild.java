@@ -73,6 +73,8 @@ final class HubBuild implements Listener {
 		World w = Bukkit.getWorlds().get(0);
 		// hub theme: "christmas" swaps in the dressed-up build; changing it rebuilds once on the next start
 		boolean themeChanged = themed() && !themeStamp().equals(plugin.getConfig().getString(base + ".build-theme", "default"));
+		if (themed()) plugin.getLogger().info(base + " theme: " + theme() + " (built: " + plugin.getConfig().getString(base + ".build-theme", "default")
+				+ ", auto-build: " + plugin.optBool(base + ".auto-build", true) + (themeChanged ? ") -> rebuilding now" : ")"));
 		if ((plugin.getConfig().getInt(base + ".build-version", 0) < version() || themeChanged) && plugin.optBool(base + ".auto-build", true)) {
 			String ys = String.valueOf(plugin.opt(base + ".y", 100));
 			Location old = origin();
