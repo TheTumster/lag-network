@@ -118,6 +118,17 @@ final class Loot implements Listener {
 		return out;
 	}
 
+	/** The grinder killed a whole stack itself: drop the tier's loot for every mob in it. False if it isn't a tier mob. */
+	boolean dropStack(LivingEntity e, int kills) {
+		String mob = e.getType().name().toLowerCase();
+		if (!templates.containsKey(mob)) return false;
+		org.bukkit.Location at = e.getLocation();
+		for (ItemStack it : lootFor(mob, Math.max(1, kills))) {
+			at.getWorld().dropItem(at, it, d -> d.setVelocity(new org.bukkit.util.Vector(0, 0, 0)));
+		}
+		return true;
+	}
+
 	/** One mob died: its drops become its tier's loot (+ a head roll). Runs before RoseStacker reads the drops. */
 	@EventHandler(priority = EventPriority.LOW)
 	public void onDeath(EntityDeathEvent e) {
