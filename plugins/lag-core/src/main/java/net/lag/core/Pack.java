@@ -119,9 +119,11 @@ final class Pack implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
+		// wait a moment before prompting: the RelapsedMC Client's "I have the pack" (brand / hello / channel) can land
+		// a second or so after the join, and it must never be asked to download a pack it already has
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-			if (p.isOnline()) send(p);
-		}, 2L);
+			if (p.isOnline() && !has(p)) send(p);
+		}, 50L);
 	}
 
 	@EventHandler

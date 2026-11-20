@@ -296,7 +296,7 @@ def main():
 
     providers = [
         {"type": "space", "advances": {"\uF801": -1, "\uF808": -8, "\uF8B0": -176, "\uF8B1": -169, "\uF820": 4}},
-        {"type": "bitmap", "file": "relapsed:font/menu_selector.png", "height": 17 + 3 * 18 + 4, "ascent": 13, "chars": [""]},
+        {"type": "bitmap", "file": "relapsed:font/menu_selector.png", "height": 17 + 5 * 18 + 4, "ascent": 13, "chars": [""]},
         {"type": "bitmap", "file": "relapsed:font/menu_cosmetics.png", "height": 17 + 4 * 18 + 4, "ascent": 13, "chars": [""]},
     ]
     providers[1:1] = logo_providers
