@@ -42,7 +42,7 @@ final class HubBuild implements Listener {
 	static final int SPAWN_VERSION = 1;
 	/** Bump when hub-spawn-christmas.txt.gz changes, so hubs already on the Christmas theme rebuild. */
 	static final int SKY_CHRISTMAS_REV = 1; // skyblock christmas: snow, icicles, decorated spruces, candy canes, crystal garland, the Great Tree north of the hub portal
-	static final int CHRISTMAS_REV = 7; // (fx are entities: no rebuild needed) 7: market town, clock tower, Santa's Workshop. 6: themed portal houses, ice palace + bridge. 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
+	static final int CHRISTMAS_REV = 8; // 8: no rink, flat centre with a snowflake inlay. 7: market town, clock tower, Santa's Workshop. 6: themed portal houses, ice palace + bridge. 5: outer gates 32 degrees, no fountain. 4: sunken rink, garden beds, outer gates turned in, garland lights, snow cleanup
 	private final LagCore plugin;
 	private final NamespacedKey holoKey;
 	private final Map<UUID, Long> portalCooldown = new HashMap<>();

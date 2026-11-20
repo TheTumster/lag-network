@@ -603,54 +603,32 @@ for k in [k for k in B if -3 <= k[0] <= 3 and -41 <= k[2] <= -38 and y0g <= k[1]
 # (the gap is the way onto the ice bridge now: no presents in it)
 
 # ======================================================================= depth in the plaza
-# 1) the rink sinks: a skating bowl two blocks down, half-step rings to walk in, a raised causeway across it
-#    on the spawn axis, and a flat island in the middle
+# 1) the centre is flat paving again (no rink): a snowflake inlay set into the floor, nothing standing up
 RIM = 8.4
-for k in [k for k in B if math.hypot(k[0] - CX, k[2] - CZ) <= RIM and FLOOR - 5 <= k[1] <= FLOOR + 4]:
+for k in [k for k in B if math.hypot(k[0] - CX, k[2] - CZ) <= RIM and FLOOR - 5 <= k[1] <= FLOOR + 6]:
     del B[k]
 for x in range(CX - 9, CX + 10):
     for z in range(CZ - 9, CZ + 10):
         d = math.hypot(x - CX, z - CZ)
         if d > RIM:
             continue
-        put(x, FLOOR - 5, z, "deepslate")
-        causeway = abs(x - CX) <= 1
-        if causeway or d <= 2.6:
-            for y in range(FLOOR - 4, FLOOR):
-                put(x, y, z, "polished_blackstone_bricks" if y == FLOOR - 1 else "deepslate_bricks")
-            put(x, FLOOR, z, "deepslate_tiles" if d <= 2.6 and not causeway else "polished_blackstone_bricks" if abs(x - CX) == 1 else "polished_deepslate")
-            continue
-        for y in range(FLOOR - 4, FLOOR - 2):
-            put(x, y, z, "deepslate_bricks")
-        if d <= 5.25:
-            put(x, FLOOR - 3, z, "sea_lantern" if (x * 3 + z) % 4 == 0 else "packed_ice")
-            put(x, FLOOR - 2, z, "ice")
-        elif d <= 6.0:
-            put(x, FLOOR - 2, z, "deepslate_bricks")
-            put(x, FLOOR - 1, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
-        elif d <= 6.75:
-            put(x, FLOOR - 2, z, "deepslate_bricks")
-            put(x, FLOOR - 1, z, "polished_blackstone_bricks")
-        elif d <= 7.5:
-            put(x, FLOOR - 2, z, "deepslate_bricks"); put(x, FLOOR - 1, z, "deepslate_bricks")
-            put(x, FLOOR, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
+        put(x, FLOOR - 1, z, "deepslate_bricks")
+        a = math.atan2(z - CZ, x - CX)
+        # six arms with little side branches, in pale stone and ice-blue glass lit from below
+        arm = min(abs(((math.degrees(a) - k * 60 + 180) % 360) - 180) for k in range(6))
+        on_arm = arm * math.pi / 180 * d < 0.75 and 1.5 <= d <= 7.2
+        branch = any(abs(d - r0) < 0.6 and 6 < arm < 26 for r0 in (4.0, 6.0))
+        if d <= 1.2:
+            b = "pearlescent_froglight"
+        elif on_arm or branch:
+            b = "light_blue_stained_glass" if (on_arm and int(d) % 2 == 0) else "calcite"
+            if b.endswith("glass"):
+                put(x, FLOOR - 1, z, "sea_lantern")
+        elif d > RIM - 0.9:
+            b = "polished_blackstone_bricks"
         else:
-            put(x, FLOOR - 2, z, "deepslate_bricks"); put(x, FLOOR - 1, z, "deepslate_bricks")
-            put(x, FLOOR, z, "polished_blackstone_bricks")
-# the causeway's edges get a low slab kerb where it crosses the ice
-for z in range(CZ - 8, CZ + 9):
-    for x in (CX - 2, CX + 2):
-        d = math.hypot(x - CX, z - CZ)
-        if 2.6 < d <= 7.5:
-            put(x, FLOOR - 1, z, "polished_blackstone_bricks")
-            put(x, FLOOR, z, "polished_blackstone_brick_slab[type=bottom,waterlogged=false]")
-# the centre island stays flat: just a glowing inlay, nothing standing up
-put(CX, FLOOR, CZ, "pearlescent_froglight")
-for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-    put(CX + dx, FLOOR, CZ + dz, "amethyst_block")
-for i in range(8):
-    a = i / 8 * 2 * math.pi
-    put(round(CX + math.cos(a) * 6.6), FLOOR + 1, round(CZ + math.sin(a) * 6.6), "light[level=14,waterlogged=false]", force=False)
+            b = "polished_deepslate" if (x + z) % 2 else "deepslate_tiles"
+        put(x, FLOOR, z, b)
 
 # 2) raised garden beds between the walks: low (1-2) in front of the gates so they never hide a portal,
 #    up to 3 high round the sides and behind spawn with a decorated spruce on the biggest
