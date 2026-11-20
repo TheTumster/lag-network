@@ -1,0 +1,107 @@
+# RelapsedMC SMP: ores and minerals (no netherite)
+# SELL-ONLY. Every sale lowers that item's sell price for everyone (dynamic-pricing, price-change per item sold);
+# prices reset every day at 00:00 New York time. So the server pays out at most about base x items/2 per item per day
+# (here ~2500 per item, see the numbers below), plus the 5,000-per-sale cap in config.yml. No money printing.
+gui-name: '&l<gradient:#7CFF6B:#38E0FF>Sell: Ores</gradient>'
+rows: 3
+permission: ''
+sell-adds-to-stock: true
+allow-sell-stock-overflow: true
+stock-reset:
+  enabled: true
+  type: DAILY
+  time: '00:00'
+  timezone: America/New_York
+
+items:
+  - material: COAL
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012800
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: RAW_COPPER
+    sell-price: 0.6
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00007200
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: COPPER_INGOT
+    sell-price: 0.75
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00011250
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: RAW_IRON
+    sell-price: 2.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00125000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: IRON_INGOT
+    sell-price: 3.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00180000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: RAW_GOLD
+    sell-price: 3.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00180000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: GOLD_INGOT
+    sell-price: 3.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00245000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: REDSTONE
+    sell-price: 0.4
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00003200
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: LAPIS_LAZULI
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012800
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: QUARTZ
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012800
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: AMETHYST_SHARD
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012800
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: EMERALD
+    sell-price: 8.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.01600000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: DIAMOND
+    sell-price: 30.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.15000000
+    lore:
+      - '&7Sells for less the more the server buys today.'

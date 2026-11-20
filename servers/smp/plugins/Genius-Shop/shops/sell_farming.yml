@@ -1,0 +1,163 @@
+# RelapsedMC SMP: farm produce
+# SELL-ONLY. Every sale lowers that item's sell price for everyone (dynamic-pricing, price-change per item sold);
+# prices reset every day at 00:00 New York time. So the server pays out at most about base x items/2 per item per day
+# (here ~1500 per item, see the numbers below), plus the 5,000-per-sale cap in config.yml. No money printing.
+gui-name: '&l<gradient:#7CFF6B:#38E0FF>Sell: Farming</gradient>'
+rows: 4
+permission: ''
+sell-adds-to-stock: true
+allow-sell-stock-overflow: true
+stock-reset:
+  enabled: true
+  type: DAILY
+  time: '00:00'
+  timezone: America/New_York
+
+items:
+  - material: WHEAT
+    sell-price: 0.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00008333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: CARROT
+    sell-price: 0.35
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00004083
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: POTATO
+    sell-price: 0.35
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00004083
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: BEETROOT
+    sell-price: 0.45
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00006750
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: MELON_SLICE
+    sell-price: 0.12
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00000480
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: PUMPKIN
+    sell-price: 1.2
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00048000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: SUGAR_CANE
+    sell-price: 0.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00008333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: CACTUS
+    sell-price: 0.4
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00005333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: COCOA_BEANS
+    sell-price: 0.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00008333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: NETHER_WART
+    sell-price: 0.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00008333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: SWEET_BERRIES
+    sell-price: 0.25
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00002083
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: GLOW_BERRIES
+    sell-price: 0.3
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00003000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: BAMBOO
+    sell-price: 0.08
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00000213
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: KELP
+    sell-price: 0.08
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00000213
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: APPLE
+    sell-price: 1.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00033333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: EGG
+    sell-price: 0.3
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00003000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: HONEYCOMB
+    sell-price: 3.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00300000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: BROWN_MUSHROOM
+    sell-price: 0.6
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: RED_MUSHROOM
+    sell-price: 0.6
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: CHORUS_FRUIT
+    sell-price: 0.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00008333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: HAY_BLOCK
+    sell-price: 4.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00675000
+    lore:
+      - '&7Sells for less the more the server buys today.'

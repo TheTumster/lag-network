@@ -1,0 +1,22 @@
+# RelapsedMC SMP: ChestShop settings (shipped from servers/smp/ in the repo). ChestShop appends every setting not
+# listed here with its default the first time it starts.
+# Make a shop: put a chest, then a sign on/next to it:  line 1 blank (your name is filled in), line 2 amount,
+# line 3 "B 10:S 8" (buy 10 / sell 8), line 4 the item (or "?" and click the sign with the item).
+
+# Messages: always our themed English file (languages/lang.en.yml), not the client's language
+USE_CLIENT_LOCALE: false
+DEFAULT_LANGUAGE: "en"
+TURN_OFF_UPDATE_NOTIFIER: true
+TURN_OFF_DEV_UPDATE_NOTIFIER: true
+
+# Shops only inside a GriefPrevention claim you can build in (no shop signs on other people's land)
+GRIEFPREVENTION_INTEGRATION: true
+
+# A player shop can't buy back above its own sell price (stops shop-to-shop money loops)
+BLOCK_SHOPS_WITH_SELL_PRICE_HIGHER_THAN_BUY_PRICE: true
+
+# Shift-click sells a whole stack instead of one bundle
+SHIFT_SELLS_IN_STACKS: true
+
+# No free "Admin Shop" signs that would create money
+FORCE_UNLIMITED_ADMIN_SHOP: false

@@ -1,0 +1,73 @@
+# RelapsedMC SMP: building blocks
+# BUY-ONLY (no sell-price), fixed prices.
+gui-name: '&l<gradient:#38E0FF:#B040FF>Building Blocks</gradient>'
+rows: 4
+permission: ''
+
+items:
+  - material: OAK_LOG
+    price: 4
+    amount: 16
+  - material: SPRUCE_LOG
+    price: 4
+    amount: 16
+  - material: BIRCH_LOG
+    price: 4
+    amount: 16
+  - material: DARK_OAK_LOG
+    price: 4
+    amount: 16
+  - material: CHERRY_LOG
+    price: 5
+    amount: 16
+  - material: GLASS
+    price: 3
+    amount: 32
+  - material: SAND
+    price: 2
+    amount: 32
+  - material: GRAVEL
+    price: 2
+    amount: 32
+  - material: WHITE_WOOL
+    price: 5
+    amount: 16
+  - material: TERRACOTTA
+    price: 3
+    amount: 32
+  - material: BRICKS
+    price: 4
+    amount: 32
+  - material: STONE_BRICKS
+    price: 3
+    amount: 32
+  - material: SMOOTH_STONE
+    price: 3
+    amount: 32
+  - material: QUARTZ_BLOCK
+    price: 12
+    amount: 16
+  - material: SEA_LANTERN
+    price: 25
+    amount: 8
+  - material: GLOWSTONE
+    price: 8
+    amount: 16
+  - material: PACKED_ICE
+    price: 6
+    amount: 16
+  - material: MOSS_BLOCK
+    price: 4
+    amount: 16
+  - material: MUD_BRICKS
+    price: 3
+    amount: 32
+  - material: WHITE_CONCRETE_POWDER
+    price: 3
+    amount: 32
+  - material: DIRT
+    price: 1
+    amount: 64
+  - material: GRASS_BLOCK
+    price: 4
+    amount: 16

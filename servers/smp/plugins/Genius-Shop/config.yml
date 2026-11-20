@@ -1,0 +1,234 @@
+# ==========================================================
+# Genius-Shop — Main Configuration
+# ==========================================================
+# This file controls general plugin behavior, currency formatting,
+# smart updates, debugging, and more.
+# ==========================================================
+
+# RelapsedMC SMP: shipped from servers/smp/ in the repo. Shops live in shops/*.yml, the menu in menus/main-menu.yml.
+# The web editor API is OFF (it would open a port with a default key); edit the yml files instead.
+config-version: 15
+
+# When true, missing/outdated config files will automatically be updated
+# by merging new keys from defaults (your custom changes are kept).
+merge-missing-defaults: true
+
+# Update checker settings
+updates:
+  # Toggle automatic update checks on startup and join
+  check-updates: false
+
+  # If true, admins will receive a message on join when an update is available
+  # Requires 'check-updates' to be true
+  send-update-message-ingame: false
+
+  # Sound played when the update message is sent to an admin in-game.
+  message-sound:
+    enabled: true
+    type: "BLOCK_NOTE_BLOCK_PLING"
+    volume: 1.0
+    pitch: 1.2
+
+# Enable detailed debug logging to console
+# Shows: shop openings, permissions checks, time restrictions,
+#        purchase/sell transactions, player balances, etc.
+# Useful for troubleshooting issues.
+debug: false
+
+# File logger for errors/exceptions (for support diagnostics).
+# This only works while 'debug' is true.
+# The file can be shared with support when troubleshooting.
+debug-error-log:
+  enabled: true
+  file: "debug/error.log"
+
+# How often to check scheduled stock reset rules (in seconds).
+# Lower = more precise schedule execution, higher = less overhead.
+stock-reset-check-interval-seconds: 1
+
+# Language file to use (located in languages/ folder)
+# Example: "en_US", "ru_RU"
+language: "en_US"
+
+# ==========================================================
+# Metrics (bStats)
+# ==========================================================
+# Enable or disable anonymous usage statistics
+# bStats collects anonymous data to help plugin developers understand usage
+# All data is anonymous and helps improve the plugin
+# View stats at: https://bstats.org/plugin/bukkit/Genius-Shop
+metrics: true
+
+# ==========================================================
+# Economy Formatting
+# ==========================================================
+eco:
+  # Optional override for currency symbol. If this is set, it replaces
+  # your economy plugin's formatting entirely.
+  # Example: "€" → €50, "G" → G50
+  override-currency-symbol: ""
+
+# Fallback used ONLY if no Vault economy is available.
+fallback-currency-symbol: "$"
+
+# ==========================================================
+# Economy Safety Guards
+# ==========================================================
+# Server-side transaction protections to reduce risk from broken
+# economy providers, bad values, or extreme dynamic-price spikes.
+economy-safety:
+  # Master toggle
+  enabled: true
+
+  # Hard business cap per transaction total.
+  # Set to 0 to disable.
+  # RelapsedMC: no single sale (or buy) over 5,000, so nobody dumps a whole inventory at the day's top price
+  max-transaction-value: 5000
+
+  # Optional cap for single unit price before amount scaling.
+  # Set to 0 to disable.
+  max-unit-price: 10000000
+
+  # Per-action cooldowns in milliseconds.
+  cooldowns:
+    enabled: true
+    buy-ms: 250
+    sell-ms: 250
+    bulk-sell-ms: 500
+
+  # Anti-spike checks for suspicious dynamic values.
+  anti-spike:
+    enabled: true
+    # Base is the configured buy/sell price, before dynamic pricing, formulas, or campaigns.
+    # Reject if current unit price > (base unit price * this value); 0 disables this upper bound.
+    # Values below 1 can block even the starting price.
+    max-base-multiplier: 10.0
+    # Reject if current unit price < (base unit price * this value), 0 disables this lower-bound check
+    min-base-multiplier: 0.0
+    # Reject if unit price step-change against last successful trade for same item is larger than this ratio.
+    # Example: 5.0 = 500% jump.
+    # RelapsedMC: sell prices fall as the server buys and jump back at the daily reset, so no step limit
+    max-step-change-ratio: 1000000.0
+
+  # Optional double-confirm flow for expensive purchases.
+  large-purchase-confirmation:
+    enabled: true
+    threshold: 1000000
+    timeout-seconds: 10
+
+  # Optional in-game admin alerts when safety/economy guard failures occur.
+  admin-alerts:
+    enabled: false
+    notify-permission: "geniusshop.admin"
+    rate-limit-ms: 3000
+
+# ==========================================================
+# Price Display Format
+# ==========================================================
+# Choose how prices are shown in-game:
+#   plain   -> 1000 / 1500.5
+#   compact -> 1k / 1.5k / 2m / 3b
+#   grouped -> 1.000 / 10.000 / 1.000.000 (separator configurable)
+# Applies to in-game shop lore and transaction messages.
+price-format:
+  # Modes: plain, compact, grouped
+  mode: "plain"
+  compact:
+    # Customize compact suffixes (e.g. 1k, 1m, 1b)
+    thousand-suffix: "k"
+    million-suffix: "m"
+    billion-suffix: "b"
+    # If true, compact mode uses scientific notation (example: 1E6)
+    use-scientific-notation: false
+  grouped:
+    # Example EU style: 1.000,50
+    thousands-separator: "."
+    decimal-separator: ","
+    # Decimal precision used in grouped mode
+    max-decimals: 2
+
+# ==========================================================
+# Date Format for Time-Limited Shops
+# ==========================================================
+# Choose how date ranges are displayed in shop availability times
+# Options:
+#   - "yyyy-MM-dd"       → 2024-10-31 (ISO format)
+#   - "MM/dd/yyyy"       → 10/31/2024 (US format)
+#   - "dd/MM/yyyy"       → 31/10/2024 (EU format)
+#   - "dd-MM-yyyy"       → 31-10-2024
+#   - "MMM dd yyyy"      → Oct 31 2024
+#   - "dd MMM yyyy"      → 31 Oct 2024
+#   - "MMMM dd, yyyy"    → October 31, 2024
+date-format: "dd MMM yyyy"
+
+# ==========================================================
+# Default Shop Files
+# ==========================================================
+# When enabled, the plugin will create default shop files on first run
+# This creates: blocks.yml, farming.yml, misc.yml, premium.yml, spawners.yml, weekend_market.yml
+create-default-shops: false
+
+# ==========================================================
+# Integrations
+# ==========================================================
+# Enable or disable support for the SmartSpawner plugin
+# Exported item-stack data is always preferred when present.
+# If enabled, the shop uses SmartSpawner's creation API when no item-stack is configured.
+smart-spawner-support: false
+# Legacy option name: this now controls API delivery, not command execution.
+smart-spawner-command-fallback: true
+
+# ==========================================================
+# Wiki Link
+# ==========================================================
+# Used by /shop wiki and web editor quick-link button
+wiki:
+  url: "https://github.com/Drallee/Genius-Shop/wiki"
+
+# ==========================================================
+# Web Config Editor API
+# ==========================================================
+# This enables a REST API for the web-based config editor
+# IMPORTANT: Keep your API key secret! Anyone with the key can edit configs
+api:
+  enabled: false
+  # The port used by the GeniusShop API.
+  # Replace this with an available port provided by your host
+  # or a port you have opened yourself.
+  # Examples: 8080, 25590, or another unused port.
+  # 8080 is only the default. If the API cannot start, check whether another
+  # service already uses the port. If it starts but cannot be reached remotely,
+  # check TCP firewall/forwarding rules and your hosting provider's allocations.
+  # On managed hosting, ask the provider which additional TCP port is available
+  # and which public address/port to use. Changing this value requires a restart.
+  port: 8080
+  # Generate a secure random key: https://www.uuidgenerator.net/
+  # Change this to a unique value for your server
+  api-key: "change-this-to-a-secure-random-key"
+  # Enable/disable the /shop editor command
+  # When false, players cannot use /shop editor to access the web editor
+  # Note: The API can still be enabled without this command
+  enable-editor-command: false
+  # Optional: Custom domain for the web editor
+  # If set, this domain will be used instead of the server IP when displaying the editor URL
+  # Examples: "shop.example.com", "example.com:8080", or "https://shop.example.com"
+  # Leave empty to use the default (server IP)
+  domain: ""
+  # Native HTTPS support.
+  # For public internet access, a reverse proxy with HTTPS is still recommended.
+  # To use native HTTPS, create a PKCS12 keystore and set the path/passwords below.
+  ssl:
+    enabled: false
+    # Relative paths are resolved from plugins/GeniusShop/.
+    # Example: "ssl/keystore.p12"
+    keystore: ""
+    keystore-password: ""
+    # Leave empty to reuse keystore-password.
+    key-password: ""
+    # Common values: "PKCS12" or "JKS"
+    keystore-type: "PKCS12"
+  # IP Bypass System
+  # When enabled, allows users with permission "geniusshop.login.ip.bypass" to log in from
+  # different IPs after confirming their identity in-game
+  # Trusted IPs are saved per-user
+  allow-ip-bypass: false
