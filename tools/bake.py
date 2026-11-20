@@ -83,6 +83,25 @@ def manage(server, rel_path, url):
                                            "sha256": sha256(os.path.join(DIST, server, rel_path))})
 
 
+def ship_server_files(manage_them=False):
+    """servers/<server>/... in the repo = plugin/server config files we own (e.g. the SMP's Essentials, GriefPrevention,
+    shop configs). Copied into the server before its first start so the boot test runs with them, copied again at the
+    end (plugins re-save some files while running) and, with manage_them, listed in the update manifest so the PC
+    launcher delivers them too. Served from raw.githubusercontent.com at this exact commit so the SHA-256 matches."""
+    base = f"https://raw.githubusercontent.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/" \
+           f"{os.environ.get('GITHUB_SHA', 'main')}/servers/"
+    for s in SERVERS:
+        src = os.path.join(ROOT, "servers", s)
+        for d, _, files in os.walk(src):
+            for f in sorted(files):
+                rel = os.path.relpath(os.path.join(d, f), src)
+                dest = os.path.join(DIST, s, rel)
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+                shutil.copy(os.path.join(d, f), dest)
+                if manage_them:
+                    manage(s, rel, base + s + "/" + rel.replace(os.sep, "/"))
+
+
 def download(url, dest, sha1=None):
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120) as r, open(dest, "wb") as f:
@@ -456,6 +475,8 @@ def main():
 
     build_lab18(local_dir)
 
+    ship_server_files()   # our config files (servers/<server>/) are in place before the plugins first see the folder
+
     log("== First start (generate configs)")
     for s in SERVERS:
         run_until_done(os.path.join(DIST, s), java("2G") + ["paper.jar", "--nogui"])
@@ -558,6 +579,7 @@ def main():
     shutil.copy(os.path.join(ROOT, "network", "network.json"), os.path.join(DIST, "network.json"))
 
     log("== Update manifest")
+    ship_server_files(manage_them=True)   # exact repo bytes again (plugins re-save some), delivered to the PC as managed files
     for f in ("START.bat", "STOP.bat", "TUNNEL.bat", "README.txt", "START-1.8-LAB.bat"):
         manage(".", f, RELEASE_DL + f)
     manage(".", os.path.join("tools", "start.ps1"), RELEASE_DL + "start.ps1")
