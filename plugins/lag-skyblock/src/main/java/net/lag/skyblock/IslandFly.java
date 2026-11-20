@@ -18,14 +18,18 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * /fly on your own island (permission lag.skyblock.islandfly - a rank perk). Turns off when you leave the island,
- * and the fall after it is cancelled.
+ * and the fall after it is cancelled. Off in combat: any player-vs-player hit (taken or dealt, arrows too) turns it
+ * off and locks it for warzone.tag-seconds (store rule: convenience perks never help in a fight).
  */
 final class IslandFly implements Listener, CommandExecutor {
 	static final String PERM = "lag.skyblock.islandfly";
 	private final Set<UUID> on = new HashSet<>();
 	private final Set<UUID> safeFall = new HashSet<>();
+	private final java.util.Map<UUID, Long> combat = new java.util.HashMap<>();
+	private final LagSkyblock plugin;
 
 	IslandFly(LagSkyblock plugin) {
+		this.plugin = plugin;
 		Bukkit.getScheduler().runTaskTimer(plugin, this::check, 20L, 10L);
 	}
 
@@ -56,6 +60,36 @@ final class IslandFly implements Listener, CommandExecutor {
 		}
 	}
 
+	private boolean inCombat(Player p) {
+		Long t = combat.get(p.getUniqueId());
+		if (t == null) return false;
+		if (t < System.currentTimeMillis()) {
+			combat.remove(p.getUniqueId());
+			return false;
+		}
+		return true;
+	}
+
+	private void tag(Player p) {
+		combat.put(p.getUniqueId(), System.currentTimeMillis() + plugin.getConfig().getLong("warzone.tag-seconds", 15) * 1000L);
+		if (on.remove(p.getUniqueId()) && !free(p)) {
+			p.setFlying(false);
+			p.setAllowFlight(false);
+			safeFall.add(p.getUniqueId());
+			p.sendActionBar(Spawners.mm("<red>Island fly off <gray>- you're in combat"));
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true, priority = org.bukkit.event.EventPriority.MONITOR)
+	public void onPvp(org.bukkit.event.entity.EntityDamageByEntityEvent e) {
+		if (!(e.getEntity() instanceof Player victim)) return;
+		Player hitter = e.getDamager() instanceof Player hp ? hp
+				: e.getDamager() instanceof org.bukkit.entity.Projectile pr && pr.getShooter() instanceof Player sp ? sp : null;
+		if (hitter == null || hitter.equals(victim)) return;
+		tag(victim);
+		tag(hitter);
+	}
+
 	@EventHandler(ignoreCancelled = true)
 	public void onFall(EntityDamageEvent e) {
 		if (e.getCause() == EntityDamageEvent.DamageCause.FALL && e.getEntity() instanceof Player p && safeFall.remove(p.getUniqueId())) {
@@ -77,6 +111,7 @@ final class IslandFly implements Listener, CommandExecutor {
 	public void onQuit(PlayerQuitEvent e) {
 		on.remove(e.getPlayer().getUniqueId());
 		safeFall.remove(e.getPlayer().getUniqueId());
+		combat.remove(e.getPlayer().getUniqueId());
 	}
 
 	@Override
@@ -95,6 +130,10 @@ final class IslandFly implements Listener, CommandExecutor {
 		}
 		if (!allowedHere(p)) {
 			p.sendMessage(Spawners.mm("<red>You can only fly on your own island."));
+			return true;
+		}
+		if (inCombat(p)) {
+			p.sendMessage(Spawners.mm("<red>You can't fly in combat. <gray>(" + ((combat.get(p.getUniqueId()) - System.currentTimeMillis()) / 1000 + 1) + "s)"));
 			return true;
 		}
 		on.add(p.getUniqueId());
