@@ -1,0 +1,67 @@
+# RelapsedMC SMP: GriefPrevention settings (shipped from servers/smp/ in the repo; GriefPrevention fills in every
+# other setting with its default and re-saves this file on start, which is fine).
+# Claim with a golden shovel (right-click two corners); a stick shows who owns a claim; the boundary shows
+# with GriefPrevention's built-in block visualisation. /trust /accesstrust /containertrust /untrust /trustlist,
+# /abandonclaim, /claimslist, or the /claimhelp menu.
+GriefPrevention:
+  Claims:
+    Mode:
+      world: Survival
+      world_nether: Survival
+      # the End stays unclaimable so the dragon island and gateways can't be locked up
+      world_the_end: Disabled
+    # 1,200 blocks to start (a 34x34 base), +150 an hour played, up to 120,000 (about 346x346)
+    InitialBlocks: 1200
+    Claim Blocks Accrued Per Hour:
+      Default: 150
+    Max Accrued Claim Blocks:
+      Default: 120000
+    # AFK pools don't earn claim blocks
+    Accrued Idle Threshold: 3
+    AccruedIdlePercent: 0
+    AbandonReturnRatio: 1.0
+    # the first chest a new player places protects a small area around it
+    AutomaticNewPlayerClaimsRadius: 4
+    MinimumWidth: 5
+    MinimumArea: 100
+    ExtendIntoGroundDistance: 64
+    ModificationTool: GOLDEN_SHOVEL
+    InvestigationTool: STICK
+    DeliverManuals: false
+    # can't /sethome inside someone else's claim without access trust
+    CommandsRequiringAccessTrust: /sethome
+    LockWoodenDoors: false
+    LockTrapDoors: false
+    LockFenceGates: true
+    ProtectCreatures: true
+    PreventTheft: true
+    VillagerTradingRequiresPermission: true
+    Expiration:
+      # Permanent world: claims are NOT removed for normal breaks. Only the tiny automatic chest claim of a
+      # player who never built anything else goes after 14 days; everything else after a full year away.
+      ChestClaimDays: 14
+      UnusedClaimDays: 0
+      AllClaims:
+        DaysInactive: 365
+        ExceptWhenOwnerHasTotalClaimBlocks: 10000
+        ExceptWhenOwnerHasBonusClaimBlocks: 5000
+      AutomaticNatureRestoration:
+        SurvivalWorlds: false
+  Economy:
+    # no buying/selling claim blocks for money (it would turn money into land with no cap)
+    ClaimBlocksPurchaseCost: 0
+    ClaimBlocksSellValue: 0
+  PvP:
+    ProtectFreshSpawns: true
+  ProtectItemsDroppedOnDeath:
+    NonPvPWorlds: true
+  BlockLandClaimExplosions: true
+  BlockSurfaceCreeperExplosions: true
+  BlockSurfaceOtherExplosions: true
+  FireSpreads: false
+  FireDestroys: false
+  EndermenMoveBlocks: false
+  CreaturesTrampleCrops: false
+  Spam:
+    # laGCore owns chat on the network; keep GP's spam guard but never auto-ban from it
+    BanOffenders: false

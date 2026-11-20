@@ -1,0 +1,58 @@
+# RelapsedMC SMP: food and utility items (never diamonds, netherite, elytra or totems)
+# BUY-ONLY (no sell-price), fixed prices.
+gui-name: '&l<gradient:#38E0FF:#B040FF>Food & Utility</gradient>'
+rows: 3
+permission: ''
+
+items:
+  - material: BREAD
+    price: 3
+    amount: 16
+  - material: COOKED_BEEF
+    price: 4
+    amount: 16
+  - material: BAKED_POTATO
+    price: 3
+    amount: 16
+  - material: GOLDEN_CARROT
+    price: 12
+    amount: 16
+  - material: TORCH
+    price: 1
+    amount: 32
+  - material: LANTERN
+    price: 6
+    amount: 8
+  - material: LADDER
+    price: 2
+    amount: 16
+  - material: BUCKET
+    price: 30
+    amount: 1
+  - material: WATER_BUCKET
+    price: 35
+    amount: 1
+  - material: NAME_TAG
+    price: 150
+    amount: 1
+  - material: SADDLE
+    price: 200
+    amount: 1
+  - material: LEAD
+    price: 40
+    amount: 1
+  - material: EXPERIENCE_BOTTLE
+    price: 20
+    amount: 16
+  - material: FIREWORK_ROCKET
+    price: 6
+    amount: 16
+  - material: MAP
+    price: 15
+    amount: 1
+  - material: BOOK
+    price: 6
+    amount: 8
+  - material: WHITE_BED
+    price: 25
+    amount: 1

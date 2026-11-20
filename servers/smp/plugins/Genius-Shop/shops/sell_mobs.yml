@@ -1,0 +1,142 @@
+# RelapsedMC SMP: mob drops
+# SELL-ONLY. Every sale lowers that item's sell price for everyone (dynamic-pricing, price-change per item sold);
+# prices reset every day at 00:00 New York time. So the server pays out at most about base x items/2 per item per day
+# (here ~1500 per item, see the numbers below), plus the 5,000-per-sale cap in config.yml. No money printing.
+gui-name: '&l<gradient:#7CFF6B:#38E0FF>Sell: Mob Drops</gradient>'
+rows: 3
+permission: ''
+sell-adds-to-stock: true
+allow-sell-stock-overflow: true
+stock-reset:
+  enabled: true
+  type: DAILY
+  time: '00:00'
+  timezone: America/New_York
+
+items:
+  - material: ROTTEN_FLESH
+    sell-price: 0.1
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00000333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: BONE
+    sell-price: 0.4
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00005333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: STRING
+    sell-price: 0.4
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00005333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: SPIDER_EYE
+    sell-price: 0.6
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: GUNPOWDER
+    sell-price: 1.2
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00048000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: ARROW
+    sell-price: 0.1
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00000333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: ENDER_PEARL
+    sell-price: 4.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00533333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: BLAZE_ROD
+    sell-price: 5.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00833333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: SLIME_BALL
+    sell-price: 1.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00075000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: MAGMA_CREAM
+    sell-price: 2.5
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00208333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: GHAST_TEAR
+    sell-price: 12.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.06000000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: LEATHER
+    sell-price: 1.2
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00048000
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: FEATHER
+    sell-price: 0.25
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00002083
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: INK_SAC
+    sell-price: 0.4
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00005333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: PHANTOM_MEMBRANE
+    sell-price: 5.0
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00833333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: PRISMARINE_SHARD
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00021333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: RABBIT_HIDE
+    sell-price: 0.8
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00021333
+    lore:
+      - '&7Sells for less the more the server buys today.'
+  - material: WHITE_WOOL
+    sell-price: 0.6
+    amount: 64
+    dynamic-pricing: true
+    price-change: 0.00012000
+    lore:
+      - '&7Sells for less the more the server buys today.'

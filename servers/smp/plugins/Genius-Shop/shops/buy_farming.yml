@@ -1,0 +1,58 @@
+# RelapsedMC SMP: seeds and saplings
+# BUY-ONLY (no sell-price), fixed prices.
+gui-name: '&l<gradient:#38E0FF:#B040FF>Seeds & Saplings</gradient>'
+rows: 3
+permission: ''
+
+items:
+  - material: WHEAT_SEEDS
+    price: 1
+    amount: 16
+  - material: PUMPKIN_SEEDS
+    price: 5
+    amount: 8
+  - material: MELON_SEEDS
+    price: 5
+    amount: 8
+  - material: BEETROOT_SEEDS
+    price: 2
+    amount: 16
+  - material: SUGAR_CANE
+    price: 3
+    amount: 8
+  - material: CACTUS
+    price: 3
+    amount: 8
+  - material: COCOA_BEANS
+    price: 4
+    amount: 8
+  - material: NETHER_WART
+    price: 10
+    amount: 8
+  - material: BONE_MEAL
+    price: 2
+    amount: 32
+  - material: OAK_SAPLING
+    price: 5
+    amount: 4
+  - material: SPRUCE_SAPLING
+    price: 5
+    amount: 4
+  - material: BIRCH_SAPLING
+    price: 5
+    amount: 4
+  - material: JUNGLE_SAPLING
+    price: 6
+    amount: 4
+  - material: ACACIA_SAPLING
+    price: 6
+    amount: 4
+  - material: DARK_OAK_SAPLING
+    price: 6
+    amount: 4
+  - material: CHERRY_SAPLING
+    price: 8
+    amount: 4
+  - material: BAMBOO
+    price: 2
+    amount: 8

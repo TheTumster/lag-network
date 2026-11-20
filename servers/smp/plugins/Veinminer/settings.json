@@ -1,0 +1,26 @@
+{
+    "cooldown": 20,
+    "mustSneak": true,
+    "delay": 0,
+    "maxChain": 64,
+    "needCorrectTool": true,
+    "searchRadius": 1,
+    "permissionRestricted": false,
+    "mergeItemDrops": false,
+    "autoUpdate": false,
+    "decreaseDurability": true,
+    "hungerPerBlock": 0.005,
+    "miningSpeedModifier": 0.0,
+    "separateGroupMining": true,
+    "minEnchantLevel": 1,
+    "dontDisplayUpdatesAndIWillNotAskForSupportBeforeUpdatingISwear": true,
+    "debug": false,
+    "client": {
+        "allow": true,
+        "require": false,
+        "translucentBlockHighlight": true,
+        "allBlocks": false,
+        "allowClientGroups": false,
+        "overrides": {}
+    }
+}

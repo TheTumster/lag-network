@@ -1,0 +1,64 @@
+# RelapsedMC SMP: /shop main menu (shipped from servers/smp/ in the repo). Each button opens shops/<shop-key>.yml.
+config-version: 3
+
+title: '&l<gradient:#38E0FF:#B040FF>RelapsedMC</gradient> &8» &7Shop'
+rows: 4
+
+items:
+  info:
+    slot: 4
+    material: BOOK
+    name: '&l<gradient:#7CFF6B:#38E0FF>SMP Shop</gradient>'
+    lore:
+      - '&7Sell what you farm, mine and hunt.'
+      - '&7Sell prices drop as the server buys'
+      - '&7and reset every day at &f00:00 ET&7.'
+      - ''
+      - '&7Trade with players: chest shops.'
+  sell_farming:
+    slot: 11
+    material: WHEAT
+    name: '&#7CFF6B&lSell: Farming'
+    lore:
+      - '&7Crops, berries, honeycomb...'
+    shop-key: sell_farming
+  sell_mobs:
+    slot: 12
+    material: BONE
+    name: '&#7CFF6B&lSell: Mob Drops'
+    lore:
+      - '&7Bones, string, pearls, rods...'
+    shop-key: sell_mobs
+  sell_ores:
+    slot: 13
+    material: RAW_IRON
+    name: '&#7CFF6B&lSell: Ores'
+    lore:
+      - '&7Coal to diamonds. No netherite.'
+    shop-key: sell_ores
+  buy_blocks:
+    slot: 14
+    material: BRICKS
+    name: '&#38E0FF&lBuy: Building Blocks'
+    lore:
+      - '&7Logs, glass, bricks, lights...'
+    shop-key: buy_blocks
+  buy_farming:
+    slot: 15
+    material: OAK_SAPLING
+    name: '&#38E0FF&lBuy: Seeds & Saplings'
+    lore:
+      - '&7Start a farm anywhere.'
+    shop-key: buy_farming
+  buy_utility:
+    slot: 22
+    material: COOKED_BEEF
+    name: '&#38E0FF&lBuy: Food & Utility'
+    lore:
+      - '&7Food, torches, name tags, rockets...'
+    shop-key: buy_utility
+  close:
+    slot: 31
+    material: BARRIER
+    name: '&#FF4D6DClose'
+    action: close

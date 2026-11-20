@@ -1,0 +1,23 @@
+[
+    {
+        "name": "Ores",
+        "blocks": [
+            "#c:ores"
+        ],
+        "tools": [
+            "#minecraft:pickaxes"
+        ]
+    },
+    {
+        "name": "Timber",
+        "blocks": [
+            "#minecraft:logs"
+        ],
+        "tools": [
+            "#minecraft:axes"
+        ],
+        "override": {
+            "maxChain": 128
+        }
+    }
+]
