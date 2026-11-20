@@ -1,31 +1,52 @@
-import json, urllib.request, urllib.parse, re
+import json, urllib.request, urllib.parse, zipfile, io, re, sys
 UA = {"User-Agent": "lag-network-probe"}
-def gj(u):
-    try: return json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30))
-    except Exception as e: return {"err": str(e)}
-def vers(s):
+def gj(u): return json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=60))
+def jar_modrinth(s):
     q = urllib.parse.urlencode({"loaders": json.dumps(["paper","spigot","bukkit","purpur"]), "game_versions": json.dumps(["1.21.11"])})
     vs = gj(f"https://api.modrinth.com/v2/project/{s}/version?{q}")
-    if isinstance(vs, dict): print(f"{s}: {vs}"); return
-    print(f"{s}: {len(vs)} versions for 1.21.11")
-    for v in vs[:2]:
-        f = next((f for f in v["files"] if f["primary"]), v["files"][0])
-        print(f"   {v['version_number']} {v['version_type']} {v['date_published'][:10]} loaders={v['loaders']} file={f['filename']} deps={[(d.get('project_id'),d['dependency_type']) for d in v['dependencies']]}")
-for q in ["excellentshop","betterrtp","shop","economy shop","sell limit","dynamic price shop"]:
-    r = gj("https://api.modrinth.com/v2/search?" + urllib.parse.urlencode({"query": q, "limit": 10, "facets": json.dumps([["versions:1.21.11"],["project_type:plugin"]])}))
-    print("SEARCH", q)
-    for h in r.get("hits", []): print(f"   {h['slug']} | {h['title']} | dl={h['downloads']} | upd={h['date_modified'][:10]} | {h['description'][:100]}")
-for s in ["simple-rtp","donut-rtp-and-rtp-zone","griefpreventioneasygui","genius-shop","economyshopgui","dynamicshop","guishop","veinminer","nightcore","nightcore-lib"]:
-    vers(s)
-    p = gj(f"https://api.modrinth.com/v2/project/{s}")
-    body = p.get("body","") if isinstance(p, dict) else ""
-    hits = [m for m in re.findall(r"[^\n]{0,120}(?:[Ll]imit|[Cc]ap|[Cc]ooldown|[Ss]afe|[Pp]remium|[Tt]oggle|[Tt]ree|[Ll]og|[Mm]ax)[^\n]{0,120}", body)][:14]
-    print("  ABOUT", s, p.get("license",{}).get("id") if isinstance(p,dict) else "", p.get("source_url") if isinstance(p,dict) else "")
-    for h in hits: print("     >", h.strip()[:240])
-for p in ["SuperRonanCraft/BetterRTP","NightExpress/ExcellentShop","nightexpress/ExcellentShop","ChestShop-authors/ChestShop","Ghost_chu/QuickShop-Hikari","2008Choco/VeinMiner","GriefPrevention/GriefPrevention"]:
-    o, sl = p.split("/")
-    d = gj(f"https://hangar.papermc.io/api/v1/projects/{o}/{sl}/versions?limit=2&offset=0&platform=PAPER")
-    print("HANGAR", p, d if "err" in d else [(v["name"], v["createdAt"][:10], "1.21.11" in (v.get("platformDependencies",{}).get("PAPER") or [])) for v in d.get("result",[])])
-for r in ["SuperRonanCraft/BetterRTP","nulli0n/ExcellentShop-spigot","nulli0n/NexEngine-spigot","nulli0n/nightcore-spigot"]:
-    d = gj(f"https://api.github.com/repos/{r}/releases?per_page=3")
-    print("GH", r, d if isinstance(d, dict) else [(x["tag_name"], x["published_at"][:10], [a["name"] for a in x["assets"]]) for x in d])
+    rel = [v for v in vs if v["version_type"] == "release"] or vs
+    f = next((f for f in rel[0]["files"] if f["primary"]), rel[0]["files"][0])
+    return f["url"], rel[0]["version_number"]
+def jar_gh(r):
+    for rel in gj(f"https://api.github.com/repos/{r}/releases?per_page=5"):
+        if rel["prerelease"] or rel["draft"]: continue
+        for a in rel["assets"]:
+            if a["name"].endswith(".jar"): return a["browser_download_url"], rel["tag_name"]
+def show(name, url, ver, full=(), grep=None, maxlen=9000):
+    data = urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120).read()
+    z = zipfile.ZipFile(io.BytesIO(data))
+    res = [n for n in z.namelist() if re.search(r"\.(yml|yaml|json|conf|toml|properties)$", n) and not n.startswith(("META-INF/maven","org/","com/","net/","kotlin","io/","dev/","de/","me/","assets/")) ]
+    print(f"########## {name} {ver} ({len(data)} bytes)")
+    print("  RESOURCES:", res[:80])
+    try:
+        pl = z.read("plugin.yml" if "plugin.yml" in z.namelist() else "paper-plugin.yml").decode()
+        print("  PLUGIN.YML:", "\n".join(l for l in pl.splitlines() if re.match(r"^(name|version|main|api-version|depend|softdepend|loadbefore|folia)", l)))
+    except Exception as e: print("  no plugin.yml", e)
+    for n in res:
+        if any(re.search(p, n) for p in full):
+            t = z.read(n).decode("utf-8", "replace")
+            print(f"===== FILE {n} ({len(t)} chars)\n{t[:maxlen]}\n===== END {n}")
+    if grep:
+        for n in res:
+            t = z.read(n).decode("utf-8", "replace")
+            for l in t.splitlines():
+                if re.search(grep, l): print(f"  GREP {n}: {l.strip()[:200]}")
+which = sys.argv[1] if len(sys.argv) > 1 else "all"
+jobs = [
+ ("genius-shop", "m", [r"^config\.yml$", r"shops/.*\.yml$"], r"(?i)limit|stock|dynamic"),
+ ("economyshopgui", "m", [], r"(?i)limit|dynamic"),
+ ("dynamicshop", "m", [], r"(?i)limit|stock"),
+ ("guishop", "m", [r"^config\.yml$"], r"(?i)limit|dynamic|stock"),
+ ("veinminer", "m", [r"(?i)config|settings"], None),
+ ("all-in-one-veinminer", "m", [r"^config\.yml$"], None),
+ ("SuperRonanCraft/BetterRTP", "g", [r"^config\.yml$", r"^locations\.yml$"], None),
+ ("griefpreventioneasygui", "m", [r"^config\.yml$"], None),
+ ("gsit", "m", [r"^config\.yml$"], None),
+ ("chestshop", "m", [r"^config\.yml$"], None),
+]
+for name, src, full, grep in jobs:
+    try:
+        url, ver = jar_modrinth(name) if src == "m" else jar_gh(name)
+        show(name, url, ver, full, grep)
+    except Exception as e:
+        print("##########", name, "FAILED", e)
