@@ -103,10 +103,9 @@ final class Pack implements Listener {
 	}
 
 	void send(Player p) {
-		if (builtIn(p)) {
-			loaded.add(p.getUniqueId());
-			return;
-		}
+		// everyone gets the server's current pack, the Relapsed client included: its built-in copy is only a
+		// fallback and goes stale between client updates (the client accepts our pack without a prompt)
+		if (builtIn(p)) loaded.add(p.getUniqueId());
 		if (!enabled() || !ready) return;
 		p.setResourcePack(ID, url(), hash, LagCore.mm("<gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient>\n<gray>Our pack adds the logo, icons and menus.\n<dark_gray>(about 1 MB, one time)"),
 				plugin.getConfig().getBoolean("resource-pack.required", false));
@@ -122,8 +121,8 @@ final class Pack implements Listener {
 		// wait a moment before prompting: the RelapsedMC Client's "I have the pack" (brand / hello / channel) can land
 		// a second or so after the join, and it must never be asked to download a pack it already has
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-			if (p.isOnline() && !has(p)) send(p);
-		}, 50L);
+			if (p.isOnline()) send(p);
+		}, 10L);
 	}
 
 	@EventHandler
