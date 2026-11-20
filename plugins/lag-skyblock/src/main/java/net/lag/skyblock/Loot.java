@@ -74,7 +74,7 @@ final class Loot implements Listener {
 	}
 
 	boolean fromSpawner(LivingEntity e) {
-		if (e.getPersistentDataContainer().has(rsSpawner, PersistentDataType.INTEGER)) return true;
+		if (e.getPersistentDataContainer().getKeys().contains(rsSpawner)) return true;
 		try {
 			return e.getEntitySpawnReason() == CreatureSpawnEvent.SpawnReason.SPAWNER;
 		} catch (Throwable t) {

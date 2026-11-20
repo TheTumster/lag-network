@@ -152,6 +152,9 @@ public final class LagSkyblock extends JavaPlugin {
 				case "season" -> season.admin(s, a);
 				case "envoy" -> warzone.envoy(s);
 				case "koth" -> warzone.kothAdmin(s, a);
+				case "grinder" -> {
+					if (s instanceof org.bukkit.entity.Player pl && grinder != null) grinder.debug(pl);
+				}
 				case "stations" -> {
 					stations.respawn();
 					s.sendMessage(Spawners.mm("<#7CFF6B>Spawn stations respawned"));
