@@ -263,11 +263,18 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 					hubBuild.atmosphere(w);
 					hubBuild.holograms();
 					sender.sendMessage(mm("<#38E0FF>Hub spawn rebuilt <gray>(" + n + " blocks)."));
+				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildspawn") && spawnBuild != null) {
+					// re-place this realm's spawn in its current theme (same spot)
+					var o = spawnBuild.origin();
+					var w = o != null ? o.getWorld() : Bukkit.getWorlds().get(0);
+					int n = spawnBuild.build(w, 0, o != null ? o.getBlockY() : 100, 0);
+					spawnBuild.holograms();
+					sender.sendMessage(mm("<#38E0FF>Spawn rebuilt <gray>(" + n + " blocks, theme: " + spawnBuild.theme() + ")."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("holograms") && hubBuild != null) {
 					hubBuild.holograms();
 					sender.sendMessage(mm("<#38E0FF>Holograms respawned."));
 				} else {
-					sender.sendMessage(mm("<gray>/lagcore reload | rebuildhub | holograms"));
+					sender.sendMessage(mm("<gray>/lagcore reload | rebuildhub | rebuildspawn | holograms"));
 				}
 			}
 			default -> { }
