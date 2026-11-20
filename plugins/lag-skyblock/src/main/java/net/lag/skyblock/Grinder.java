@@ -91,9 +91,9 @@ final class Grinder implements Listener {
 	/** One cage mob, one check: returns its highest point since it last stood on ground, or null if it was killed. */
 	private Double step(LivingEntity e, double need) {
 		// "no AI" must not mean "no gravity": keep physics on, keep the brain off
-		if (e instanceof org.bukkit.entity.Mob m && !m.hasAI()) {
-			m.setAI(true);
-			m.setAware(false);
+		if (e instanceof org.bukkit.entity.Mob m) {
+			if (!m.hasAI()) m.setAI(true);
+			if (m.isAware()) m.setAware(false);
 		}
 		{
 			{
@@ -131,13 +131,29 @@ final class Grinder implements Listener {
 			Double peak = peaks.get(e.getUniqueId());
 			p.sendMessage(Spawners.mm("<gray>" + e.getType().name().toLowerCase() + " <white>cage=" + cage + " ground=" + e.isOnGround()
 					+ " y=" + String.format("%.1f", e.getLocation().getY()) + " peak=" + (peak == null ? "-" : String.format("%.1f", peak))
-					+ " ai=" + (e instanceof org.bukkit.entity.Mob m ? m.hasAI() + "/" + m.isAware() : "-") + " reason=" + e.getEntitySpawnReason()));
+					+ " stack=" + stackSize(e) + " ai=" + (e instanceof org.bukkit.entity.Mob m ? m.hasAI() + "/" + m.isAware() : "-") + " reason=" + e.getEntitySpawnReason()));
 		}
 		p.sendMessage(Spawners.mm("<gray>Cage mobs in this world: <white>" + all + " <gray>· shown: <white>" + near + " <gray>within 20 blocks"));
 	}
 
 	/** Dies of "cramming": nothing is immune to it, and RoseStacker takes the whole stack with it (our config). */
 	private void kill(LivingEntity e) {
+		// the whole stack goes at once and we drop the loot ourselves: no dependence on how RoseStacker reads the death
+		try {
+			int size = stackSize(e);
+			if (plugin.loot.dropStack(e, size)) {
+				Location l = e.getLocation().add(0, 0.4, 0);
+				l.getWorld().spawnParticle(org.bukkit.Particle.POOF, l, 8, 0.25, 0.25, 0.25, 0.02);
+				l.getWorld().playSound(l, org.bukkit.Sound.ENTITY_CHICKEN_EGG, 0.25f, 0.6f);
+				e.remove();
+				return;
+			}
+		} catch (Throwable t) {
+			if (!warned) {
+				warned = true;
+				plugin.getLogger().warning("Whole-stack kill failed on a " + e.getType() + ": " + t);
+			}
+		}
 		try {
 			e.setInvulnerable(false);
 			e.setNoDamageTicks(0);
@@ -146,6 +162,28 @@ final class Grinder implements Listener {
 			// fall through to the plain kill
 		}
 		if (!e.isDead() && e.getHealth() > 0) e.setHealth(0);
+	}
+
+	private Object rsApi;
+	private java.lang.reflect.Method rsStacked, rsSize;
+
+	/** How many mobs this entity stands for (RoseStacker stacks them into one entity). */
+	int stackSize(LivingEntity e) {
+		try {
+			if (rsApi == null) {
+				var rs = Bukkit.getPluginManager().getPlugin("RoseStacker");
+				if (rs == null) return 1;
+				Class<?> api = Class.forName("dev.rosewood.rosestacker.api.RoseStackerAPI", true, rs.getClass().getClassLoader());
+				rsStacked = api.getMethod("getStackedEntity", LivingEntity.class);
+				rsApi = api.getMethod("getInstance").invoke(null);
+			}
+			Object se = rsStacked.invoke(rsApi, e);
+			if (se == null) return 1;
+			if (rsSize == null) rsSize = se.getClass().getMethod("getStackSize");
+			return Math.max(1, ((Number) rsSize.invoke(se)).intValue());
+		} catch (Throwable t) {
+			return 1;
+		}
 	}
 
 	@EventHandler(ignoreCancelled = true)
