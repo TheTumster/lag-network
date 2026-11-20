@@ -228,8 +228,10 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		switch (cmd.getName().toLowerCase()) {
 			case "hub" -> {
 				if (!(sender instanceof Player p)) return true;
-				if (!isHub() && label.equalsIgnoreCase("spawn") && spawnBuild != null && spawnBuild.spawnPoint() != null) {
-					p.teleport(spawnBuild.spawnPoint());
+				if (!isHub() && label.equalsIgnoreCase("spawn")) {
+					// /spawn stays on this server: its built spawn if it has one, else /setspawn's spot or the world spawn
+					// (/hub and /lobby are the ones that go to the hub)
+					p.teleport(spawnBuild != null && spawnBuild.spawnPoint() != null ? spawnBuild.spawnPoint() : spawn());
 				} else if (isHub()) {
 					if (hub != null) hub.toSpawn(p);
 				} else {
