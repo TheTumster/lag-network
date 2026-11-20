@@ -66,6 +66,7 @@ public final class LagSkyblock extends JavaPlugin {
 	Collector collector;
 	Market market;
 	Stations stations;
+	Grinder grinder;
 	Warzone warzone;
 	Vault vault;
 	Crates crates;
@@ -140,6 +141,8 @@ public final class LagSkyblock extends JavaPlugin {
 		auction = new Auction(this);
 		getServer().getPluginManager().registerEvents(auction, this);
 		getCommand("ah").setExecutor(auction);
+		grinder = new Grinder(this);
+		getServer().getPluginManager().registerEvents(grinder, this);
 		stations = new Stations(this);
 		getServer().getPluginManager().registerEvents(stations, this);
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -193,6 +196,7 @@ public final class LagSkyblock extends JavaPlugin {
 		if (top != null) top.save();
 		if (generators != null) generators.save();
 		if (vault != null) vault.save();
+		if (grinder != null) grinder.shutdown();
 		if (auction != null) auction.save();
 		if (crates != null) {
 			crates.save();
@@ -281,7 +285,7 @@ public final class LagSkyblock extends JavaPlugin {
 			want.put("global-entity-settings.kill-entire-stack-on-death-conditions", getConfig().getStringList("rosestacker.kill-entire-stack-on"));
 			want.put("global-spawner-settings.silk-touch-required", false);
 			want.put("global-spawner-settings.spawn-player-activation-range", getConfig().getInt("rosestacker.player-activation-range", 24));
-			want.put("global-spawner-settings.disable-mob-ai", false);
+			want.put("global-spawner-settings.disable-mob-ai", getConfig().getBoolean("rosestacker.disable-mob-ai", true));
 			// a fixed 360 mobs an hour per cage (2 every 400 ticks), so the economy's numbers hold
 			int delay = getConfig().getInt("rosestacker.spawn-delay", 400);
 			want.put("global-spawner-settings.spawn-delay-minimum", delay);

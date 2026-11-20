@@ -200,7 +200,8 @@ final class Spawners implements Listener, CommandExecutor {
 		for (int i = 0; i < tiers.size() && i < PATH.length; i++) inv.setItem(PATH[i], tierItem(p, tiers.get(i), top));
 		inv.setItem(INFO, named(Material.BOOK, "<#38E0FF><bold>HOW IT WORKS", List.of(
 				"<gray>Cages spawn real mobs that stack up.",
-				"<gray>Build a <white>grinder</white>: drop or burn the stack",
+				"<gray>Build a <white>grinder</white>: drop them 6+ blocks or",
+				"<gray>into lava. Works for every cage,",
 				"<gray>and the whole stack dies into your hoppers.",
 				"<gray>Sell the loot to <white>the Collector</white> (/sell).",
 				"<gray>Away? Cages keep going: <white>/vault</white>.",
