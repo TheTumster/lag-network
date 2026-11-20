@@ -33,20 +33,11 @@ def show(name, url, ver, full=(), grep=None, maxlen=9000):
                 if re.search(grep, l): print(f"  GREP {n}: {l.strip()[:200]}")
 which = sys.argv[1] if len(sys.argv) > 1 else "all"
 jobs = [
- ("genius-shop", "m", [r"^config\.yml$", r"shops/.*\.yml$"], r"(?i)limit|stock|dynamic"),
- ("economyshopgui", "m", [], r"(?i)limit|dynamic"),
- ("dynamicshop", "m", [], r"(?i)limit|stock"),
- ("guishop", "m", [r"^config\.yml$"], r"(?i)limit|dynamic|stock"),
- ("veinminer", "m", [r"(?i)config|settings"], None),
- ("all-in-one-veinminer", "m", [r"^config\.yml$"], None),
- ("SuperRonanCraft/BetterRTP", "g", [r"^config\.yml$", r"^locations\.yml$"], None),
- ("griefpreventioneasygui", "m", [r"^config\.yml$"], None),
- ("gsit", "m", [r"^config\.yml$"], None),
- ("chestshop", "m", [r"^config\.yml$"], None),
+ ("economyshopgui", "m", [r"^config\.yml$", r"ExampleShop\.yml$", r"shops/Ores\.yml$", r"1-sections/Ores\.yml$", r"LanguageFiles/lang-en\.yml$"], None),
 ]
 for name, src, full, grep in jobs:
     try:
         url, ver = jar_modrinth(name) if src == "m" else jar_gh(name)
-        show(name, url, ver, full, grep)
+        show(name, url, ver, full, grep, maxlen=60000)
     except Exception as e:
         print("##########", name, "FAILED", e)
