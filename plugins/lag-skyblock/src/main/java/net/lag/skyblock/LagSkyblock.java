@@ -287,6 +287,8 @@ public final class LagSkyblock extends JavaPlugin {
 			want.put("global-entity-settings.kill-entire-stack-on-death", false);
 			want.put("global-entity-settings.kill-entire-stack-on-death-conditions", getConfig().getStringList("rosestacker.kill-entire-stack-on"));
 			want.put("global-spawner-settings.silk-touch-required", false);
+			// dropped items don't show a floating "16x Raw Chicken" label
+			want.put("global-item-settings.display-tags", getConfig().getBoolean("rosestacker.item-tags", false));
 			want.put("global-spawner-settings.spawn-player-activation-range", getConfig().getInt("rosestacker.player-activation-range", 24));
 			want.put("global-spawner-settings.disable-mob-ai", getConfig().getBoolean("rosestacker.disable-mob-ai", true));
 			// any cage mob that dies takes its whole stack with it, whatever killed it
