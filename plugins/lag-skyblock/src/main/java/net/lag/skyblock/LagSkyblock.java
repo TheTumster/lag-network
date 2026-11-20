@@ -296,6 +296,7 @@ public final class LagSkyblock extends JavaPlugin {
 			want.put("global-spawner-settings.spawn-count-stack-size-multiplier", getConfig().getInt("rosestacker.spawn-count", 2));
 			want.put("global-spawner-settings.spawn-count-stack-size-randomized", false);
 			want.put("global-spawner-settings.max-stack-size", getConfig().getInt("rosestacker.max-cage-stack", 256));
+			want.put("global-spawner-settings.spawn-range", getConfig().getInt("rosestacker.spawn-range", 1));
 			ConfigurationSection extra = getConfig().getConfigurationSection("rosestacker.settings");
 			if (extra != null) for (String k : extra.getKeys(true)) if (!extra.isConfigurationSection(k)) want.put(k, extra.get(k));
 			for (var e : want.entrySet()) {
@@ -308,6 +309,26 @@ public final class LagSkyblock extends JavaPlugin {
 				y.save(cfg);
 				any = true;
 				getLogger().info("RoseStacker set up for grinders (whole stack dies from " + getConfig().getStringList("rosestacker.kill-entire-stack-on") + ")");
+			}
+		}
+		// cages spawn their mobs in open air right next to the cage: no grass, light or floor needed (vanilla rules made
+		// chickens/pigs/cows need grass and the hostile tiers need darkness, which no drop grinder can give them)
+		File ss = rsFile("spawner_settings.yml");
+		if (ss.exists()) {
+			YamlConfiguration y = YamlConfiguration.loadConfiguration(ss);
+			boolean changed = false;
+			java.util.List<String> req = getConfig().isList("rosestacker.spawn-requirements") ? getConfig().getStringList("rosestacker.spawn-requirements") : java.util.List.of("air");
+			for (Tier t : tiers) {
+				String key = t.mob().toUpperCase(java.util.Locale.ROOT) + ".spawn-requirements";
+				if (!req.equals(y.getStringList(key))) {
+					y.set(key, req);
+					changed = true;
+				}
+			}
+			if (changed) {
+				y.save(ss);
+				any = true;
+				getLogger().info("RoseStacker: cages spawn in open air (no grass/darkness/floor needed)");
 			}
 		}
 		File[] locales = rsFile("locale").listFiles((d, n) -> n.endsWith(".yml"));
