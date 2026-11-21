@@ -20,9 +20,7 @@ ping-spoof:
 prevent-spectator-effect:
   enabled: false
 global-playerlist:
-  enabled: true
-  display-others-as-spectators: false
-  display-vanished-players-as-spectators: true
+  enabled: false
 layout:
   enabled: true
   direction: COLUMNS
