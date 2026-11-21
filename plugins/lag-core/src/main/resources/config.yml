@@ -84,7 +84,8 @@ fresh-chat:
 
 # Links for chat buttons ({discord}, {store}). Empty = the button just shows its hover text.
 links:
-  discord: ""
+  discord: "https://discord.gg/G4pHKXDDru"
+  website: "https://relapsedmc.com"
   store: ""
 
 # Ranks: how each one shows before a name (chat, tab, above heads, scoreboard). Order = tab order.
