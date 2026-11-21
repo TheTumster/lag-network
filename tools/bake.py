@@ -90,7 +90,7 @@ def ship_server_files(manage_them=False):
     launcher delivers them too. Served from raw.githubusercontent.com at this exact commit so the SHA-256 matches."""
     base = f"https://raw.githubusercontent.com/{os.environ.get('GITHUB_REPOSITORY', 'TheTumster/lag-network')}/" \
            f"{os.environ.get('GITHUB_SHA', 'main')}/servers/"
-    for s in SERVERS:
+    for s in SERVERS + ["proxy"]:
         src = os.path.join(ROOT, "servers", s)
         for d, _, files in os.walk(src):
             for f in sorted(files):

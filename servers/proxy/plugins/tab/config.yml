@@ -1,0 +1,78 @@
+# RelapsedMC tab list (TAB on the Velocity proxy). Only the layout feature is on: the header and footer
+# come from laGCore on each server. Columns, top to bottom then left to right: slots 1-20 realms,
+# 21-40 you, 41-60 the network, 61-80 who's online. Shipped from the repo (servers/proxy/): edit it there.
+header-footer:
+  enabled: false
+tablist-name-formatting:
+  enabled: false
+scoreboard-teams:
+  enabled: false
+playerlist-objective:
+  enabled: false
+belowname-objective:
+  enabled: false
+bossbar:
+  enabled: false
+scoreboard:
+  enabled: false
+ping-spoof:
+  enabled: false
+prevent-spectator-effect:
+  enabled: false
+global-playerlist:
+  enabled: true
+  display-others-as-spectators: false
+  display-vanished-players-as-spectators: true
+layout:
+  enabled: true
+  direction: COLUMNS
+  enable-remaining-players-text: true
+  remaining-players-text: '<#8A8FA3>... and %s more'
+  empty-slot-ping-value: 1000
+  layouts:
+    relapsed:
+      fixed-slots:
+        - '1|<gradient:#38E0FF:#B040FF><bold>REALMS</bold></gradient>'
+        - '2|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
+        - '4|<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>'
+        - '5|<white>%online_skyblock% <#8A8FA3>playing'
+        - '6|<#5A5F73>Islands, cages, seasons'
+        - '8|<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>'
+        - '9|<white>%online_factions% <#8A8FA3>playing'
+        - '10|<#5A5F73>Relapse #1 in December'
+        - '12|<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>'
+        - '13|<white>%online_cannons% <#8A8FA3>playing'
+        - '14|<#5A5F73>Test cannons on a plot'
+        - '16|<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>'
+        - '17|<white>%online_smp% <#8A8FA3>playing'
+        - '18|<#5A5F73>Claims, shops, survival'
+        - '20|<#5A5F73>/server to switch'
+        - '21|<gradient:#B040FF:#FF4DD2><bold>YOU</bold></gradient>'
+        - '22|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
+        - '24|<#8A8FA3>Name'
+        - '25|<white>%player%'
+        - '27|<#8A8FA3>Realm'
+        - '28|<white>%server%'
+        - '30|<#8A8FA3>Ping'
+        - '31|<white>%ping%<#8A8FA3>ms'
+        - '33|<#8A8FA3>On your realm'
+        - '34|<white>%serveronline% <#8A8FA3>online'
+        - '36|<#8A8FA3>Network'
+        - '37|<white>%online% <#8A8FA3>online'
+        - '41|<gradient:#FFD24D:#FF9F4D><bold>RELAPSEDMC</bold></gradient>'
+        - '42|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
+        - '44|<#8A8FA3>Get around'
+        - '45|<white>/hub <#5A5F73>· <white>/spawn'
+        - '46|<white>/server <#5A5F73>· realm menu'
+        - '48|<#8A8FA3>Need a hand?'
+        - '49|<white>Ask a staff member'
+        - '50|<#8A8FA3>Staff online <white>%staffonline%'
+        - '52|<#8A8FA3>Ranks are cosmetic'
+        - '53|<#5A5F73>No pay-to-win, ever'
+        - '58|<gradient:#38E0FF:#B040FF><bold>play.relapsedmc.com</bold></gradient>'
+        - '61|<gradient:#38E0FF:#7CFF6B><bold>ONLINE</bold></gradient> <#8A8FA3>%online%'
+        - '62|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
+      groups:
+        players:
+          slots:
+            - '63-80'

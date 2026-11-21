@@ -12,6 +12,10 @@
     {
       "modrinth": "viabackwards",
       "loader": "velocity"
+    },
+    {
+      "modrinth": "tab-was-taken",
+      "loader": "velocity"
     }
   ],
   "hub": [
