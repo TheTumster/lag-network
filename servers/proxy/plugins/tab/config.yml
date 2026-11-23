@@ -24,29 +24,29 @@ global-playerlist:
 layout:
   enabled: true
   direction: COLUMNS
-  default-skin: 'player:MHF_Exclamation'
+  default-skin: 'mineskin:6917c379efa34919bbd64308d8c51c1c'
   enable-remaining-players-text: true
   remaining-players-text: '<#8A8FA3>... and %s more'
   empty-slot-ping-value: 1000
   layouts:
     relapsed:
       fixed-slots:
-        - '1|<gradient:#38E0FF:#B040FF><bold>REALMS</bold></gradient>|player:MHF_Present1'
+        - '1|<gradient:#38E0FF:#B040FF><bold>REALMS</bold></gradient>'
         - '2|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
-        - '4|<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>|player:MHF_OakLog'
+        - '4|<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>'
         - '5|<white>%online_skyblock% <#8A8FA3>playing'
         - '6|<#5A5F73>Islands, cages, seasons'
-        - '8|<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>|player:MHF_TNT2'
+        - '8|<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>'
         - '9|<white>%online_factions% <#8A8FA3>playing'
         - '10|<#5A5F73>Relapse #1 in December'
-        - '12|<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>|player:MHF_TNT'
+        - '12|<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>'
         - '13|<white>%online_cannons% <#8A8FA3>playing'
         - '14|<#5A5F73>Test cannons on a plot'
-        - '16|<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>|player:MHF_Chest'
+        - '16|<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>'
         - '17|<white>%online_smp% <#8A8FA3>playing'
         - '18|<#5A5F73>Claims, shops, survival'
         - '20|<#5A5F73>/server to switch'
-        - '21|<gradient:#B040FF:#FF4DD2><bold>YOU</bold></gradient>|player:MHF_Present2'
+        - '21|<gradient:#B040FF:#FF4DD2><bold>YOU</bold></gradient>'
         - '22|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
         - '24|<#8A8FA3>Name'
         - '25|<white>%player%'
@@ -58,7 +58,7 @@ layout:
         - '34|<white>%serveronline% <#8A8FA3>online'
         - '36|<#8A8FA3>Network'
         - '37|<white>%online% <#8A8FA3>online'
-        - '41|<gradient:#FFD24D:#FF9F4D><bold>RELAPSEDMC</bold></gradient>|player:MHF_Present1'
+        - '41|<gradient:#FFD24D:#FF9F4D><bold>RELAPSEDMC</bold></gradient>'
         - '42|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
         - '44|<#8A8FA3>Get around'
         - '45|<white>/hub <#5A5F73>· <white>/spawn'
@@ -73,7 +73,7 @@ layout:
         - '58|<#8A8FA3>Discord'
         - '59|<white>discord.gg/G4pHKXDDru'
         - '60|<gradient:#38E0FF:#B040FF><bold>play.relapsedmc.com</bold></gradient>'
-        - '61|<gradient:#38E0FF:#7CFF6B><bold>ONLINE</bold></gradient> <#8A8FA3>%online%|player:MHF_Present2'
+        - '61|<gradient:#38E0FF:#7CFF6B><bold>ONLINE</bold></gradient> <#8A8FA3>%online%'
         - '62|<#3A3F55>▬▬▬▬▬▬▬▬▬▬'
       groups:
         players:
