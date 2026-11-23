@@ -1,6 +1,14 @@
 # RelapsedMC tab list (TAB on the Velocity proxy). Only the layout feature is on: the header and footer
 # come from laGCore on each server. Columns, top to bottom then left to right: slots 1-20 realms,
 # 21-40 you, 41-60 the network, 61-80 who's online. Shipped from the repo (servers/proxy/): edit it there.
+# Pretty realm names wherever %server% is used ("hub" -> "Hub").
+placeholder-output-replacements:
+  "%server%":
+    "hub": "Hub"
+    "skyblock": "Skyblock"
+    "factions": "Factions"
+    "cannons": "Cannons"
+    "smp": "SMP"
 header-footer:
   enabled: false
 tablist-name-formatting:
