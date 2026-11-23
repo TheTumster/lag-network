@@ -1,5 +1,5 @@
 # Core plugin. The SAME network name goes in every server's copy of this file.
-network-name: "RelapsedMC"
+network-name: "RELAPSEDMC"
 
 # What this server is: hub, factions or smp. Hub features (selector item, no damage, etc.) only run on the hub.
 role: hub
@@ -15,7 +15,7 @@ realms:
       - "<gray>Competitive islands, real mob grinders."
       - "<gray>Cage ladder • Warzone • monthly seasons"
       - ""
-      - "<#38E0FF>▶ Click to play"
+      - "<#FF6B6B>▶ Click to play"
   factions:
     server: factions
     name: "<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>"
@@ -25,7 +25,7 @@ realms:
       - "<gray>Raid, cannon, claim, conquer."
       - "<gray>1.8 PvP  •  1.8 cannon physics"
       - ""
-      - "<#38E0FF>▶ Click to play"
+      - "<#FF6B6B>▶ Click to play"
   cannons:
     server: cannons
     name: "<gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient>"
@@ -35,7 +35,7 @@ realms:
       - "<gray>Test cannons on the exact Factions jar."
       - "<gray>Creative • free /tntfill • diamond protection"
       - ""
-      - "<#38E0FF>▶ Click to play"
+      - "<#FF6B6B>▶ Click to play"
   smp:
     server: smp
     name: "<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>"
@@ -44,7 +44,7 @@ realms:
     lore:
       - "<gray>Chill survival with land claims."
       - ""
-      - "<#38E0FF>▶ Click to play"
+      - "<#FF6B6B>▶ Click to play"
 # Fresh chat: wipe the chat when you arrive on a server, then show that realm's banner (the hub has its own).
 # {bar} {logo} {arrow} {player} {online}
 fresh-chat:
@@ -58,28 +58,28 @@ fresh-chat:
       - ""
       - "{c}<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient> <dark_gray>•</dark_gray> <white>8-mans</white> <dark_gray>•</dark_gray> <gray>no allies <dark_gray>•</dark_gray> <gray>1.8 cannons"
       - ""
-      - "{c}[[<#FF4D6D><bold>⚔ START</bold>|/f create|<gray>Make a faction: <white>/f create <name>]]   [[<#B040FF><bold>☰ GUIDE</bold>|/spawn|<gray>Back to spawn: the kiosk explains everything]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
+      - "{c}[[<#FF4D6D><bold>⚔ START</bold>|/f create|<gray>Make a faction: <white>/f create <name>]]   [[<#FFA19A><bold>☰ GUIDE</bold>|/spawn|<gray>Back to spawn: the kiosk explains everything]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     skyblock:
       - "{logo}"
       - ""
       - "{c}<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient> <dark_gray>•</dark_gray> <gray>grind <dark_gray>•</dark_gray> <gray>spawners <dark_gray>•</dark_gray> <gray>monthly seasons"
       - ""
-      - "{c}[[<#7CFF6B><bold>⬢ ISLAND</bold>|/is|<gray>Create or go to your island]]   [[<#B040FF><bold>◆ SELL</bold>|/sell|<gray>Sell everything to the Collector]]   [[<#FFD24D><bold>★ TOP</bold>|/is top|<gray>Island top]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
+      - "{c}[[<#7CFF6B><bold>⬢ ISLAND</bold>|/is|<gray>Create or go to your island]]   [[<#FFA19A><bold>◆ SELL</bold>|/sell|<gray>Sell everything to the Collector]]   [[<#FFD24D><bold>★ TOP</bold>|/is top|<gray>Island top]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     cannons:
       - "{logo}"
       - ""
       - "{c}<gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient> <dark_gray>•</dark_gray> <gray>same jar as Factions <dark_gray>•</dark_gray> <gray>your own plot"
       - ""
-      - "{c}[[<#FF9F4D><bold>⬛ PLOT</bold>|/plot auto|<gray>Get your own plot]]   [[<#FF4D6D><bold>➹ HOME</bold>|/plot home|<gray>Back to your plot]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
+      - "{c}[[<#FF9F4D><bold>⬛ PLOT</bold>|/plot auto|<gray>Get your own plot]]   [[<#FF4D6D><bold>➹ HOME</bold>|/plot home|<gray>Back to your plot]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     smp:
       - "{logo}"
       - ""
       - "{c}<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient> <dark_gray>•</dark_gray> <gray>survival <dark_gray>•</dark_gray> <gray>land claims <dark_gray>•</dark_gray> <gray>never resets"
       - ""
-      - "{c}[[<#7CFF6B><bold>➹ WILD</bold>|/rtp|<gray>Random teleport into the wild]]   [[<#FFD24D><bold>⌂ HOME</bold>|/home|<gray>Go to your home]]   [[<#38E0FF><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
+      - "{c}[[<#7CFF6B><bold>➹ WILD</bold>|/rtp|<gray>Random teleport into the wild]]   [[<#FFD24D><bold>⌂ HOME</bold>|/home|<gray>Go to your home]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
 
 # Links for chat buttons ({discord}, {store}). Empty = the button just shows its hover text.
@@ -93,7 +93,7 @@ links:
 ranks:
   owner: "<gradient:#B040FF:#FF4DD2><bold>OWNER</bold></gradient>"
   admin: "<#FF6B3B><bold>ADMIN</bold>"
-  mod: "<#38E0FF><bold>MOD</bold>"
+  mod: "<#FF6B6B><bold>MOD</bold>"
   media: "<#FF4DD2><bold>MEDIA</bold>"
   vip: "<#B040FF><bold>VIP</bold>"
 rank-players:
@@ -139,7 +139,7 @@ spawns:
         text: "<gray>8-mans <dark_gray>• <gray>no allies <dark_gray>• <gray>18h shields <dark_gray>• <gray>KOTH-only netherite\n<dark_gray>Turn around for the Obelisk <dark_gray>• <gray>left: <white>Getting Started <dark_gray>• <gray>right: <white>Top Factions"
       - offset: [0.5, 15.6, -22]
         scale: 1.6
-        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+        text: "<gradient:#FF5C5C:#FFA19A><bold>HUB</bold></gradient>"
       - offset: [-17.5, 8.8, 0.5]
         scale: 1.5
         text: "<gradient:#FF4D6D:#FFD24D:#FF4D6D:{phase}><bold>NEW HERE?</bold></gradient>"
@@ -157,7 +157,7 @@ spawns:
         text: "<gradient:#FF4D6D:#FFD24D><bold>CLASSIC</bold></gradient>"
       - offset: [34.5, 13.5, 0.5]
         scale: 2.2
-        text: "<gradient:#B040FF:#38E0FF><bold>CORRUPTED</bold></gradient>"
+        text: "<gradient:#FFA19A:#FF5C5C><bold>CORRUPTED</bold></gradient>"
       - offset: [24.5, 7.2, 24.5]
         scale: 1
         text: "<gray>Wilderness <dark_gray>↘"
@@ -185,7 +185,7 @@ spawns:
         item: NETHER_STAR
         scale: 1.4
         spin: -1
-        glow: "#38E0FF"
+        glow: "#FF6B6B"
   skyblock:
     y: 100
     # v3 "the Shattered World": the core + 8 district islands, and the Warzone (PvP) under it
@@ -206,7 +206,7 @@ spawns:
     holograms:
       - offset: [0.5, 5.4, -10.5]
         scale: 3
-        text: "<gradient:#7CFF6B:#38E0FF:#B040FF:{phase}><bold>SKYBLOCK</bold></gradient>"
+        text: "<gradient:#7CFF6B:#FF5C5C:#FFA19A:{phase}><bold>SKYBLOCK</bold></gradient>"
       - offset: [0.5, 4.3, -10.5]
         scale: 0.9
         text: "<dark_gray><italic>When the Corrupted world collapsed, the pieces that didn't fall became islands.\n<dark_gray><italic>Every month the void takes them back."
@@ -215,7 +215,7 @@ spawns:
         text: "<gray>New here? The <white>Getting Started</white> board is to your left <dark_gray>• <white>/is <gray>to start"
       - offset: [0.5, 18.5, -60.5]
         scale: 2
-        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+        text: "<gradient:#FF5C5C:#FFA19A><bold>HUB</bold></gradient>"
       - offset: [58.5, 10.5, 0.5]
         scale: 2
         text: "<gradient:#B040FF:#FF4DD2><bold>CAGE SANCTUM</bold></gradient>\n<gray>13 cages, one ladder <dark_gray>• <white>/spawners"
@@ -252,7 +252,7 @@ spawns:
         text: "<gray>Get your own plot: <white>/plot auto <dark_gray>• <white>/plot home <dark_gray>• <white>/plot add <player>\n<white>/tntfill <gray>free fill <dark_gray>• <white>//upload <link> <gray>then <white>//schem load <dark_gray>• <gray>same jar as Factions"
       - offset: [0.5, 10.6, -15]
         scale: 1.4
-        text: "<gradient:#38E0FF:#B040FF><bold>HUB</bold></gradient>"
+        text: "<gradient:#FF5C5C:#FFA19A><bold>HUB</bold></gradient>"
 
 # Console commands run once, the first time that server starts (per role).
 first-start-commands:
@@ -305,7 +305,7 @@ hub:
       - offset: [0.5, 6.3, -38.5]
         scale: 1.8
         bob: false
-        text: "<gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#C9B8E8>from <gradient:#38E0FF:#B040FF><bold>RelapsedMC</bold></gradient>"
+        text: "<gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#C9B8E8>from <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient>"
       - offset: [0.5, 5.5, -38.5]
         scale: 1.2
         bob: false
@@ -436,7 +436,7 @@ hub:
       text: "<white>{smp} <#B9A8D8>playing"
     - offset: [-32.5, 4.8, -11.5]
       scale: 1.4
-      text: "<gradient:#B040FF:#38E0FF><bold>DISCORD</bold></gradient>\n<#B9A8D8>coming soon"
+      text: "<gradient:#FFA19A:#FF5C5C><bold>DISCORD</bold></gradient>\n<#B9A8D8>coming soon"
   # Spinning, glowing 3D items (the realm icons spin inside their portals). glow = outline colour.
   displays:
     - offset: [0.5, 42.8, -11.5]
@@ -481,8 +481,8 @@ hub:
 
 scoreboard:
   enabled: true
-  footer: "<gradient:#38E0FF:#B040FF>play.relapsedmc.com</gradient>"
+  footer: "<gradient:#FF5C5C:#FFA19A>PLAY.RELAPSEDMC.COM</gradient>"
 
-# RelapsedMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
+# RELAPSEDMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
 teams:
   max-size: 8

@@ -275,7 +275,7 @@ final class InfoPanel implements Listener {
 		rect(p, v, -hw, height - 0.05, 0, height, 0.01, "light_blue_concrete");
 		rect(p, v, 0, height - 0.05, hw, height, 0.01, "purple_concrete");
 		// header: everything centred (text displays always centre on their anchor)
-		text(p, v, 0, height - 0.62, def.getString("title", "<gradient:#38E0FF:#B040FF><bold>GETTING STARTED</bold></gradient>"), (float) def.getDouble("title-size", 1.1), false);
+		text(p, v, 0, height - 0.62, def.getString("title", "<gradient:#FF5C5C:#FFA19A><bold>GETTING STARTED</bold></gradient>"), (float) def.getDouble("title-size", 1.1), false);
 		if (def.isString("footer")) text(p, v, 0, 0.1, def.getString("footer"), 0.45f, false);
 		// tabs
 		List<Map<?, ?>> tabs = def.getMapList("tabs");

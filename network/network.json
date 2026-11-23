@@ -1,6 +1,6 @@
 {
   "_readme": "One place for the network's settings. Re-run setup after changing.",
-  "name": "RelapsedMC",
+  "name": "RELAPSEDMC",
   "minecraft": "1.21.11",
   "public_port": 25565,
   "servers": {

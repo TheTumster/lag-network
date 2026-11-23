@@ -107,7 +107,7 @@ public final class Selector implements Listener {
 		boolean art = plugin.pack != null && plugin.pack.has(p);
 		Inventory inv = Bukkit.createInventory(h, 45, LagCore.mm(art
 				? plugin.pack.menuTitle(p, Pack.MENU_SELECTOR, "<white><bold>CHOOSE A REALM</bold>")
-				: "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient> <dark_gray>» <gray>Choose a realm"));
+				: "<gradient:#FF5C5C:#FFA19A><bold>" + plugin.networkName() + "</bold></gradient> <dark_gray>» <gray>Choose a realm"));
 		h.inv = inv;
 		if (!art) {
 			ItemStack dark = pane(Material.BLACK_STAINED_GLASS_PANE);
@@ -130,7 +130,7 @@ public final class Selector implements Listener {
 				row++;
 			}
 		}
-		inv.setItem(36, button(plugin, Material.AMETHYST_SHARD, "<#B040FF><bold>Discord</bold>", "<gray>Join the community", "discord"));
+		inv.setItem(36, button(plugin, Material.AMETHYST_SHARD, "<#FFA19A><bold>Discord</bold>", "<gray>Join the community", "discord"));
 		inv.setItem(40, button(plugin, Material.BARRIER, "<#FF4D6D><bold>Close</bold>", "<gray>Back to the hub", "close"));
 		inv.setItem(44, button(plugin, Material.GOLD_INGOT, "<#FFD24D><bold>Store</bold>", "<gray>Ranks and cosmetics", "store"));
 		p.openInventory(inv);
@@ -150,7 +150,7 @@ public final class Selector implements Listener {
 			p.closeInventory();
 			if (!"close".equals(button)) {
 				String url = plugin.getConfig().getString("links." + button, "");
-				p.sendMessage(LagCore.mm(url.isEmpty() ? "<gray>Coming soon." : "<gray>" + ("discord".equals(button) ? "Discord" : "Store") + ": <click:open_url:'" + url + "'><#38E0FF><u>" + url + "</u></click>"));
+				p.sendMessage(LagCore.mm(url.isEmpty() ? "<gray>Coming soon." : "<gray>" + ("discord".equals(button) ? "Discord" : "Store") + ": <click:open_url:'" + url + "'><#FF6B6B><u>" + url + "</u></click>"));
 			}
 			p.playSound(p.getLocation(), Sound.UI_BUTTON_CLICK, 0.6f, 1.2f);
 			return;
@@ -158,14 +158,14 @@ public final class Selector implements Listener {
 		String soon = pdc.get(new org.bukkit.NamespacedKey(plugin, "soon"), org.bukkit.persistence.PersistentDataType.STRING);
 		if (soon != null) {
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
-			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + soon.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
+			p.sendActionBar(LagCore.mm("<gradient:#FFA19A:#FF5C5C><bold>" + soon.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
 			return;
 		}
 		String server = pdc.get(new org.bukkit.NamespacedKey(plugin, "realm"), org.bukkit.persistence.PersistentDataType.STRING);
 		if (server == null) return;
 		p.closeInventory();
 		p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.6f, 1.6f);
-		p.sendMessage(LagCore.mm("<gray>Sending you to <#38E0FF>" + server + "<gray>..."));
+		p.sendMessage(LagCore.mm("<gray>Sending you to <#FF6B6B>" + server + "<gray>..."));
 		plugin.send(p, server);
 	}
 

@@ -17,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 
 /**
- * RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector): gens and cages (spawners) make
+ * RELAPSEDMC Skyblock. One loop, one currency (Shards), one buyer (the Collector): gens and cages (spawners) make
  * loot, the Collector buys it, Shards buy more cages, heads unlock the next tier, placed cages are island value.
  */
 public final class LagSkyblock extends JavaPlugin {
@@ -337,7 +337,7 @@ public final class LagSkyblock extends JavaPlugin {
 		}
 		File[] locales = rsFile("locale").listFiles((d, n) -> n.endsWith(".yml"));
 		if (locales != null) {
-			String prefix = getConfig().getString("rosestacker.prefix", "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7");
+			String prefix = getConfig().getString("rosestacker.prefix", "<g:#FF5C5C:#FFA19A>&lRELAPSED &8» &7");
 			for (File f : locales) {
 				YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
 				if (!prefix.equals(y.getString("prefix"))) {

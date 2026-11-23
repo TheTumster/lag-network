@@ -148,7 +148,7 @@ final class Parkour implements Listener {
 		p.setFlying(false);
 		p.getInventory().setItem(7, item("checkpoint", Material.FEATHER, "<#38E0FF><bold>Last checkpoint</bold> <gray>(Right Click)"));
 		p.getInventory().setItem(8, item("quit", Material.RED_BED, "<#FF4D6D><bold>Quit parkour</bold> <gray>(Right Click)"));
-		p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>PARKOUR</bold></gradient>"), LagCore.mm("<gray>Go! <dark_gray>• <gray>" + (checkpoints.size()) + " checkpoints"),
+		p.showTitle(Title.title(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>PARKOUR</bold></gradient>"), LagCore.mm("<gray>Go! <dark_gray>• <gray>" + (checkpoints.size()) + " checkpoints"),
 				Title.Times.times(Duration.ZERO, Duration.ofMillis(1200), Duration.ofMillis(400))));
 		p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, 1.6f);
 	}
@@ -165,7 +165,7 @@ final class Parkour implements Listener {
 			return;
 		}
 		r.checkpoint = i;
-		p.sendMessage(LagCore.mm("<dark_gray>[<gradient:#38E0FF:#B040FF>Parkour</gradient><dark_gray>] <gray>Checkpoint <white>" + (i + 1) + "/" + checkpoints.size()
+		p.sendMessage(LagCore.mm("<dark_gray>[<gradient:#FF5C5C:#FFA19A>Parkour</gradient><dark_gray>] <gray>Checkpoint <white>" + (i + 1) + "/" + checkpoints.size()
 				+ " <dark_gray>• <white>" + fmt(System.currentTimeMillis() - r.start)));
 		p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.2f + i * 0.1f);
 		p.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, p.getLocation().add(0, 1, 0), 30, 0.5, 0.6, 0.5,
@@ -190,13 +190,13 @@ final class Parkour implements Listener {
 			times.set(key + ".name", p.getName());
 			save();
 		}
-		p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + fmt(ms) + "</bold></gradient>"),
+		p.showTitle(Title.title(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + fmt(ms) + "</bold></gradient>"),
 				LagCore.mm(pb ? "<gold><bold>NEW PERSONAL BEST!" : "<gray>Best: <white>" + fmt(best)),
 				Title.Times.times(Duration.ZERO, Duration.ofSeconds(3), Duration.ofMillis(600))));
 		p.playSound(p.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.7f, 1.2f);
 		p.getWorld().spawnParticle(Particle.TOTEM_OF_UNDYING, p.getLocation().add(0, 1, 0), 60, 0.6, 0.8, 0.6, 0.3);
 		if (pb && ms < record) {
-			Bukkit.broadcast(LagCore.mm("<dark_gray>[<gradient:#38E0FF:#B040FF>Parkour</gradient><dark_gray>] <white>" + p.getName()
+			Bukkit.broadcast(LagCore.mm("<dark_gray>[<gradient:#FF5C5C:#FFA19A>Parkour</gradient><dark_gray>] <white>" + p.getName()
 					+ " <gray>set a new <gold><bold>RECORD</bold></gold><gray>: <white>" + fmt(ms)));
 		}
 		build.holograms();
@@ -285,7 +285,7 @@ final class Parkour implements Listener {
 			Player p = Bukkit.getPlayer(en.getKey());
 			if (p == null) continue;
 			Run r = en.getValue();
-			p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>PARKOUR</bold></gradient> <dark_gray>• <white>" + fmt(now - r.start)
+			p.sendActionBar(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>PARKOUR</bold></gradient> <dark_gray>• <white>" + fmt(now - r.start)
 					+ " <dark_gray>• <gray>Checkpoint <white>" + (r.checkpoint + 1) + "/" + checkpoints.size()));
 		}
 	}

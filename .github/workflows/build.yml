@@ -59,7 +59,7 @@ jobs:
       - name: Zip
         run: |
           cd dist && zip -qr ../laG-Network.zip laG-Network && ls -la ../laG-Network.zip
-          # RelapsedMC resource pack (fixed timestamps so the zip, and its SHA-1, only change when the pack does)
+          # RELAPSEDMC resource pack (fixed timestamps so the zip, and its SHA-1, only change when the pack does)
           cd ../resourcepack && find . -exec touch -t 202601010000 {} + && zip -qrX ../RelapsedMC-pack.zip pack.mcmeta pack.png assets && sha1sum ../RelapsedMC-pack.zip
 
       - name: Publish as latest release
@@ -69,5 +69,5 @@ jobs:
         run: |
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest laG-Network.zip RelapsedMC-pack.zip network/network.json dist/bake-report.json dist/update-manifest.json localjars/laGCannons.jar localjars/laGSkyblock.jar localjars/laGFactions.jar localjars/laGCore.jar localjars/FactionsUUID.jar localjars/laGLab.jar build/laG-255-datapack.zip windows/START.bat windows/STOP.bat windows/TUNNEL.bat windows/README.txt windows/START-1.8-LAB.bat windows_tools/start.ps1 windows_tools/start-lab.ps1 windows_tools/stop.ps1 windows_tools/tunnel.ps1 \
-            --title "RelapsedMC (build ${{ github.run_number }})" \
+            --title "RELAPSEDMC (build ${{ github.run_number }})" \
             --notes "Download laG-Network.zip, extract it anywhere, double-click START.bat." --latest

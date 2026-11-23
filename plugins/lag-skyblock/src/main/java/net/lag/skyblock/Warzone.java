@@ -277,7 +277,7 @@ final class Warzone implements Listener, CommandExecutor {
 			envoys.put(b, rarity);
 			String name = switch (rarity) {
 				case "legendary" -> "<gradient:#FFD84D:#FF8A3D><bold>LEGENDARY ENVOY</bold></gradient>";
-				case "rare" -> "<gradient:#38E0FF:#B040FF><bold>RARE ENVOY</bold></gradient>";
+				case "rare" -> "<gradient:#FF5C5C:#FFA19A><bold>RARE ENVOY</bold></gradient>";
 				default -> "<white><bold>ENVOY</bold>";
 			};
 			envoyLabels.put(b, label(b.getLocation().add(0.5, 1.6, 0.5), name, 1.1f));
@@ -321,7 +321,7 @@ final class Warzone implements Listener, CommandExecutor {
 		p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.7f, 1.4f);
 		if (!rarity.equals("common")) {
 			Bukkit.broadcast(Spawners.mm("<dark_gray>» <white>" + p.getName() + " <gray>looted a " + (rarity.equals("legendary")
-					? "<gradient:#FFD84D:#FF8A3D><bold>LEGENDARY</bold></gradient>" : "<gradient:#38E0FF:#B040FF><bold>RARE</bold></gradient>") + " <gray>envoy"));
+					? "<gradient:#FFD84D:#FF8A3D><bold>LEGENDARY</bold></gradient>" : "<gradient:#FF5C5C:#FFA19A><bold>RARE</bold></gradient>") + " <gray>envoy"));
 		}
 	}
 

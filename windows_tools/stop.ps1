@@ -7,7 +7,7 @@ $net = Get-Content "$Root\network.json" -Raw | ConvertFrom-Json
 
 function Say($msg, $color = "Cyan") { Write-Host "  $msg" -ForegroundColor $color }
 Write-Host ""
-Write-Host "  RelapsedMC - stopping" -ForegroundColor Magenta
+Write-Host "  RELAPSEDMC - stopping" -ForegroundColor Magenta
 Write-Host ""
 
 $secretFile = "$Root\.rcon-secret"

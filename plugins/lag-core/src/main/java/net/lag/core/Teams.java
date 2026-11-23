@@ -41,14 +41,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 /**
- * RelapsedMC Teams: a crew that works on every realm, separate from factions.
+ * RELAPSEDMC Teams: a crew that works on every realm, separate from factions.
  *
  * Every server's laGCore shares one SQLite file (../shared/teams.db), so a team made on the hub is the same team on
  * Factions, Skyblock, SMP and Cannons. Team chat and notices go through a table every server polls, so /tc reaches
  * teammates on other realms too.
  *
  * Commands (work without the client): /team create|invite|accept|deny|leave|kick|disband|info, /tc <message>
- * RelapsedMC Client extras (plugin channels, format must match the client's TeamLink.java):
+ * RELAPSEDMC Client extras (plugin channels, format must match the client's TeamLink.java):
  *   S2C relapsed:team    team state: utf name, utf leader, bool youLead, varint n x (utf name, bool online, utf realm),
  *                        varint n x (utf team, utf by)  [invites],  varint n x (varint id, utf name, utf by, varint size, long time) [schems]
  *   S2C relapsed:tmates  teammates on this server: varint n x (utf name, utf dim, double x, y, z)
@@ -244,7 +244,7 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 
 	/**
 	 * Vanilla also has /team, /teammsg and /tm (scoreboard teams). Catch those names before any command map does,
-	 * so players always get RelapsedMC teams. Ops can still reach vanilla's with /minecraft:team.
+	 * so players always get RELAPSEDMC teams. Ops can still reach vanilla's with /minecraft:team.
 	 */
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onCommand(PlayerCommandPreprocessEvent e) {
@@ -390,7 +390,7 @@ final class Teams implements TabExecutor, Listener, PluginMessageListener {
 			p.sendMessage(LagCore.mm("<white><click:suggest_command:'" + r[0].replaceAll(" [<\\[].*", " ") + "'>" + LagCore.esc(r[0])
 					+ "</click></white> <dark_gray>- <gray>" + r[1]));
 		}
-		p.sendMessage(LagCore.mm("<dark_gray>RelapsedMC Client: everything is in Right Shift > Team, plus schem share and pings."));
+		p.sendMessage(LagCore.mm("<dark_gray>RELAPSEDMC Client: everything is in Right Shift > Team, plus schem share and pings."));
 	}
 
 	@Override

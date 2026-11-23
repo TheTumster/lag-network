@@ -425,7 +425,7 @@ final class Crates implements Listener, CommandExecutor {
 				s.sendMessage("crate give <player> <crate> [amount] | crate giveall <crate> [amount] | crate reload   (crates: " + String.join(", ", crates.keySet()) + ")");
 				return true;
 			}
-			p.sendMessage(Spawners.mm("<gradient:#B040FF:#38E0FF><bold>YOUR KEYS</bold></gradient>"));
+			p.sendMessage(Spawners.mm("<gradient:#FFA19A:#FF5C5C><bold>YOUR KEYS</bold></gradient>"));
 			for (Crate c : crates.values()) {
 				p.sendMessage(Spawners.mm("<dark_gray>▸ <color:" + c.color() + ">" + c.name() + " <dark_gray>× <white>" + keys(p.getUniqueId(), c.id())));
 			}

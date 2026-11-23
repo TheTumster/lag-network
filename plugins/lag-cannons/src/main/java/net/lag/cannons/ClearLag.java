@@ -44,12 +44,12 @@ final class ClearLag implements CommandExecutor {
 		List<Integer> warn = plugin.getConfig().getIntegerList("clearlag.warn-at");
 		if (warn.isEmpty()) warn = List.of(60, 30, 10, 5, 4, 3, 2, 1);
 		if (warn.contains(secondsLeft)) {
-			broadcast("<dark_gray>[<gradient:#38E0FF:#B040FF>ClearLag</gradient><dark_gray>] <gray>Dropped items clear in <white>"
+			broadcast("<dark_gray>[<gradient:#FF5C5C:#FFA19A>ClearLag</gradient><dark_gray>] <gray>Dropped items clear in <white>"
 					+ secondsLeft + "s");
 		}
 		if (secondsLeft <= 0) {
 			int n = clear();
-			broadcast("<dark_gray>[<gradient:#38E0FF:#B040FF>ClearLag</gradient><dark_gray>] <gray>Cleared <white>" + n + "<gray> entities.");
+			broadcast("<dark_gray>[<gradient:#FF5C5C:#FFA19A>ClearLag</gradient><dark_gray>] <gray>Cleared <white>" + n + "<gray> entities.");
 			secondsLeft = interval();
 		}
 	}
@@ -97,7 +97,7 @@ final class ClearLag implements CommandExecutor {
 				return true;
 			}
 			int n = clear();
-			broadcast("<dark_gray>[<gradient:#38E0FF:#B040FF>ClearLag</gradient><dark_gray>] <gray>Cleared <white>" + n + "<gray> entities.");
+			broadcast("<dark_gray>[<gradient:#FF5C5C:#FFA19A>ClearLag</gradient><dark_gray>] <gray>Cleared <white>" + n + "<gray> entities.");
 			secondsLeft = interval();
 			return true;
 		}

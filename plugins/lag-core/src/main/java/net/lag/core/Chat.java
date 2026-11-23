@@ -79,7 +79,7 @@ final class Chat {
 			String name = plugin.networkName().toUpperCase();
 			StringBuilder spaced = new StringBuilder();
 			for (char ch : name.toCharArray()) spaced.append(ch).append(' ');
-			p.sendMessage(center(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + spaced.toString().trim() + "</bold></gradient>")));
+			p.sendMessage(center(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + spaced.toString().trim() + "</bold></gradient>")));
 		}
 	}
 

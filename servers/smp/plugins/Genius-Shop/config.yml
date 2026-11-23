@@ -5,7 +5,7 @@
 # smart updates, debugging, and more.
 # ==========================================================
 
-# RelapsedMC SMP: shipped from servers/smp/ in the repo. Shops live in shops/*.yml, the menu in menus/main-menu.yml.
+# RELAPSEDMC SMP: shipped from servers/smp/ in the repo. Shops live in shops/*.yml, the menu in menus/main-menu.yml.
 # The web editor API is OFF (it would open a port with a default key); edit the yml files instead.
 config-version: 15
 
@@ -82,7 +82,7 @@ economy-safety:
 
   # Hard business cap per transaction total.
   # Set to 0 to disable.
-  # RelapsedMC: no single sale (or buy) over 5,000, so nobody dumps a whole inventory at the day's top price
+  # RELAPSEDMC: no single sale (or buy) over 5,000, so nobody dumps a whole inventory at the day's top price
   max-transaction-value: 5000
 
   # Optional cap for single unit price before amount scaling.
@@ -107,7 +107,7 @@ economy-safety:
     min-base-multiplier: 0.0
     # Reject if unit price step-change against last successful trade for same item is larger than this ratio.
     # Example: 5.0 = 500% jump.
-    # RelapsedMC: sell prices fall as the server buys and jump back at the daily reset, so no step limit
+    # RELAPSEDMC: sell prices fall as the server buys and jump back at the daily reset, so no step limit
     max-step-change-ratio: 1000000.0
 
   # Optional double-confirm flow for expensive purchases.

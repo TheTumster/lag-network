@@ -180,7 +180,7 @@ overridden-commands:
 # You should not need to disable commands used by other plugins, as they will automatically get priority.
 # See https://breezewiki.com/bukkit/wiki/Commands.yml#aliases to map commands to other plugins.
 disabled-commands:
-  # RelapsedMC SMP: the only way to sell to the server is /shop (it has daily price decay), so Essentials'
+  # RELAPSEDMC SMP: the only way to sell to the server is /shop (it has daily price decay), so Essentials'
   # uncapped /sell and /setworth are off. /tpr is off too: BetterRTP owns /rtp.
   - sell
   - setworth
@@ -482,7 +482,7 @@ per-player-locale: false
 # Some messages may use custom colors, which must be edited in the appropriate message files.
 # For more information on customizing messages, see https://essentialsx.net/wiki/Locale.html
 message-colors:
-  # RelapsedMC SMP: soft grey text, cyan highlights
+  # RELAPSEDMC SMP: soft grey text, cyan highlights
   primary: '#B9C4D6'
   secondary: '#38E0FF'
 
@@ -826,7 +826,7 @@ world-home-permissions: false
 # Remember, they must have BOTH permission nodes in order to be able to set multiple homes.
 # For more information, visit https://wiki.ess3.net/wiki/Multihome
 sethome-multiple:
-  # RelapsedMC SMP: everyone 3; VIP 5; staff (mod/media/admin) 10. Ranks map in the server's permissions.yml
+  # RELAPSEDMC SMP: everyone 3; VIP 5; staff (mod/media/admin) 10. Ranks map in the server's permissions.yml
   # (LuckPerms group.<rank> -> essentials.sethome.multiple.<home_rank>); owner has essentials.sethome.multiple.unlimited.
   default: 3
   vip: 5
@@ -1259,7 +1259,7 @@ newbies:
   # {DISPLAYNAME} will be replaced with the player name.
   # Set to '' to disable.
   #announce-format: ''
-  announce-format: '&#38E0FFWelcome &f{DISPLAYNAME}&#38E0FF to the RelapsedMC SMP!'
+  announce-format: '&#38E0FFWelcome &f{DISPLAYNAME}&#38E0FF to the RELAPSEDMC SMP!'
 
   # When players spawn for the first time, which spawnpoint should be used?
   # Set to 'none' to use the spawnpoint of the world.

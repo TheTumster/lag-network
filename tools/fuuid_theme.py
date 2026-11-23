@@ -1,9 +1,9 @@
-"""RelapsedMC look for FactionsUUID's /f show (/f who, /f f): rewrites commands.show.normalFormat in translations.conf.
+"""RELAPSEDMC look for FactionsUUID's /f show (/f who, /f f): rewrites commands.show.normalFormat in translations.conf.
 Usage: python3 tools/fuuid_theme.py path/to/plugins/FactionsUUID/config/translations.conf"""
 import re, sys
 
-BAR = "<gradient:#38E0FF:#B040FF><strikethrough>                    </strikethrough></gradient>"
-BAR2 = "<gradient:#B040FF:#38E0FF><strikethrough>                    </strikethrough></gradient>"
+BAR = "<gradient:#FF5C5C:#FFA19A><strikethrough>                    </strikethrough></gradient>"
+BAR2 = "<gradient:#FFA19A:#FF5C5C><strikethrough>                    </strikethrough></gradient>"
 D = "<dark_gray>»</dark_gray> "
 SHOW = [
     f"{BAR} <faction:relation_color><bold><faction:name></bold> {BAR2}",
@@ -17,7 +17,7 @@ SHOW = [
     f"<faction:if_allies>{D}<gray>Allies <white>(<faction:allies_count>/<faction:allies_max>)</white>: {{allies-list}}",
     f"<faction:if_online>{D}<#7CFF6B>Online <white>(<faction:members_online_count>/<faction:members_total_count>)<faction:if_online>: {{online-list}}",
     f"<faction:if_offline>{D}<gray>Offline <white>(<faction:members_offline_count>/<faction:members_total_count>)<faction:if_offline>: {{offline-list}}",
-    "<gradient:#38E0FF:#B040FF:#38E0FF><strikethrough>                                                       </strikethrough></gradient>",
+    "<gradient:#FF5C5C:#FFA19A:#38E0FF><strikethrough>                                                       </strikethrough></gradient>",
 ]
 
 

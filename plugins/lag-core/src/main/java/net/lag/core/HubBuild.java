@@ -32,7 +32,7 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
 /**
- * The RelapsedMC hub spawn: places the generated floating island (resources/hub-spawn.txt.gz, made by
+ * The RELAPSEDMC hub spawn: places the generated floating island (resources/hub-spawn.txt.gz, made by
  * tools/hub/genspawn.py) on first start, sets spawn on it, spawns the floating titles, and turns the
  * nether portals into server portals (walk in = join that server). Offsets in config are relative to the
  * spawn floor centre (base + ".origin").
@@ -330,7 +330,7 @@ final class HubBuild implements Listener {
 		// parkour start (leaderboard) + finish
 		if (plugin.parkour != null) {
 			Location ps = plugin.parkour.startHologram(), pf = plugin.parkour.finishHologram(), pb = plugin.parkour.boardHologram();
-			if (pb != null) text(pb, "<gradient:#38E0FF:#B040FF:#38E0FF:{phase}><bold>PARKOUR</bold></gradient>\n<gray>Follow the bridge to the <gold>gold plate</gold>\n{parkour_top}", 1.3f);
+			if (pb != null) text(pb, "<gradient:#FF5C5C:#FFA19A:#FF5C5C:{phase}><bold>PARKOUR</bold></gradient>\n<gray>Follow the bridge to the <gold>gold plate</gold>\n{parkour_top}", 1.3f);
 			if (ps != null) text(ps, "<gold><bold>START</bold>\n<gray>Step on the plate", 1.2f);
 			if (pf != null) text(pf, "<gradient:#FFD24D:#FF4DD2:#FFD24D:{phase}><bold>FINISH</bold></gradient>", 2f);
 		}
@@ -556,7 +556,7 @@ final class HubBuild implements Listener {
 		var realmSec = plugin.section("realms");
 		var realm = realmSec == null ? null : realmSec.getConfigurationSection(key);
 		if (realm != null && realm.getBoolean("coming-soon", false)) {
-			p.sendActionBar(LagCore.mm("<gradient:#B040FF:#38E0FF><bold>" + key.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
+			p.sendActionBar(LagCore.mm("<gradient:#FFA19A:#FF5C5C><bold>" + key.toUpperCase() + "</bold></gradient> <gray>is coming soon"));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.8f);
 			Location o = origin();
 			if (o != null && p.getWorld().equals(o.getWorld()) && near(p.getLocation(), 60) && p.getLocation().getBlock().getType() == org.bukkit.Material.NETHER_PORTAL)
@@ -565,7 +565,7 @@ final class HubBuild implements Listener {
 		}
 		String server = realm != null ? realm.getString("server", key) : key;
 		p.playSound(p.getLocation(), Sound.BLOCK_PORTAL_TRAVEL, 0.25f, 1.6f);
-		p.sendActionBar(LagCore.mm("<gradient:#38E0FF:#B040FF>Sending you to <bold>" + key.toUpperCase() + "</bold>...</gradient>"));
+		p.sendActionBar(LagCore.mm("<gradient:#FF5C5C:#FFA19A>Sending you to <bold>" + key.toUpperCase() + "</bold>...</gradient>"));
 		plugin.send(p, server);
 		return true;
 	}
@@ -668,7 +668,7 @@ final class HubBuild implements Listener {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
 			String msg = String.valueOf(plugin.opt(base + ".christmas.greeting",
-					"<#FF4D4D><bold>Santa</bold> <dark_gray>» <white>Ho ho ho, <#F4C542>{player}<white>! Merry Christmas from <gradient:#38E0FF:#B040FF><bold>RelapsedMC</bold></gradient><white>. Follow a runner to a gate, or click me to pick a realm."));
+					"<#FF4D4D><bold>Santa</bold> <dark_gray>» <white>Ho ho ho, <#F4C542>{player}<white>! Merry Christmas from <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient><white>. Follow a runner to a gate, or click me to pick a realm."));
 			p.sendMessage(LagCore.mm(msg.replace("{player}", p.getName())));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.7f, 1.2f);
 		}, 50L);

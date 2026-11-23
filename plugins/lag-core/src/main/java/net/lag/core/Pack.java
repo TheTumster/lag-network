@@ -21,7 +21,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
 
 /**
- * The RelapsedMC resource pack (logo, icons, menu panels; tools/pack/genpack.py). Downloaded once at startup to
+ * The RELAPSEDMC resource pack (logo, icons, menu panels; tools/pack/genpack.py). Downloaded once at startup to
  * get its SHA-1, then offered to everyone on join. Glyphs are only used for players who loaded it.
  */
 final class Pack implements Listener {
@@ -58,7 +58,7 @@ final class Pack implements Listener {
 
 	Pack(LagCore plugin) {
 		this.plugin = plugin;
-		// the RelapsedMC Client says "I have the pack" on this channel when it joins or switches server
+		// the RELAPSEDMC Client says "I have the pack" on this channel when it joins or switches server
 		try {
 			Bukkit.getMessenger().registerIncomingPluginChannel(plugin, CLIENT_PACK_CHANNEL, (ch, player, data) -> loaded.add(player.getUniqueId()));
 		} catch (Throwable t) {
@@ -92,10 +92,10 @@ final class Pack implements Listener {
 		});
 	}
 
-	/** The RelapsedMC Client has the pack built in and advertises this channel: never prompt it. */
+	/** The RELAPSEDMC Client has the pack built in and advertises this channel: never prompt it. */
 	static final String CLIENT_PACK_CHANNEL = "relapsed:pack";
 
-	/** The RelapsedMC Client: it advertises the channel, and its brand reads "...+relapsed". */
+	/** The RELAPSEDMC Client: it advertises the channel, and its brand reads "...+relapsed". */
 	static boolean builtIn(Player p) {
 		if (p.getListeningPluginChannels().contains(CLIENT_PACK_CHANNEL)) return true;
 		String brand = p.getClientBrandName();
@@ -107,7 +107,7 @@ final class Pack implements Listener {
 		// fallback and goes stale between client updates (the client accepts our pack without a prompt)
 		if (builtIn(p)) loaded.add(p.getUniqueId());
 		if (!enabled() || !ready) return;
-		p.setResourcePack(ID, url(), hash, LagCore.mm("<gradient:#38E0FF:#B040FF><bold>RELAPSEDMC</bold></gradient>\n<gray>Our pack adds the logo, icons and menus.\n<dark_gray>(about 1 MB, one time)"),
+		p.setResourcePack(ID, url(), hash, LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient>\n<gray>Our pack adds the logo, icons and menus.\n<dark_gray>(about 1 MB, one time)"),
 				plugin.getConfig().getBoolean("resource-pack.required", false));
 	}
 
@@ -118,7 +118,7 @@ final class Pack implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		// wait a moment before prompting: the RelapsedMC Client's "I have the pack" (brand / hello / channel) can land
+		// wait a moment before prompting: the RELAPSEDMC Client's "I have the pack" (brand / hello / channel) can land
 		// a second or so after the join, and it must never be asked to download a pack it already has
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (p.isOnline()) send(p);
@@ -155,7 +155,7 @@ final class Pack implements Listener {
 	/** The logo (if the player has the pack) or the gradient text fallback. */
 	String logo(Player p, String size) {
 		if (has(p)) return glyph(size);
-		return "<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>";
+		return "<gradient:#FF5C5C:#FFA19A><bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>";
 	}
 
 	String icon(Player p, String icon, String fallback) {

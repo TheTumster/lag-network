@@ -274,7 +274,7 @@ final class Grinder implements Listener {
 			d.setPersistent(false);
 			d.getPersistentDataContainer().set(demoTag, PersistentDataType.BYTE, (byte) 1);
 		}));
-		label(base.clone().add(0.5, 10.4, 0.5), "<gradient:#38E0FF:#B040FF><bold>HOW TO BUILD A GRINDER</bold></gradient>\n<gray>One design works for <white>every cage");
+		label(base.clone().add(0.5, 10.4, 0.5), "<gradient:#FF5C5C:#FFA19A><bold>HOW TO BUILD A GRINDER</bold></gradient>\n<gray>One design works for <white>every cage");
 		label(base.clone().add(0.5, 8.4, -1.4), "<#38E0FF><bold>1</bold> <white>Cage up high\n<gray>open air under it");
 		label(base.clone().add(0.5, 5.0, -1.4), "<#38E0FF><bold>2</bold> <white>Mobs drop 6+ blocks\n<gray>(or into lava) and the\n<gray>whole stack dies");
 		label(base.clone().add(0.5, 2.3, -1.9), "<#38E0FF><bold>3</bold> <white>Hopper into a chest\n<gray>then <white>/sell");

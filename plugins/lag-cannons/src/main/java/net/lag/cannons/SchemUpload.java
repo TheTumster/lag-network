@@ -86,7 +86,7 @@ final class SchemUpload {
 					} else {
 						folder.mkdirs();
 						Files.write(out.toPath(), data);
-						result = "<gradient:#38E0FF:#B040FF>Uploaded!</gradient> <gray>Now run <white>//schem load " + finalName
+						result = "<gradient:#FF5C5C:#FFA19A>Uploaded!</gradient> <gray>Now run <white>//schem load " + finalName
 								+ "<gray> then <white>//paste";
 					}
 				}

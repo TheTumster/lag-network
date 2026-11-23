@@ -63,7 +63,7 @@ final class HubFx implements Listener {
 	/** Trail id -> [icon, display name]. */
 	static final String[][] TRAILS = {
 			{"none", "BARRIER", "<red>No trail"},
-			{"brand", "AMETHYST_SHARD", "<gradient:#38E0FF:#B040FF><bold>Relapsed</bold></gradient> <gray>(cyan to purple)"},
+			{"brand", "AMETHYST_SHARD", "<gradient:#FF5C5C:#FFA19A><bold>Relapsed</bold></gradient> <gray>(cyan to purple)"},
 			{"endrod", "END_ROD", "<white><bold>Starlight</bold>"},
 			{"soul", "SOUL_LANTERN", "<aqua><bold>Soulfire</bold>"},
 			{"flame", "BLAZE_POWDER", "<gold><bold>Inferno</bold>"},
@@ -107,9 +107,9 @@ final class HubFx implements Listener {
 
 	void giveHotbar(Player p) {
 		p.getInventory().setItem(0, hubItem("cosmetics", Material.NETHER_STAR,
-				"<gradient:#B040FF:#38E0FF><bold>Cosmetics</bold></gradient> <gray>(Right Click)", "<gray>Particle trails and more"));
+				"<gradient:#FFA19A:#FF5C5C><bold>Cosmetics</bold></gradient> <gray>(Right Click)", "<gray>Particle trails and more"));
 		p.getInventory().setItem(2, hubItem("codex", Material.WRITTEN_BOOK,
-				"<gradient:#B040FF:#38E0FF><bold>The Relapse Codex</bold></gradient> <gray>(Right Click)",
+				"<gradient:#FFA19A:#FF5C5C><bold>The Relapse Codex</bold></gradient> <gray>(Right Click)",
 				"<gray>The story, and every realm explained"));
 		p.getInventory().setItem(8, visibilityItem(hidden.contains(p.getUniqueId())));
 	}
@@ -125,7 +125,7 @@ final class HubFx implements Listener {
 				List<Component> pages = new ArrayList<>();
 				for (String pg : y.getStringList("pages")) pages.add(LagCore.mm(MapInfo.fill(plugin, pg)));
 				codex = net.kyori.adventure.inventory.Book.book(LagCore.mm(y.getString("title", "Codex")),
-						LagCore.mm(y.getString("author", "RelapsedMC")), pages);
+						LagCore.mm(y.getString("author", "RELAPSEDMC")), pages);
 			} catch (Exception ex) {
 				plugin.getLogger().warning("Codex failed to load: " + ex);
 				return;
@@ -194,7 +194,7 @@ final class HubFx implements Listener {
 		boolean art = plugin.pack != null && plugin.pack.has(p);
 		Inventory inv = Bukkit.createInventory(h, 36, LagCore.mm(art
 				? plugin.pack.menuTitle(p, Pack.MENU_COSMETICS, "<white><bold>COSMETICS</bold> <gray>» Trails")
-				: "<gradient:#B040FF:#38E0FF><bold>Cosmetics</bold></gradient> <dark_gray>» Trails"));
+				: "<gradient:#FFA19A:#FF5C5C><bold>Cosmetics</bold></gradient> <dark_gray>» Trails"));
 		h.inv = inv;
 		if (!art) Selector.border(inv);
 		String cur = trails.getOrDefault(p.getUniqueId(), "none");
@@ -271,7 +271,7 @@ final class HubFx implements Listener {
 			final int n = i;
 			Bukkit.getScheduler().runTaskLater(plugin, () -> {
 				if (!p.isOnline()) return;
-				p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + name.substring(0, n) + "</bold></gradient><white>▌"),
+				p.showTitle(Title.title(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + name.substring(0, n) + "</bold></gradient><white>▌"),
 						Component.empty(), fast));
 				p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 0.25f, 1.6f + n * 0.03f);
 			}, i * 2L);
@@ -279,7 +279,7 @@ final class HubFx implements Listener {
 		long end = name.length() * 2L + 2;
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
-			p.showTitle(Title.title(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + name + "</bold></gradient>"),
+			p.showTitle(Title.title(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + name + "</bold></gradient>"),
 					LagCore.mm("<gray>Welcome " + (p.hasPlayedBefore() ? "back, " : "") + "<white>" + LagCore.esc(p.getName())),
 					Title.Times.times(Duration.ZERO, Duration.ofSeconds(3), Duration.ofMillis(800))));
 			// chord
@@ -309,7 +309,7 @@ final class HubFx implements Listener {
 		String season = build.christmas() ? "{c}<#F4C542>❄ <gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#F4C542>❄" : "";
 		if (lines.isEmpty()) lines = java.util.List.of("{logo}", season,
 				"{c}<gray>Welcome " + (p.hasPlayedBefore() ? "back, " : "") + "<white>{player}<gray>. <dark_gray>•</dark_gray> <white>{online}</white> <gray>online",
-				"", "{c}[[<#38E0FF><bold>▶ PLAY</bold>|/server|<gray>Pick a realm]]   [[<#B040FF><bold>✦ DISCORD</bold>|{discord}|<gray>Join the community]]   [[<#FFD24D><bold>⛃ STORE</bold>|{store}|<gray>Ranks and cosmetics]]", "");
+				"", "{c}[[<#FF6B6B><bold>▶ PLAY</bold>|/server|<gray>Pick a realm]]   [[<#FFA19A><bold>✦ DISCORD</bold>|{discord}|<gray>Join the community]]   [[<#FFD24D><bold>⛃ STORE</bold>|{store}|<gray>Ranks and cosmetics]]", "");
 		Chat.banner(p, plugin, lines, "Hub");
 	}
 
@@ -419,7 +419,7 @@ final class HubFx implements Listener {
 		float prog = 1f - (tick % period) / (float) period;
 		double phase = ((tick * 0.04) % 2.0) - 1.0;
 		String m = msgs.get(i)
-				.replace("{gradient}", "<gradient:#38E0FF:#B040FF:#38E0FF:" + String.format(java.util.Locale.ROOT, "%.2f", phase) + ">")
+				.replace("{gradient}", "<gradient:#FF5C5C:#FFA19A:#FF5C5C:" + String.format(java.util.Locale.ROOT, "%.2f", phase) + ">")
 				.replace("{network}", plugin.networkName().toUpperCase())
 				.replace("{online}", String.valueOf(plugin.count("ALL")));
 		bar.name(LagCore.mm(m));

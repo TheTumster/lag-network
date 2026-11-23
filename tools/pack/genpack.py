@@ -1,4 +1,4 @@
-"""RelapsedMC resource pack generator.
+"""RELAPSEDMC resource pack generator.
 
 Renders the wordmark logo, pixel icons and menu panels into resourcepack/ (committed; CI just zips it),
 plus network/server-icon.png for the server list. Custom glyphs live in the font "relapsed:ui" so the default
@@ -18,7 +18,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
 PACK = os.path.join(ROOT, "resourcepack")
 TEX = os.path.join(PACK, "assets", "relapsed", "textures", "font")
 FONT_DIR = "/usr/share/fonts/opentype/inter"
-CYAN, PURPLE, PINK = (0x38, 0xE0, 0xFF), (0xB0, 0x40, 0xFF), (0xFF, 0x4D, 0xD2)
+CYAN, PURPLE, PINK = (0xFF, 0x5C, 0x5C), (0xFF, 0x8A, 0x80), (0xFF, 0xB4, 0xA8)  # light-red brand (was cyan/violet/pink)
 os.makedirs(TEX, exist_ok=True)
 
 
@@ -57,7 +57,7 @@ def wordmark(scale=4):
     W, H = w + 4 * scale, h + 24 * scale
     out = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    glow.paste((176, 64, 255, 255), (2 * scale, 0), m)
+    glow.paste((255, 92, 92, 255), (2 * scale, 0), m)
     out = Image.alpha_composite(out, glow.filter(ImageFilter.GaussianBlur(5 * scale)))
     face = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     face.paste((255, 255, 255, 255), (2 * scale, 0), m)
@@ -138,7 +138,7 @@ def panel(rows, highlight_slots, title):
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     # body
-    body = gradient(W, H, [(16, 10, 34), (26, 12, 48), (16, 10, 34)])
+    body = gradient(W, H, [(20, 12, 16), (34, 14, 20), (20, 12, 16)])
     mask = Image.new("L", (W, H))
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, W - 1, H - 1), radius=5, fill=235)
     im.paste(body, (0, 0), mask)
@@ -155,7 +155,7 @@ def panel(rows, highlight_slots, title):
         x, y = 7 + c * 18, 17 + r * 18
         hl = s in highlight_slots
         d.rectangle((x, y, x + 17, y + 17), fill=(0, 0, 0, 0))
-        d.rectangle((x, y, x + 17, y + 17), outline=(0x38, 0xE0, 0xFF, 255) if hl else (70, 50, 110, 200), width=1)
+        d.rectangle((x, y, x + 17, y + 17), outline=(0xFF, 0x6B, 0x6B, 255) if hl else (96, 44, 52, 200), width=1)
         if hl:
             d.rectangle((x + 1, y + 1, x + 16, y + 16), outline=(0xB0, 0x40, 0xFF, 140), width=1)
     # cut slot interiors fully transparent (items render on top regardless)
@@ -214,7 +214,7 @@ def selector_panel():
     W, H = 176, 17 + rows * 18 + 4
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    body = gradient(W, H, [(14, 9, 30), (24, 11, 44), (14, 9, 30)])
+    body = gradient(W, H, [(18, 11, 15), (32, 13, 19), (18, 11, 15)])
     mask = Image.new("L", (W, H))
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, W - 1, H - 1), radius=5, fill=240)
     im.paste(body, (0, 0), mask)
@@ -227,7 +227,7 @@ def selector_panel():
     for r, (name, col) in enumerate(SELECTOR_REALMS):
         y0 = 17 + r * 18
         x0, x1 = 7, 7 + 9 * 18 - 1
-        dark = (18, 11, 34)
+        dark = (22, 12, 16)
         strip = Image.new("RGBA", (x1 - x0 + 1, 16))
         sp = strip.load()
         for xx in range(strip.size[0]):
@@ -256,8 +256,8 @@ def selector_panel():
     # bottom bar: three button boxes (holes) and a fine line between
     y0 = 17 + 4 * 18
     d = ImageDraw.Draw(im)
-    d.line((26, y0 + 9, 7 + 4 * 18 - 3, y0 + 9), fill=(80, 60, 130, 255))
-    d.line((7 + 5 * 18 + 2, y0 + 9, 7 + 8 * 18 - 3, y0 + 9), fill=(80, 60, 130, 255))
+    d.line((26, y0 + 9, 7 + 4 * 18 - 3, y0 + 9), fill=(110, 50, 58, 255))
+    d.line((7 + 5 * 18 + 2, y0 + 9, 7 + 8 * 18 - 3, y0 + 9), fill=(110, 50, 58, 255))
     for c, col in ((0, PURPLE), (4, (200, 70, 90)), (8, (0xFF, 0xD2, 0x4D))):
         x = 7 + c * 18
         d.rectangle((x, y0, x + 17, y0 + 17), outline=col + (255,), width=1)

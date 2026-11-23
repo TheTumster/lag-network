@@ -1,7 +1,7 @@
-# RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector):
+# RELAPSEDMC Skyblock. One loop, one currency (Shards), one buyer (the Collector):
 # mine your gen -> sell to the Collector -> buy cages (spawners) -> grinder kills the stacks -> sell the loot
 # -> heads unlock the next cage -> the cages you place are your island's value -> top islands win the season.
-# Design doc: "RelapsedMC Skyblock - Economy" in the RelapsedMC project.
+# Design doc: "RELAPSEDMC Skyblock - Economy" in the RELAPSEDMC project.
 
 # Bumped when the economy changes: an older config.yml is moved to config-old-<n>.yml and replaced with this one.
 config-version: 4
@@ -53,7 +53,7 @@ rosestacker:
   spawn-count: 2
   max-cage-stack: 256
   settings: {}
-  prefix: "<g:#38E0FF:#B040FF>&lRELAPSED &8» &7"
+  prefix: "<g:#FF5C5C:#FFA19A>&lRELAPSED &8» &7"
 
 # The Collector buys everything (/sell, /sell hand, the Collector at spawn). Spawner loot is priced from the tiers
 # above. These are untagged items: gen ore drops and crops. Anything not listed can't be sold.
@@ -85,7 +85,7 @@ spawn:
   origin: [0, 100, 0]
   # station NPCs: where they stand and which way they face (yaw: 0 south, 90 west, 180 north, -90 east)
   npcs:
-    collector: {name: "<gradient:#38E0FF:#B040FF><bold>THE COLLECTOR</bold></gradient>", sub: "<gray>He buys everything <white>/sell", at: [0.5, 2, -4.5], yaw: 0, type: WANDERING_TRADER, command: collector}
+    collector: {name: "<gradient:#FF5C5C:#FFA19A><bold>THE COLLECTOR</bold></gradient>", sub: "<gray>He buys everything <white>/sell", at: [0.5, 2, -4.5], yaw: 0, type: WANDERING_TRADER, command: collector}
     keeper:    {name: "<gradient:#B040FF:#FF4DD2><bold>CAGE KEEPER</bold></gradient>", sub: "<gray>Cages + unlocks <white>/spawners", at: [58.5, 2, 0.5], yaw: 90, type: CLERIC, command: spawners}
     smith:     {name: "<gradient:#FFB020:#FF6A3D><bold>GEN SMITH</bold></gradient>", sub: "<gray>Upgrade your gen <white>/gen", at: [-53.5, 1, 0.5], yaw: -90, type: ARMORER, command: gen}
     merchant:  {name: "<gradient:#7CFF6B:#38E0FF><bold>MERCHANT</bold></gradient>", sub: "<gray>Basics + grinder parts <white>/market", at: [-40.5, 1, -35.5], yaw: -45, type: FARMER, command: market}

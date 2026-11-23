@@ -3,7 +3,7 @@ version: '${version}'
 main: net.lag.skyblock.LagSkyblock
 api-version: '1.21'
 softdepend: [Vault, Essentials, RoseStacker, BentoBox, Votifier]
-description: RelapsedMC Skyblock - Shards economy, cage ladder, the Collector, Market, gens, island top, Warzone, seasons
+description: RELAPSEDMC Skyblock - Shards economy, cage ladder, the Collector, Market, gens, island top, Warzone, seasons
 commands:
   spawners:
     description: The cage ladder - buy cages (spawners), unlock the next tier with heads

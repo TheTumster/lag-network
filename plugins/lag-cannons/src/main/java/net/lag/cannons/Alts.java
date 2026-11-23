@@ -58,7 +58,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
  *    plates/tripwires (so alts can't fire cannons).
  */
 final class Alts implements Listener {
-	private static final String P = "<gradient:#38E0FF:#B040FF>[RelapsedMC]</gradient> ";
+	private static final String P = "<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> ";
 	private static final long INVITE_MS = 5 * 60_000L;
 	private static final Set<String> F_ROOTS = Set.of("f", "fac", "faction", "factions");
 
@@ -144,7 +144,7 @@ final class Alts implements Listener {
 			String rel = parts[2].toLowerCase(Locale.ROOT);
 			if (rel.equals("ally") || rel.equals("truce")) {
 				e.setCancelled(true);
-				send(p, "<red>No allies or truces on RelapsedMC. It's you and your 8 against everyone.");
+				send(p, "<red>No allies or truces on RELAPSEDMC. It's you and your 8 against everyone.");
 				return;
 			}
 		}

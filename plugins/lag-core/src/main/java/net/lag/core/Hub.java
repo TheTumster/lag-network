@@ -46,7 +46,7 @@ final class Hub implements Listener {
 	private ItemStack selectorItem() {
 		ItemStack it = new ItemStack(Material.RECOVERY_COMPASS);
 		ItemMeta m = it.getItemMeta();
-		m.displayName(LagCore.mm("<gradient:#38E0FF:#B040FF><bold>Server Selector</bold></gradient> <gray>(Right Click)").decoration(TextDecoration.ITALIC, false));
+		m.displayName(LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>Server Selector</bold></gradient> <gray>(Right Click)").decoration(TextDecoration.ITALIC, false));
 		m.setEnchantmentGlintOverride(true);
 		m.addItemFlags(ItemFlag.values());
 		it.setItemMeta(m);
@@ -71,7 +71,7 @@ final class Hub implements Listener {
 		p.setAllowFlight(plugin.getConfig().getBoolean("hub.double-jump", true));
 		if (plugin.getConfig().getBoolean("hub.join-title", true) && plugin.hubFx == null) {
 			p.showTitle(Title.title(
-					LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"),
+					LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + plugin.networkName() + "</bold></gradient>"),
 					LagCore.mm("<gray>Right click the compass to pick a realm"),
 					Title.Times.times(Duration.ofMillis(300), Duration.ofSeconds(3), Duration.ofMillis(700))));
 		}

@@ -1,4 +1,4 @@
-"""RelapsedMC hub spawn, v4 ("the Gallery").
+"""RELAPSEDMC hub spawn, v4 ("the Gallery").
 
 Writes plugins/lag-core/src/main/resources/hub-spawn.txt.gz (palette line, then "x y z idx") and parkour.json.
 (0,0,0) = top of the spawn dais. The hub places it at y=100. North = -Z; players spawn facing north.
@@ -411,7 +411,7 @@ for realm, px in PORTALS:
 
 def monolith():
     """Between the two middle gates, dead centre of the spawn view: a dark slab with a purple neon outline.
-    The RelapsedMC logo hologram floats in front of it."""
+    The RELAPSEDMC logo hologram floats in front of it."""
     y0, PZ = TERRACE_Y + 1, PORTAL_Z - 1
     TOPM = [11, 11, 11, 10, 9]
     inM = lambda dx, dy: abs(dx) <= 4 and 0 <= dy <= TOPM[abs(dx)]

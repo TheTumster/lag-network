@@ -1,10 +1,10 @@
-# RelapsedMC SMP: what every player can do, and what each rank adds (shipped by tools/bake.py from servers/smp/).
+# RELAPSEDMC SMP: what every player can do, and what each rank adds (shipped by tools/bake.py from servers/smp/).
 # Bukkit reads this file on start. LuckPerms honours it: "relapsedmc.smp.player" is default:true, so every player
 # has its children; a rank is the LuckPerms group laGCore already uses (lp user <name> parent add vip), and
 # LuckPerms gives members "group.<rank>", whose children below apply. Edit here, not with lp, so it stays in git.
 
 relapsedmc.smp.player:
-  description: Everything a normal RelapsedMC SMP player can do
+  description: Everything a normal RELAPSEDMC SMP player can do
   default: true
   children:
     # homes (3, see Essentials sethome-multiple), tpa, back after a teleport (not after death)

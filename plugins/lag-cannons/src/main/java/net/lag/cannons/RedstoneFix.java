@@ -51,7 +51,7 @@ final class RedstoneFix implements Listener {
 		// FAWE pastes asynchronously; give it a moment to finish
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			int fixed = fix(at, r, true);
-			if (fixed > 0) p.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>[RelapsedMC] <gray>Reconnected <white>" + fixed + "<gray> redstone."));
+			if (fixed > 0) p.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>[RELAPSEDMC] <gray>Reconnected <white>" + fixed + "<gray> redstone."));
 		}, delay);
 	}
 
@@ -77,7 +77,7 @@ final class RedstoneFix implements Listener {
 			if (args.length > 0) r = Math.min(96, Math.max(1, Integer.parseInt(args[0])));
 		} catch (NumberFormatException ignored) { }
 		int fixed = fix(p.getLocation(), r);
-		p.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#38E0FF:#B040FF>Redstone fixed</gradient> <gray>(" + fixed + " dust in a " + r + " block radius)"));
+		p.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#FF5C5C:#FFA19A>Redstone fixed</gradient> <gray>(" + fixed + " dust in a " + r + " block radius)"));
 		return true;
 	}
 

@@ -53,7 +53,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	}
 
 	public String networkName() {
-		return getConfig().getString("network-name", "RelapsedMC");
+		return getConfig().getString("network-name", "RELAPSEDMC");
 	}
 
 	/**
@@ -108,8 +108,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		}
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
-		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RelapsedMC Client: which realm is this
-		teams = new Teams(this); // RelapsedMC Teams: network-wide crews (/team, /tc, schem share, pings)
+		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RELAPSEDMC Client: which realm is this
+		teams = new Teams(this); // RELAPSEDMC Teams: network-wide crews (/team, /tc, schem share, pings)
 		if (!teams.start()) teams = null;
 
 		pack = new Pack(this);
@@ -248,7 +248,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 				getConfig().set("hub.spawn", l.getWorld().getName() + "," + l.getX() + "," + l.getY() + "," + l.getZ() + "," + l.getYaw() + "," + l.getPitch());
 				saveConfig();
 				p.getWorld().setSpawnLocation(l);
-				p.sendMessage(mm("<#38E0FF>Spawn set."));
+				p.sendMessage(mm("<#FF6B6B>Spawn set."));
 			}
 			case "lagcore" -> {
 				if (args.length > 0 && args[0].equalsIgnoreCase("reload")) {
@@ -256,7 +256,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 					if (hubBuild != null) hubBuild.holograms();
 					if (spawnBuild != null) spawnBuild.holograms();
 					if (infoPanel != null) infoPanel.reload();
-					sender.sendMessage(mm("<#38E0FF>RelapsedMC core reloaded."));
+					sender.sendMessage(mm("<#FF6B6B>RELAPSEDMC core reloaded."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildhub") && hubBuild != null) {
 					// re-place the spawn island (same spot), e.g. after an update or if someone broke it
 					var o = hubBuild.origin();
@@ -264,17 +264,17 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 					int n = hubBuild.build(w, o != null ? o.getBlockX() : 0, o != null ? o.getBlockY() : 100, o != null ? o.getBlockZ() : 0);
 					hubBuild.atmosphere(w);
 					hubBuild.holograms();
-					sender.sendMessage(mm("<#38E0FF>Hub spawn rebuilt <gray>(" + n + " blocks)."));
+					sender.sendMessage(mm("<#FF6B6B>Hub spawn rebuilt <gray>(" + n + " blocks)."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildspawn") && spawnBuild != null) {
 					// re-place this realm's spawn in its current theme (same spot)
 					var o = spawnBuild.origin();
 					var w = o != null ? o.getWorld() : Bukkit.getWorlds().get(0);
 					int n = spawnBuild.build(w, 0, o != null ? o.getBlockY() : 100, 0);
 					spawnBuild.holograms();
-					sender.sendMessage(mm("<#38E0FF>Spawn rebuilt <gray>(" + n + " blocks, theme: " + spawnBuild.theme() + ")."));
+					sender.sendMessage(mm("<#FF6B6B>Spawn rebuilt <gray>(" + n + " blocks, theme: " + spawnBuild.theme() + ")."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("holograms") && hubBuild != null) {
 					hubBuild.holograms();
-					sender.sendMessage(mm("<#38E0FF>Holograms respawned."));
+					sender.sendMessage(mm("<#FF6B6B>Holograms respawned."));
 				} else {
 					sender.sendMessage(mm("<gray>/lagcore reload | rebuildhub | rebuildspawn | holograms"));
 				}

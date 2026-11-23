@@ -1,4 +1,4 @@
-"""RelapsedMC hub spawn generator.
+"""RELAPSEDMC hub spawn generator.
 
 Writes plugins/lag-core/src/main/resources/hub-spawn.txt.gz: a floating island the hub places on first start
 (laGCore HubBuild). Coordinates are relative to the spawn floor center (0,0,0); the hub puts that at y=100.

@@ -1,4 +1,4 @@
-# RelapsedMC tab list (TAB on the Velocity proxy). Only the layout feature is on: the header and footer
+# RELAPSEDMC tab list (TAB on the Velocity proxy). Only the layout feature is on: the header and footer
 # come from laGCore on each server. Columns, top to bottom then left to right: slots 1-20 realms,
 # 21-40 you, 41-60 the network, 61-80 who's online. Shipped from the repo (servers/proxy/): edit it there.
 header-footer:
@@ -31,7 +31,7 @@ layout:
   layouts:
     relapsed:
       fixed-slots:
-        - '1|<#3FE6FF>▌ </#3FE6FF><white><bold><u>REALMS</u></bold></white>'
+        - '1|<#FF6B6B>▌ </#FF6B6B><white><bold><u>REALMS</u></bold></white>'
         - '2|<#2B3048>━━━━━━━━━━━━━'
         - '4|<#5CFF8A><bold>SKYBLOCK</bold>'
         - '5|<white><bold>%online_skyblock%</bold></white> <#9AA3B8>playing'
@@ -46,7 +46,7 @@ layout:
         - '17|<white><bold>%online_smp%</bold></white> <#9AA3B8>playing'
         - '18|<#5E6478>Claims, shops, survival'
         - '20|<#5E6478>/server to switch'
-        - '21|<#A855FF>▌ </#A855FF><white><bold><u>YOU</u></bold></white>'
+        - '21|<#FF6B6B>▌ </#FF6B6B><white><bold><u>YOU</u></bold></white>'
         - '22|<#2B3048>━━━━━━━━━━━━━'
         - '24|<#9AA3B8>Name'
         - '25|<white><bold>%player%</bold></white>'
@@ -58,7 +58,7 @@ layout:
         - '34|<white><bold>%serveronline%</bold></white> <#9AA3B8>online'
         - '36|<#9AA3B8>Network'
         - '37|<white><bold>%online%</bold></white> <#9AA3B8>online'
-        - '41|<#3FE6FF>▌ </#3FE6FF><white><bold><u>RELAPSEDMC</u></bold></white>'
+        - '41|<#FF6B6B>▌ </#FF6B6B><white><bold><u>RELAPSEDMC</u></bold></white>'
         - '42|<#2B3048>━━━━━━━━━━━━━'
         - '44|<#9AA3B8>Get around'
         - '45|<#E8ECF5>/hub <#5E6478>· <#E8ECF5>/spawn'
@@ -69,11 +69,11 @@ layout:
         - '52|<#9AA3B8>Ranks are cosmetic'
         - '53|<#5E6478>No pay-to-win, ever'
         - '55|<#9AA3B8>Website'
-        - '56|<#45C8FF><u>relapsedmc.com</u>'
+        - '56|<#FF8A80><u>RELAPSEDMC.COM</u>'
         - '58|<#9AA3B8>Discord'
-        - '59|<#45C8FF><u>discord.gg/G4pHKXDDru</u>'
-        - '60|<gradient:#3FE6FF:#A855FF><bold>play.relapsedmc.com</bold></gradient>'
-        - '61|<#A855FF>▌ </#A855FF><white><bold><u>ONLINE</u></bold></white> <white><bold>%online%</bold></white>'
+        - '59|<#FF8A80><u>discord.gg/G4pHKXDDru</u>'
+        - '60|<gradient:#FF5C5C:#FFA19A><bold>PLAY.RELAPSEDMC.COM</bold></gradient>'
+        - '61|<#FF6B6B>▌ </#FF6B6B><white><bold><u>ONLINE</u></bold></white> <white><bold>%online%</bold></white>'
         - '62|<#2B3048>━━━━━━━━━━━━━'
       groups:
         players:

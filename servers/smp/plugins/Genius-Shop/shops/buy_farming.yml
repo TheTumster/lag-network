@@ -1,6 +1,6 @@
-# RelapsedMC SMP: seeds and saplings
+# RELAPSEDMC SMP: seeds and saplings
 # BUY-ONLY (no sell-price), fixed prices.
-gui-name: '&l<gradient:#38E0FF:#B040FF>Seeds & Saplings</gradient>'
+gui-name: '&l<gradient:#FF5C5C:#FFA19A>Seeds & Saplings</gradient>'
 rows: 3
 permission: ''
 

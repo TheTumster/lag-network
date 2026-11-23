@@ -1,4 +1,4 @@
-# RelapsedMC Skyblock crates. They stand on the Crate Vaults island at spawn (at: offset from the spawn floor centre).
+# RELAPSEDMC Skyblock crates. They stand on the Crate Vaults island at spawn (at: offset from the spawn floor centre).
 # Every key opens the same crate with the same odds, however it was earned:
 #   crate give <player> <crate> [amount]      (console: the store, vote plugins, events)
 #   crate giveall <crate> [amount]

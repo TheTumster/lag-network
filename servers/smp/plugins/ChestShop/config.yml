@@ -1,4 +1,4 @@
-# RelapsedMC SMP: ChestShop settings (shipped from servers/smp/ in the repo). ChestShop appends every setting not
+# RELAPSEDMC SMP: ChestShop settings (shipped from servers/smp/ in the repo). ChestShop appends every setting not
 # listed here with its default the first time it starts.
 # Make a shop: put a chest, then a sign on/next to it:  line 1 blank (your name is filled in), line 2 amount,
 # line 3 "B 10:S 8" (buy 10 / sell 8), line 4 the item (or "?" and click the sign with the item).

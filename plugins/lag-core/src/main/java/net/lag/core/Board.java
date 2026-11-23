@@ -29,7 +29,7 @@ final class Board implements Listener {
 	private void setup(Player p) {
 		Scoreboard sb = Bukkit.getScoreboardManager().getNewScoreboard();
 		Objective o = sb.registerNewObjective("lag", Criteria.DUMMY,
-				LagCore.mm("<gradient:#38E0FF:#B040FF><bold>" + plugin.networkName() + "</bold></gradient>"));
+				LagCore.mm("<gradient:#FF5C5C:#FFA19A><bold>" + plugin.networkName() + "</bold></gradient>"));
 		o.setDisplaySlot(DisplaySlot.SIDEBAR);
 		o.numberFormat(NumberFormat.blank());
 		p.setScoreboard(sb);
@@ -47,7 +47,7 @@ final class Board implements Listener {
 			return;
 		}
 		String phase = String.format(java.util.Locale.ROOT, "%.2f", ((System.currentTimeMillis() / 1000.0 * 0.25) % 2.0) - 1.0);
-		String grad = "<gradient:#3FE6FF:#A855FF:#3FE6FF:" + phase + ">";
+		String grad = "<gradient:#FF5C5C:#FFA19A:#FF5C5C:" + phase + ">";
 		Pack pk = plugin.pack;
 		boolean art = pk != null && pk.has(p);
 		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
@@ -67,7 +67,7 @@ final class Board implements Listener {
 		lines.add(LagCore.mm(D + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yy"))
 				+ " <dark_gray>• " + D + sc(realm) + (hubRole ? " <dark_gray>• " + V + plugin.count("ALL") + " " + D + sc("online") : "")));
 		lines.add(Component.empty());
-		lines.add(LagCore.mm(sIcon + "<#3FE6FF><bold><u>" + sc("you")));
+		lines.add(LagCore.mm(sIcon + "<#FF6B6B><bold><u>" + sc("you")));
 		lines.add(LagCore.mm(pad + L + sc("rank") + " " + rank(p)));
 		boolean facBoard = "factions".equalsIgnoreCase(role) && Papi.present();
 		if (!facBoard) lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms")); // factions: room for the shield line
@@ -107,7 +107,7 @@ final class Board implements Listener {
 		}
 		lines.add(Component.text("   "));
 		String foot = plugin.getConfig().getString("scoreboard.footer", "");
-		lines.add(LagCore.mm(foot.contains("play.") ? foot : grad + "play.relapsedmc.com</gradient>"));
+		lines.add(LagCore.mm(foot.toLowerCase().contains("play.") ? foot : grad + "PLAY.RELAPSEDMC.COM</gradient>"));
 		int score = lines.size();
 		for (int n = 1; n <= 15; n++) {
 			if (n > score) o.getScoreboard().resetScores("l" + n);
@@ -121,7 +121,7 @@ final class Board implements Listener {
 				LagCore.mm(bar + "\n<#9AA3B8>" + sc("online") + " <white><bold>" + plugin.count("ALL")
 						+ "</bold>   <#2B3048>|   <#9AA3B8>" + sc("ping") + " " + pingCol + ping + "ms"
 						+ "   <#2B3048>|   <#9AA3B8>" + sc("realm") + " <white><bold>" + realm + "</bold>"
-						+ "\n\n" + grad + "<bold>play.relapsedmc.com</bold></gradient>"
+						+ "\n\n" + grad + "<bold>PLAY.RELAPSEDMC.COM</bold></gradient>"
 						+ "\n<#5CFF8A>" + sc("skyblock") + " <#2B3048>•</#2B3048> <#FF4F64>" + sc("factions") + " <#2B3048>•</#2B3048> <#45C8FF>" + sc("smp") + " <#2B3048>•</#2B3048> <#FFAA45>" + sc("1.8 cannons") + "\n"));
 	}
 

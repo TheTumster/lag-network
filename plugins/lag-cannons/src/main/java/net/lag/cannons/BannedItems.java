@@ -55,7 +55,7 @@ final class BannedItems implements Listener {
 			if (banned(inv.getItem(i))) { inv.setItem(i, null); any = true; }
 		}
 		if (banned(p.getItemOnCursor())) { p.setItemOnCursor(null); any = true; }
-		if (any && p instanceof Player pl) pl.sendMessage("§c[RelapsedMC] Shields, maces and spears are disabled here.");
+		if (any && p instanceof Player pl) pl.sendMessage("§c[RELAPSEDMC] Shields, maces and spears are disabled here.");
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)

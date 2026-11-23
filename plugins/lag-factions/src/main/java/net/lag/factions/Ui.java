@@ -16,10 +16,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-/** RelapsedMC look: brand prefix, MiniMessage, menu items, sounds. */
+/** RELAPSEDMC look: brand prefix, MiniMessage, menu items, sounds. */
 final class Ui {
 	static final ZoneId EST = ZoneId.of("America/New_York");
-	static final String GRAD = "<gradient:#38E0FF:#B040FF>";
+	static final String GRAD = "<gradient:#FF5C5C:#FFA19A>";
 	static final String RED = "<#FF4D6D>", PURPLE = "<#B040FF>", CYAN = "<#38E0FF>", GREEN = "<#7CFF6B>", GOLD = "<#FFD24D>",
 			LABEL = "<#8A8FA3>", DIM = "<#4A4E5C>";
 	static final String PREFIX = GRAD + "<bold>F</bold></gradient> <dark_gray>»</dark_gray> ";

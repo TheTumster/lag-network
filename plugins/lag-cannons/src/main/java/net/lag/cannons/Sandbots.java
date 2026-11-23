@@ -175,7 +175,7 @@ final class Sandbots implements Listener {
 			a.setArms(true);
 			a.getEquipment().setHelmet(new ItemStack(Material.SAND));
 			a.getEquipment().setItemInMainHand(new ItemStack(Material.SAND));
-			a.customName(MM.deserialize(b.active ? "<gradient:#38E0FF:#B040FF><bold>Sandbot</bold></gradient> <gray>" + b.spots.size() + " spots • " + speedLabel(b)
+			a.customName(MM.deserialize(b.active ? "<gradient:#FF5C5C:#FFA19A><bold>Sandbot</bold></gradient> <gray>" + b.spots.size() + " spots • " + speedLabel(b)
 					: "<dark_gray>Sandbot <gray>(paused)"));
 			a.setCustomNameVisible(true);
 			a.getPersistentDataContainer().set(botKey, PersistentDataType.STRING, b.id.toString());
@@ -236,7 +236,7 @@ final class Sandbots implements Listener {
 	private ItemStack wand(Bot b) {
 		ItemStack it = new ItemStack(Material.BLAZE_ROD);
 		ItemMeta m = it.getItemMeta();
-		m.displayName(MM.deserialize("<gradient:#38E0FF:#B040FF><bold>Sandbot Wand</bold></gradient>").decoration(TextDecoration.ITALIC, false));
+		m.displayName(MM.deserialize("<gradient:#FF5C5C:#FFA19A><bold>Sandbot Wand</bold></gradient>").decoration(TextDecoration.ITALIC, false));
 		m.lore(List.of(
 				MM.deserialize("<gray>Left-click a block face to add/remove a sand spot").decoration(TextDecoration.ITALIC, false),
 				MM.deserialize("<gray>Spots glow while you hold this").decoration(TextDecoration.ITALIC, false)));
@@ -354,7 +354,7 @@ final class Sandbots implements Listener {
 				spawnEntity(b);
 				save();
 				p.getInventory().addItem(wand(b));
-				say(p, "<gradient:#38E0FF:#B040FF>Sandbot placed!</gradient> <gray>Left-click block faces with the wand to mark sand spots.");
+				say(p, "<gradient:#FF5C5C:#FFA19A>Sandbot placed!</gradient> <gray>Left-click block faces with the wand to mark sand spots.");
 			}
 			case "wand" -> {
 				Bot b = nearest(p);
@@ -429,7 +429,7 @@ final class Sandbots implements Listener {
 				else lines.forEach(l -> say(p, l));
 			}
 			default -> {
-				say(p, "<gradient:#38E0FF:#B040FF><bold>Sandbots</bold></gradient>");
+				say(p, "<gradient:#FF5C5C:#FFA19A><bold>Sandbots</bold></gradient>");
 				say(p, "<white>/sandbot create <gray>- place a bot here (gives you its wand)");
 				say(p, "<white>/sandbot wand <gray>- wand for your nearest bot");
 				say(p, "<white>/sandbot speed <ticks> <gray>- refill rate for your nearest bot (20 = 1s, 1 = every tick)");

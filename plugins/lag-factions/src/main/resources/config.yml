@@ -1,5 +1,5 @@
 config-version: 2
-# laGFactions (RelapsedMC factions layer). /lf reload after editing.
+# laGFactions (RELAPSEDMC factions layer). /lf reload after editing.
 
 shield:
   enabled: true
@@ -71,7 +71,7 @@ outpost:
   wall-height: 30
   first-build-minutes: 5
 
-# Recolour FactionsUUID's own messages to the RelapsedMC palette on every start.
+# Recolour FactionsUUID's own messages to the RELAPSEDMC palette on every start.
 theme-messages: true
 
 # KOTHs (staff-started): /koth create <name> [radius], /koth start <name> [minutes], /koth stop, /koth list

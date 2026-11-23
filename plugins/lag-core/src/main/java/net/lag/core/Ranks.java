@@ -143,7 +143,7 @@ final class Ranks implements Listener {
 			else tag = "<dark_gray>[</dark_gray><#FF4D6D>" + LagCore.esc(fac) + "</#FF4D6D><dark_gray>]</dark_gray> ";
 		}
 		String rankLine = b.isEmpty() ? "<gray>Member" : b.trim();
-		String card = "<gradient:#38E0FF:#B040FF><bold>" + LagCore.esc(p.getName()) + "</bold></gradient>"
+		String card = "<gradient:#FF5C5C:#FFA19A><bold>" + LagCore.esc(p.getName()) + "</bold></gradient>"
 				+ "<newline><gray>Rank " + rankLine
 				+ "<newline><gray>Realm <white>" + realm
 				+ (fac.isEmpty() ? "" : "<newline><gray>Faction <white>" + LagCore.esc(fac))
