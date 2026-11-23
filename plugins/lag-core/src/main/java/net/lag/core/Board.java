@@ -47,17 +47,17 @@ final class Board implements Listener {
 			return;
 		}
 		String phase = String.format(java.util.Locale.ROOT, "%.2f", ((System.currentTimeMillis() / 1000.0 * 0.25) % 2.0) - 1.0);
-		String grad = "<gradient:#38E0FF:#B040FF:#38E0FF:" + phase + ">";
+		String grad = "<gradient:#3FE6FF:#A855FF:#3FE6FF:" + phase + ">";
 		Pack pk = plugin.pack;
 		boolean art = pk != null && pk.has(p);
 		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
 		// premium layout: date + realm strip, small-caps section headers, gray labels / white values, gradient IP
-		String L = "<#8A8FA3>", V = "<white>", D = "<#4A4E5C>";
+		String L = "<#9AA3B8>", V = "<white><bold>", D = "<#5E6478>";
 		String pad = "  ";
 		int ping = p.getPing();
-		String pingCol = ping < 80 ? "<#7CFF6B>" : ping < 150 ? "<#FFD24D>" : "<#FF4D6D>";
+		String pingCol = ping < 80 ? "<#5CFF8A><bold>" : ping < 150 ? "<#FFAA45><bold>" : "<#FF4F64><bold>";
 		String sIcon = art ? Pack.glyph(Pack.I_STAR) + " " : "";
 		String pIcon = art ? Pack.glyph(Pack.I_PLAYERS) + " " : "";
 		String bIcon = art ? Pack.glyph(Pack.I_BOLT) + " " : "";
@@ -67,14 +67,14 @@ final class Board implements Listener {
 		lines.add(LagCore.mm(D + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yy"))
 				+ " <dark_gray>• " + D + sc(realm) + (hubRole ? " <dark_gray>• " + V + plugin.count("ALL") + " " + D + sc("online") : "")));
 		lines.add(Component.empty());
-		lines.add(LagCore.mm(sIcon + "<#38E0FF><bold>" + sc("you")));
+		lines.add(LagCore.mm(sIcon + "<#3FE6FF><bold><u>" + sc("you")));
 		lines.add(LagCore.mm(pad + L + sc("rank") + " " + rank(p)));
 		boolean facBoard = "factions".equalsIgnoreCase(role) && Papi.present();
 		if (!facBoard) lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms")); // factions: room for the shield line
 		lines.add(Component.text(" "));
 		if (facBoard) {
 			String f = Papi.apply(p, "%factionsuuid_faction_name%").trim();
-			lines.add(LagCore.mm(tIcon + "<#FF4D6D><bold>" + sc("faction")));
+			lines.add(LagCore.mm(tIcon + "<#FF4F64><bold><u>" + sc("faction")));
 			if (f.isEmpty() || f.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) {
 				lines.add(LagCore.mm(pad + L + sc("none") + " " + D + "• " + V + "/f create"));
 				lines.add(LagCore.mm(pad + L + sc("power") + " " + V + Papi.apply(p, "%factionsuuid_player_power%")));
@@ -89,18 +89,18 @@ final class Board implements Listener {
 				if (!shield.isEmpty()) lines.add(LagCore.mm(pad + shield));
 			}
 			lines.add(Component.text("  "));
-			lines.add(LagCore.mm(bIcon + "<#B040FF><bold>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));
+			lines.add(LagCore.mm(bIcon + "<#A855FF><bold><u>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));
 			lines.add(LagCore.mm(pad + MapInfo.countdown(plugin)));
 		} else {
 			var realms = plugin.section("realms");
 			if (hubRole && realms != null) {
-				lines.add(LagCore.mm(bIcon + "<#B040FF><bold>" + sc("realms")));
+				lines.add(LagCore.mm(bIcon + "<#A855FF><bold><u>" + sc("realms")));
 				for (String k : realms.getKeys(false)) {
 					String server = realms.getString(k + ".server", k);
 					lines.add(LagCore.mm(pad + L + sc(k) + " " + V + plugin.count(server)));
 				}
 			} else {
-				lines.add(LagCore.mm(pIcon + "<#B040FF><bold>" + sc("network")));
+				lines.add(LagCore.mm(pIcon + "<#A855FF><bold><u>" + sc("network")));
 				lines.add(LagCore.mm(pad + L + sc("online") + " " + V + plugin.count("ALL")));
 				lines.add(LagCore.mm(pad + L + sc("realm") + " " + V + realm));
 			}
@@ -117,12 +117,12 @@ final class Board implements Listener {
 		String bar = grad + "<strikethrough>                                        </strikethrough></gradient>";
 		p.sendPlayerListHeaderAndFooter(
 				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
-						+ "<#8A8FA3>" + sc("you're on") + " <white><bold>" + sc(realm) + "</bold>\n" + bar),
-				LagCore.mm(bar + "\n<#8A8FA3>" + sc("online") + " <white>" + plugin.count("ALL")
-						+ "   <#4A4E5C>|   <#8A8FA3>" + sc("ping") + " " + pingCol + ping + "ms"
-						+ "   <#4A4E5C>|   <#8A8FA3>" + sc("realm") + " <white>" + realm
+						+ "<#9AA3B8>" + sc("you're on") + " <white><bold><u>" + sc(realm) + "</bold>\n" + bar),
+				LagCore.mm(bar + "\n<#9AA3B8>" + sc("online") + " <white><bold>" + plugin.count("ALL")
+						+ "</bold>   <#2B3048>|   <#9AA3B8>" + sc("ping") + " " + pingCol + ping + "ms"
+						+ "   <#2B3048>|   <#9AA3B8>" + sc("realm") + " <white><bold>" + realm + "</bold>"
 						+ "\n\n" + grad + "<bold>play.relapsedmc.com</bold></gradient>"
-						+ "\n<#4A4E5C>" + sc("skyblock") + " • " + sc("factions") + " • " + sc("smp") + " • " + sc("1.8 cannons") + "\n"));
+						+ "\n<#5CFF8A>" + sc("skyblock") + " <#2B3048>•</#2B3048> <#FF4F64>" + sc("factions") + " <#2B3048>•</#2B3048> <#45C8FF>" + sc("smp") + " <#2B3048>•</#2B3048> <#FFAA45>" + sc("1.8 cannons") + "\n"));
 	}
 
 	/** First matching LuckPerms group (group.<name> permission) from config "ranks"; ops count as the first rank. */
