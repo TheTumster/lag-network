@@ -1,4 +1,4 @@
-// laGFactions: RELAPSEDMC's factions layer on top of the FactionsUUID engine (shields, menus, map, upgrades, shop,
+// laGFactions: RelapsedMC's factions layer on top of the FactionsUUID engine (shields, menus, map, upgrades, shop,
 // outpost). Compiles against the FactionsUUID jar CI builds from source first (localjars/FactionsUUID.jar).
 def fuuid = rootProject.file('localjars/FactionsUUID.jar')
 repositories {

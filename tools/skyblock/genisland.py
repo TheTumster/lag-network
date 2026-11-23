@@ -1,4 +1,4 @@
-"""RELAPSEDMC starter island -> plugins/lag-skyblock/src/main/resources/blueprints/relapsed.blu (BentoBox blueprint).
+"""RelapsedMC starter island -> plugins/lag-skyblock/src/main/resources/blueprints/relapsed.blu (BentoBox blueprint).
 
 A blueprint is a zip holding one JSON file named after the blueprint. Coordinates are relative; (0,0,0) is the
 island's top centre; the player spawns on the [spawn_here] sign (BentoBox removes it).

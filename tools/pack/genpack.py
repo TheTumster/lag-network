@@ -1,4 +1,4 @@
-"""RELAPSEDMC resource pack generator.
+"""RelapsedMC resource pack generator.
 
 Renders the wordmark logo, pixel icons and menu panels into resourcepack/ (committed; CI just zips it),
 plus network/server-icon.png for the server list. Custom glyphs live in the font "relapsed:ui" so the default

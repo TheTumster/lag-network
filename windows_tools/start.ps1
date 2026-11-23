@@ -6,7 +6,7 @@ $net = Get-Content "$Root\network.json" -Raw | ConvertFrom-Json
 
 function Say($msg, $color = "Cyan") { Write-Host "  $msg" -ForegroundColor $color }
 Write-Host ""
-Write-Host "  RELAPSEDMC" -ForegroundColor Magenta
+Write-Host "  RelapsedMC" -ForegroundColor Magenta
 Write-Host ""
 
 # ---- Java 25+ (uses a private copy in .\runtime if your PC doesn't have one)
@@ -169,7 +169,7 @@ foreach ($pair in @(@("$Root\proxy\plugins\viaversion\config.yml", '(?m)^(packet
     }
 }
 
-# ---- Rename: laG Network -> RELAPSEDMC (player-facing names only; one time, safe to re-run). UTF-8 in and out.
+# ---- Rename: laG Network -> RelapsedMC (player-facing names only; one time, safe to re-run). UTF-8 in and out.
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 $dot = [string][char]0x2022
 $renamed = $false
@@ -180,21 +180,21 @@ foreach ($f in @("$Root\hub\plugins\laGCore\config.yml", "$Root\factions\plugins
         if ($t -match 'laG Network') {
             $n = $t -replace 'laG cannon physics', '1.8 cannon physics'
             if ($f -like '*velocity.toml') {
-                $n = [regex]::Replace($n, '(?m)^motd\s*=.*$', ('motd = "<gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient>\n<gray>Factions ' + $dot + ' SMP ' + $dot + ' 1.8 Cannons"'))
+                $n = [regex]::Replace($n, '(?m)^motd\s*=.*$', ('motd = "<gradient:#FF5C5C:#FFA19A><bold>RelapsedMC</bold></gradient>\n<gray>Factions ' + $dot + ' SMP ' + $dot + ' 1.8 Cannons"'))
             }
-            $n = $n -replace 'laG Network', 'RELAPSEDMC'
+            $n = $n -replace 'laG Network', 'RelapsedMC'
             [IO.File]::WriteAllText($f, $n, $utf8); $renamed = $true
         }
     }
 }
-if ($renamed) { Say "Network is now RELAPSEDMC." Green }
+if ($renamed) { Say "Network is now RelapsedMC." Green }
 
 # ---- Server-list MOTD (proxy): centered wordmark + current map. Re-applied until it has the Relapse line.
 $vt = "$Root\proxy\velocity.toml"
 if (Test-Path $vt) {
     $t = [IO.File]::ReadAllText($vt, $utf8)
     if ($t -notmatch 'RELAPSE #1') {
-        $motd = 'motd = ' + '"                     <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>' + $dot + '</dark_gray> <#7CFF6B>Skyblock S1"'
+        $motd = 'motd = ' + '"                     <gradient:#FF5C5C:#FFA19A><bold>RelapsedMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>' + $dot + '</dark_gray> <#7CFF6B>Skyblock S1"'
         $n = [regex]::Replace($t, '(?m)^motd\s*=.*$', { param($m) $motd })
         if ($n -ne $t) { [IO.File]::WriteAllText($vt, $n, $utf8); Say "Updated the server-list MOTD." Green }
     }
@@ -255,13 +255,13 @@ if (Test-Path $cpc) {
     if ($n -ne $t) { Set-Content $cpc $n -NoNewline; Say "CoreProtect: stopped logging dispenser/hopper items (cannon lag)." Green }
 }
 
-# ---- /fps menu (everyone can hide TNT/sand/explosions on their own screen): RELAPSEDMC look
+# ---- /fps menu (everyone can hide TNT/sand/explosions on their own screen): RelapsedMC look
 # Sakura wraps long messages onto indented continuation lines, so each pattern replaces the whole value.
 foreach ($srv in @("factions", "cannons")) {
     $sg = "$Root\$srv\config\sakura-global.yml"
     if (Test-Path $sg) {
         $t = [IO.File]::ReadAllText($sg, $utf8)
-        $brand = '<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> '
+        $brand = '<gradient:#FF5C5C:#FFA19A>[RelapsedMC]</gradient> '
         $n = [regex]::Replace($t, '(?m)^(  fps-setting-change:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<gray><state> <white><name></white> for you. <dark_gray>(/fps)'''))
         $n = [regex]::Replace($n, '(?m)^(  durable-block-interaction:)[^\r\n]*(?:\r?\n    [^\r\n]*)*', ('${1} ''' + $brand + '<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left'''))
         $n = [regex]::Replace($n, '(?m)^(\s+material:)\s*PINK_STAINED_GLASS_PANE', '${1} CYAN_STAINED_GLASS_PANE')

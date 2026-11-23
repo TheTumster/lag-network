@@ -1,5 +1,5 @@
 # Core plugin. The SAME network name goes in every server's copy of this file.
-network-name: "RELAPSEDMC"
+network-name: "RelapsedMC"
 
 # What this server is: hub, factions or smp. Hub features (selector item, no damage, etc.) only run on the hub.
 role: hub
@@ -305,7 +305,7 @@ hub:
       - offset: [0.5, 6.3, -38.5]
         scale: 1.8
         bob: false
-        text: "<gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#C9B8E8>from <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient>"
+        text: "<gradient:#FF4D4D:#FFFFFF:#3DDC6B><bold>Merry Christmas</bold></gradient> <#C9B8E8>from <gradient:#FF5C5C:#FFA19A><bold>RelapsedMC</bold></gradient>"
       - offset: [0.5, 5.5, -38.5]
         scale: 1.2
         bob: false
@@ -481,8 +481,8 @@ hub:
 
 scoreboard:
   enabled: true
-  footer: "<gradient:#FF5C5C:#FFA19A>PLAY.RELAPSEDMC.COM</gradient>"
+  footer: "<gradient:#FF5C5C:#FFA19A>play.RelapsedMC.com</gradient>"
 
-# RELAPSEDMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
+# RelapsedMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
 teams:
   max-size: 8

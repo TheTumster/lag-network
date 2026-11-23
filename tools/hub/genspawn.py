@@ -1,4 +1,4 @@
-"""RELAPSEDMC hub spawn generator, v3 ("citadel").
+"""RelapsedMC hub spawn generator, v3 ("citadel").
 
 Writes plugins/lag-core/src/main/resources/hub-spawn.txt.gz: palette line, then "x y z idx" per block.
 Coordinates are relative to the spawn point floor (0,0,0) = top of the dais over the beacon; the hub places it

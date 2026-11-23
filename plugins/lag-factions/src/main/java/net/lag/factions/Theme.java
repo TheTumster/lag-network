@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * Recolours every FactionsUUID message to the RELAPSEDMC palette (runs in onLoad, before FactionsUUID reads its
+ * Recolours every FactionsUUID message to the RelapsedMC palette (runs in onLoad, before FactionsUUID reads its
  * files): yellow/gold text becomes gray/cyan, green/red become the brand green/red. Both message files are covered:
  * config/lang.yml (legacy & codes) and config/translations.conf (MiniMessage). Safe to run every start.
  */
@@ -38,7 +38,7 @@ final class Theme {
 	static void apply(File pluginsDir, Logger log) {
 		File base = new File(pluginsDir, "FactionsUUID/config");
 		int n = remap(new File(base, "lang.yml"), LEGACY, log) + remap(new File(base, "translations.conf"), MINI, log);
-		if (n > 0) log.info("Recoloured " + n + " FactionsUUID message colours to the RELAPSEDMC palette");
+		if (n > 0) log.info("Recoloured " + n + " FactionsUUID message colours to the RelapsedMC palette");
 	}
 
 	private static int remap(File f, Map<String, String> map, Logger log) {

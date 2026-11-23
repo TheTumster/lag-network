@@ -32,7 +32,7 @@ import org.joml.AxisAngle4f;
 import org.joml.Vector3f;
 
 /**
- * The RELAPSEDMC hub spawn: places the generated floating island (resources/hub-spawn.txt.gz, made by
+ * The RelapsedMC hub spawn: places the generated floating island (resources/hub-spawn.txt.gz, made by
  * tools/hub/genspawn.py) on first start, sets spawn on it, spawns the floating titles, and turns the
  * nether portals into server portals (walk in = join that server). Offsets in config are relative to the
  * spawn floor centre (base + ".origin").
@@ -668,7 +668,7 @@ final class HubBuild implements Listener {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			if (!p.isOnline()) return;
 			String msg = String.valueOf(plugin.opt(base + ".christmas.greeting",
-					"<#FF4D4D><bold>Santa</bold> <dark_gray>» <white>Ho ho ho, <#F4C542>{player}<white>! Merry Christmas from <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient><white>. Follow a runner to a gate, or click me to pick a realm."));
+					"<#FF4D4D><bold>Santa</bold> <dark_gray>» <white>Ho ho ho, <#F4C542>{player}<white>! Merry Christmas from <gradient:#FF5C5C:#FFA19A><bold>RelapsedMC</bold></gradient><white>. Follow a runner to a gate, or click me to pick a realm."));
 			p.sendMessage(LagCore.mm(msg.replace("{player}", p.getName())));
 			p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.7f, 1.2f);
 		}, 50L);

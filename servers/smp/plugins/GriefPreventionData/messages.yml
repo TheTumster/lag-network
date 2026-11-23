@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: GriefPrevention messages in the network style (shipped from servers/smp/ in the repo).
+# RelapsedMC SMP: GriefPrevention messages in the network style (shipped from servers/smp/ in the repo).
 # Only the messages players see most are here; GriefPrevention adds the rest with its defaults on start.
 # Colours use $ instead of & ($x$3$8$E$0$F$F = #38E0FF).
 Messages:

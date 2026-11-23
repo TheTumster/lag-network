@@ -3,7 +3,7 @@ $ErrorActionPreference = "Continue"
 $Root = Split-Path -Parent $PSScriptRoot
 function Say($msg, $color = "Cyan") { Write-Host "  $msg" -ForegroundColor $color }
 Write-Host ""
-Write-Host "  RELAPSEDMC - friend tunnel" -ForegroundColor Magenta
+Write-Host "  RelapsedMC - friend tunnel" -ForegroundColor Magenta
 Write-Host ""
 
 function Find-Playit {

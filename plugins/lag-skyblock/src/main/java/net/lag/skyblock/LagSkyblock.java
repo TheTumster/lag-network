@@ -17,7 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 
 /**
- * RELAPSEDMC Skyblock. One loop, one currency (Shards), one buyer (the Collector): gens and cages (spawners) make
+ * RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector): gens and cages (spawners) make
  * loot, the Collector buys it, Shards buy more cages, heads unlock the next tier, placed cages are island value.
  */
 public final class LagSkyblock extends JavaPlugin {

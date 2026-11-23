@@ -94,7 +94,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(redstoneFix, this);
 		sandbots = new Sandbots(this);
 		getServer().getPluginManager().registerEvents(sandbots, this);
-		// RELAPSEDMC Client: faction mates + claim crumbs (after FactionsUUID has finished enabling)
+		// RelapsedMC Client: faction mates + claim crumbs (after FactionsUUID has finished enabling)
 		getServer().getScheduler().runTask(this, () -> new ClientLink(this).start());
 		// sweep healed blocks once a minute
 		Bukkit.getScheduler().runTaskTimer(this, this::regen, 1200L, 1200L);
@@ -261,7 +261,7 @@ public final class LagCannons extends JavaPlugin implements Listener {
 							n++;
 						}
 					}
-			p.sendMessage(ChatColor.LIGHT_PURPLE + "[RELAPSEDMC] " + ChatColor.GRAY + "Test fill: " + ChatColor.WHITE + n + ChatColor.GRAY
+			p.sendMessage(ChatColor.LIGHT_PURPLE + "[RelapsedMC] " + ChatColor.GRAY + "Test fill: " + ChatColor.WHITE + n + ChatColor.GRAY
 					+ " dispensers, " + amount + " TNT each (radius " + r + "). Free because you're op in creative.");
 			return true;
 		}

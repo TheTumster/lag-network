@@ -3,7 +3,7 @@ version: '${version}'
 main: net.lag.core.LagCore
 api-version: '1.21'
 softdepend: [PlaceholderAPI]
-description: RELAPSEDMC core - hub, server selector, scoreboard, network glue
+description: RelapsedMC core - hub, server selector, scoreboard, network glue
 commands:
   hub:
     description: Go back to the hub
@@ -18,7 +18,7 @@ commands:
     description: laG Core admin
     permission: lag.admin
   team:
-    description: Your RELAPSEDMC team (works on every realm)
+    description: Your RelapsedMC team (works on every realm)
     aliases: [teams, crew]
   tc:
     description: Team chat

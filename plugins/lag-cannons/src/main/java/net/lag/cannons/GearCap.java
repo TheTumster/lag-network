@@ -120,7 +120,7 @@ final class GearCap implements Listener {
 		boolean any = false;
 		for (ItemStack it : inv.getContents()) any |= clamp(it); // contents include armor + offhand
 		if (any) p.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> <gray>Some gear was over the cap (Protection 4, Unbreaking 3) and got lowered."));
+				"<gradient:#FF5C5C:#FFA19A>[RelapsedMC]</gradient> <gray>Some gear was over the cap (Protection 4, Unbreaking 3) and got lowered."));
 		unequipLocked(p);
 	}
 
@@ -135,7 +135,7 @@ final class GearCap implements Listener {
 		inv.setArmorContents(armor);
 		for (ItemStack left : inv.addItem(off.toArray(new ItemStack[0])).values()) p.getWorld().dropItemNaturally(p.getLocation(), left);
 		p.sendMessage(MiniMessage.miniMessage().deserialize(
-				"<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> <red>Netherite only works if it's a KOTH reward."));
+				"<gradient:#FF5C5C:#FFA19A>[RelapsedMC]</gradient> <red>Netherite only works if it's a KOTH reward."));
 	}
 
 	// ---------------------------------------------------------------- sources of over-cap gear
@@ -259,7 +259,7 @@ final class GearCap implements Listener {
 			meta.lore(lore);
 		}
 		it.setItemMeta(meta);
-		p.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> <gray>Tagged as KOTH gear."));
+		p.sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#FF5C5C:#FFA19A>[RelapsedMC]</gradient> <gray>Tagged as KOTH gear."));
 		return true;
 	}
 }

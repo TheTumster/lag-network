@@ -50,7 +50,7 @@ final class Board implements Listener {
 		String grad = "<gradient:#FF5C5C:#FFA19A:#FF5C5C:" + phase + ">";
 		Pack pk = plugin.pack;
 		boolean art = pk != null && pk.has(p);
-		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>"));
+		o.displayName(LagCore.mm(art ? Pack.glyph(Pack.LOGO_LINE) : grad + "<bold>" + plugin.networkName() + "</bold></gradient>"));
 		String role = plugin.getConfig().getString("role", "hub");
 		String realm = role.substring(0, 1).toUpperCase() + role.substring(1);
 		// premium layout: date + realm strip, small-caps section headers, gray labels / white values, gradient IP
@@ -107,7 +107,7 @@ final class Board implements Listener {
 		}
 		lines.add(Component.text("   "));
 		String foot = plugin.getConfig().getString("scoreboard.footer", "");
-		lines.add(LagCore.mm(foot.toLowerCase().contains("play.") ? foot : grad + "PLAY.RELAPSEDMC.COM</gradient>"));
+		lines.add(LagCore.mm(foot.toLowerCase().contains("play.") ? foot : grad + "play.RelapsedMC.com</gradient>"));
 		int score = lines.size();
 		for (int n = 1; n <= 15; n++) {
 			if (n > score) o.getScoreboard().resetScores("l" + n);
@@ -116,12 +116,12 @@ final class Board implements Listener {
 		// tab list: logo, realm strip; footer with live stats, IP and links
 		String bar = grad + "<strikethrough>                                        </strikethrough></gradient>";
 		p.sendPlayerListHeaderAndFooter(
-				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName().toUpperCase() + "</bold></gradient>\n")
+				LagCore.mm("\n" + (art ? Pack.glyph(Pack.LOGO_TAB) + "\n\n\n" : grad + "<bold>" + plugin.networkName() + "</bold></gradient>\n")
 						+ "<#9AA3B8>" + sc("you're on") + " <white><bold><u>" + sc(realm) + "</bold>\n" + bar),
 				LagCore.mm(bar + "\n<#9AA3B8>" + sc("online") + " <white><bold>" + plugin.count("ALL")
 						+ "</bold>   <#2B3048>|   <#9AA3B8>" + sc("ping") + " " + pingCol + ping + "ms"
 						+ "   <#2B3048>|   <#9AA3B8>" + sc("realm") + " <white><bold>" + realm + "</bold>"
-						+ "\n\n" + grad + "<bold>PLAY.RELAPSEDMC.COM</bold></gradient>"
+						+ "\n\n" + grad + "<bold>play.RelapsedMC.com</bold></gradient>"
 						+ "\n<#5CFF8A>" + sc("skyblock") + " <#2B3048>•</#2B3048> <#FF4F64>" + sc("factions") + " <#2B3048>•</#2B3048> <#45C8FF>" + sc("smp") + " <#2B3048>•</#2B3048> <#FFAA45>" + sc("1.8 cannons") + "\n"));
 	}
 

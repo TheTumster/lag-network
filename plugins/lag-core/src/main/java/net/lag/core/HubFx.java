@@ -125,7 +125,7 @@ final class HubFx implements Listener {
 				List<Component> pages = new ArrayList<>();
 				for (String pg : y.getStringList("pages")) pages.add(LagCore.mm(MapInfo.fill(plugin, pg)));
 				codex = net.kyori.adventure.inventory.Book.book(LagCore.mm(y.getString("title", "Codex")),
-						LagCore.mm(y.getString("author", "RELAPSEDMC")), pages);
+						LagCore.mm(y.getString("author", "RelapsedMC")), pages);
 			} catch (Exception ex) {
 				plugin.getLogger().warning("Codex failed to load: " + ex);
 				return;

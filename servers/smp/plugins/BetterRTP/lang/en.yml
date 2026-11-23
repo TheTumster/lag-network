@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: BetterRTP messages in the network style (shipped from servers/smp/ in the repo).
+# RelapsedMC SMP: BetterRTP messages in the network style (shipped from servers/smp/ in the repo).
 # #RRGGBB = hex colour.
 Messages:
   Prefix: '&8[#38E0FFRTP&8] &7'

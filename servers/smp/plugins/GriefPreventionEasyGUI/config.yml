@@ -1,6 +1,6 @@
 # ============================================================
 # GriefPreventionEasyGUI Configuration
-# RELAPSEDMC SMP: /claimhelp menu for claims and /trust (shipped from servers/smp/ in the repo).
+# RelapsedMC SMP: /claimhelp menu for claims and /trust (shipped from servers/smp/ in the repo).
 # Teleport-to-claim is OFF: it would skip /home limits and Essentials' teleport warmup.
 # ============================================================
 

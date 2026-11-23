@@ -16,7 +16,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-/** RELAPSEDMC look: brand prefix, MiniMessage, menu items, sounds. */
+/** RelapsedMC look: brand prefix, MiniMessage, menu items, sounds. */
 final class Ui {
 	static final ZoneId EST = ZoneId.of("America/New_York");
 	static final String GRAD = "<gradient:#FF5C5C:#FFA19A>";

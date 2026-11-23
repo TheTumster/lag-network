@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: building blocks
+# RelapsedMC SMP: building blocks
 # BUY-ONLY (no sell-price), fixed prices.
 gui-name: '&l<gradient:#FF5C5C:#FFA19A>Building Blocks</gradient>'
 rows: 4

@@ -26,7 +26,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * Feeds the RELAPSEDMC Client (TheTumster/factions-client, ServerLink.java).
+ * Feeds the RelapsedMC Client (TheTumster/factions-client, ServerLink.java).
  * Only players running the client receive anything: it registers these channels on join, and Bukkit only
  * delivers plugin messages to players listening on the channel.
  *
@@ -67,7 +67,7 @@ final class ClientLink implements Listener {
 
 	void start() {
 		if (fuuid == null) {
-			plugin.getLogger().info("ClientLink: FactionsUUID not found, RELAPSEDMC Client features off on this server");
+			plugin.getLogger().info("ClientLink: FactionsUUID not found, RelapsedMC Client features off on this server");
 			return;
 		}
 		var m = Bukkit.getMessenger();
@@ -77,7 +77,7 @@ final class ClientLink implements Listener {
 		m.registerOutgoingPluginChannel(plugin, HOME);
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 		Bukkit.getScheduler().runTaskTimer(plugin, this::flush, 20L, 10L);
-		plugin.getLogger().info("ClientLink: sending faction data to RELAPSEDMC Client users");
+		plugin.getLogger().info("ClientLink: sending faction data to RelapsedMC Client users");
 	}
 
 	// ---------------------------------------------------------------- crumbs

@@ -1,4 +1,4 @@
-"""RELAPSEDMC Skyblock spawn v3: "the Shattered World" -> plugins/lag-core/src/main/resources/spawn-skyblock.txt.gz
+"""RelapsedMC Skyblock spawn v3: "the Shattered World" -> plugins/lag-core/src/main/resources/spawn-skyblock.txt.gz
 
 Lore: when the Corrupted world collapsed, the pieces that didn't fall became islands. Spawn is the biggest piece left:
 the Core, a cracked crystal still floating over what was the world's heart, with the districts that broke off around it.

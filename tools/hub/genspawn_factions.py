@@ -1,4 +1,4 @@
-"""RELAPSEDMC Factions spawn: "the Fault" -> plugins/lag-core/src/main/resources/spawn-factions.txt.gz
+"""RelapsedMC Factions spawn: "the Fault" -> plugins/lag-core/src/main/resources/spawn-factions.txt.gz
 
 (0,0,0) = spawn floor centre, players spawn facing north (-Z). Floor is y=0, players stand at y=1.
 The citadel is split down the middle by a glowing fault line:

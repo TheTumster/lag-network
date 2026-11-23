@@ -1,7 +1,7 @@
-# RELAPSEDMC Skyblock. One loop, one currency (Shards), one buyer (the Collector):
+# RelapsedMC Skyblock. One loop, one currency (Shards), one buyer (the Collector):
 # mine your gen -> sell to the Collector -> buy cages (spawners) -> grinder kills the stacks -> sell the loot
 # -> heads unlock the next cage -> the cages you place are your island's value -> top islands win the season.
-# Design doc: "RELAPSEDMC Skyblock - Economy" in the RELAPSEDMC project.
+# Design doc: "RelapsedMC Skyblock - Economy" in the RelapsedMC project.
 
 # Bumped when the economy changes: an older config.yml is moved to config-old-<n>.yml and replaced with this one.
 config-version: 4

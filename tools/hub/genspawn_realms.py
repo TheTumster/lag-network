@@ -1,4 +1,4 @@
-"""RELAPSEDMC realm spawns (factions, skyblock, cannons) -> plugins/lag-core/src/main/resources/spawn-<realm>.txt.gz.
+"""RelapsedMC realm spawns (factions, skyblock, cannons) -> plugins/lag-core/src/main/resources/spawn-<realm>.txt.gz.
 
 Same format as the hub island (palette line, then "x y z idx"). (0,0,0) = spawn floor centre, player faces north (-Z).
 Each: themed round plaza, a round HUB portal straight ahead (z=-13), a few lantern posts, realm decor, rocky underside.

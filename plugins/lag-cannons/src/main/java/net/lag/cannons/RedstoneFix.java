@@ -51,7 +51,7 @@ final class RedstoneFix implements Listener {
 		// FAWE pastes asynchronously; give it a moment to finish
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			int fixed = fix(at, r, true);
-			if (fixed > 0) p.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>[RELAPSEDMC] <gray>Reconnected <white>" + fixed + "<gray> redstone."));
+			if (fixed > 0) p.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>[RelapsedMC] <gray>Reconnected <white>" + fixed + "<gray> redstone."));
 		}, delay);
 	}
 

@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: food and utility items (never diamonds, netherite, elytra or totems)
+# RelapsedMC SMP: food and utility items (never diamonds, netherite, elytra or totems)
 # BUY-ONLY (no sell-price), fixed prices.
 gui-name: '&l<gradient:#FF5C5C:#FFA19A>Food & Utility</gradient>'
 rows: 3

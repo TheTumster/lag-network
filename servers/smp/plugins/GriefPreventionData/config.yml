@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: GriefPrevention settings (shipped from servers/smp/ in the repo; GriefPrevention fills in every
+# RelapsedMC SMP: GriefPrevention settings (shipped from servers/smp/ in the repo; GriefPrevention fills in every
 # other setting with its default and re-saves this file on start, which is fine).
 # Claim with a golden shovel (right-click two corners); a stick shows who owns a claim; the boundary shows
 # with GriefPrevention's built-in block visualisation. /trust /accesstrust /containertrust /untrust /trustlist,

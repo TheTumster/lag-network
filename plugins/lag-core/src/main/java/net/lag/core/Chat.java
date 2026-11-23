@@ -13,7 +13,7 @@ import net.kyori.adventure.text.format.TextDecoration;
  * click buttons. Used by the hub welcome and every realm's join banner.
  *
  * Banner lines (config fresh-chat.banner.<role>) understand:
- *   {logo}      the big RELAPSEDMC wordmark (pack) or a spaced gradient title (no pack), centered, 3 lines tall
+ *   {logo}      the big RelapsedMC wordmark (pack) or a spaced gradient title (no pack), centered, 3 lines tall
  *   {c}...      center the rest of the line
  *   {player} {online} {realm}
  *   [[label|command|hover]]  a clickable button (command starts with / ; or a https:// link opens a URL)

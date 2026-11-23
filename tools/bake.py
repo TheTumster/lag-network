@@ -302,11 +302,11 @@ def patch_backend(name):
                      ("cannons.explosion.optimise-protected-regions", True), ("cannons.explosion.avoid-redundant-block-searches", True),
                      ("cannons.explosion.reuse-block-cache-across-explosions", True), ("technical.redstone.redstone-cache", True)):
             yaml_set(sw, k, v)
-        # Sakura /fps menu (hide TNT/sand/explosions client-side; laGCannons gives everyone access): RELAPSEDMC branding
+        # Sakura /fps menu (hide TNT/sand/explosions client-side; laGCannons gives everyone access): RelapsedMC branding
         sg = os.path.join(d, "config", "sakura-global.yml")
         if not os.path.exists(sg):
             open(sg, "w").write("_version: 3\n")
-        brand = "<gradient:#FF5C5C:#FFA19A>[RELAPSEDMC]</gradient> "
+        brand = "<gradient:#FF5C5C:#FFA19A>[RelapsedMC]</gradient> "
         yaml_set(sg, "messages.fps-setting-change", brand + "<gray><state> <white><name></white> for you. <dark_gray>(/fps)")
         yaml_set(sg, "messages.durable-block-interaction", brand + "<white>This block has <gray><remaining></gray> of <gray><durability></gray> hits left")
         yaml_set(sg, "fps.material", "CYAN_STAINED_GLASS_PANE")
@@ -382,7 +382,7 @@ def write_core_config(name):
     core_dir = os.path.join(DIST, name, "plugins", "laGCore")
     os.makedirs(core_dir, exist_ok=True)
     src = open(os.path.join(ROOT, "plugins", "lag-core", "src", "main", "resources", "config.yml")).read()
-    src = src.replace("role: hub", f"role: {name}").replace('network-name: "RELAPSEDMC"', f'network-name: "{NET["name"]}"')
+    src = src.replace("role: hub", f"role: {name}").replace('network-name: "RelapsedMC"', f'network-name: "{NET["name"]}"')
     open(os.path.join(core_dir, "config.yml"), "w").write(src)
     for junk in ("parkour.yml",):
         p = os.path.join(core_dir, junk)
@@ -395,7 +395,7 @@ def patch_proxy():
     path = os.path.join(d, "velocity.toml")
     t = open(path).read()
     t = toml_set(t, "bind", f'"0.0.0.0:{NET["public_port"]}"')
-    t = toml_set(t, "motd", '"                     <gradient:#FF5C5C:#FFA19A><bold>RELAPSEDMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>•</dark_gray> <#7CFF6B>Skyblock S1"')
+    t = toml_set(t, "motd", '"                     <gradient:#FF5C5C:#FFA19A><bold>RelapsedMC</bold></gradient> <dark_gray>[<gray>1.21</gray>]</dark_gray>\\n    <#FF4D6D><bold>RELAPSE #1</bold></#FF4D6D> <gray>launching December <dark_gray>•</dark_gray> <#7CFF6B>Skyblock S1"')
     t = toml_set(t, "player-info-forwarding-mode", '"modern"')
     t = toml_set(t, "online-mode", "true")
     t = toml_set(t, "bungee-plugin-message-channel", "true")
@@ -525,7 +525,7 @@ def main():
         for want in must.get(srv, []):
             if not any(e.lower().startswith(want.lower()) for e in enabled):
                 problems.append(f"[{srv}] {want} did not enable")
-        # RELAPSEDMC Teams: every server must open the shared teams database
+        # RelapsedMC Teams: every server must open the shared teams database
         if not any("Teams on" in l for l in logs.get(srv, [])):
             bad = [l for l in logs.get(srv, []) if "Teams off" in l]
             problems.append(f"[{srv}] Teams did not start" + (f": {bad[0].strip()}" if bad else ""))

@@ -19,7 +19,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import dev.kitteh.factions.Faction;
 
 /**
- * RELAPSEDMC factions layer on top of FactionsUUID. FactionsUUID keeps the data (claims, power, members); every
+ * RelapsedMC factions layer on top of FactionsUUID. FactionsUUID keeps the data (claims, power, members); every
  * screen players see for these commands is ours:
  *   /f, /f menu      GUI hub
  *   /f shield        raid window picker (EST), shield status

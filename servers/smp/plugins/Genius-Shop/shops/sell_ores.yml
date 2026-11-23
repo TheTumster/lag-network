@@ -1,4 +1,4 @@
-# RELAPSEDMC SMP: ores and minerals (no netherite)
+# RelapsedMC SMP: ores and minerals (no netherite)
 # SELL-ONLY. Every sale lowers that item's sell price for everyone (dynamic-pricing, price-change per item sold);
 # prices reset every day at 00:00 New York time. So the server pays out at most about base x items/2 per item per day
 # (here ~2500 per item, see the numbers below), plus the 5,000-per-sale cap in config.yml. No money printing.

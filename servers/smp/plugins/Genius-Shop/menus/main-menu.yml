@@ -1,7 +1,7 @@
-# RELAPSEDMC SMP: /shop main menu (shipped from servers/smp/ in the repo). Each button opens shops/<shop-key>.yml.
+# RelapsedMC SMP: /shop main menu (shipped from servers/smp/ in the repo). Each button opens shops/<shop-key>.yml.
 config-version: 3
 
-title: '&l<gradient:#FF5C5C:#FFA19A>RELAPSEDMC</gradient> &8» &7Shop'
+title: '&l<gradient:#FF5C5C:#FFA19A>RelapsedMC</gradient> &8» &7Shop'
 rows: 4
 
 items:

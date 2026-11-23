@@ -1,4 +1,4 @@
-"""RELAPSEDMC look for FactionsUUID's /f show (/f who, /f f): rewrites commands.show.normalFormat in translations.conf.
+"""RelapsedMC look for FactionsUUID's /f show (/f who, /f f): rewrites commands.show.normalFormat in translations.conf.
 Usage: python3 tools/fuuid_theme.py path/to/plugins/FactionsUUID/config/translations.conf"""
 import re, sys
 

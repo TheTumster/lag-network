@@ -10,7 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 
 /**
- * Tells the RELAPSEDMC Client which realm this server is (laGCore's "role": hub, factions, skyblock, smp, cannons),
+ * Tells the RelapsedMC Client which realm this server is (laGCore's "role": hub, factions, skyblock, smp, cannons),
  * so it can switch to that realm's mode. Sent when the client registers the channel, which also happens again
  * after every /server switch through the proxy.
  * Wire format (must match ServerLink.RealmPayload): VarInt-prefixed UTF-8 string.

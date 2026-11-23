@@ -53,7 +53,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 	}
 
 	public String networkName() {
-		return getConfig().getString("network-name", "RELAPSEDMC");
+		return getConfig().getString("network-name", "RelapsedMC");
 	}
 
 	/**
@@ -108,8 +108,8 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 		}
 		getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
 		getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
-		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RELAPSEDMC Client: which realm is this
-		teams = new Teams(this); // RELAPSEDMC Teams: network-wide crews (/team, /tc, schem share, pings)
+		getServer().getPluginManager().registerEvents(new ClientRealm(this), this); // RelapsedMC Client: which realm is this
+		teams = new Teams(this); // RelapsedMC Teams: network-wide crews (/team, /tc, schem share, pings)
 		if (!teams.start()) teams = null;
 
 		pack = new Pack(this);
@@ -256,7 +256,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 					if (hubBuild != null) hubBuild.holograms();
 					if (spawnBuild != null) spawnBuild.holograms();
 					if (infoPanel != null) infoPanel.reload();
-					sender.sendMessage(mm("<#FF6B6B>RELAPSEDMC core reloaded."));
+					sender.sendMessage(mm("<#FF6B6B>RelapsedMC core reloaded."));
 				} else if (args.length > 0 && args[0].equalsIgnoreCase("rebuildhub") && hubBuild != null) {
 					// re-place the spawn island (same spot), e.g. after an update or if someone broke it
 					var o = hubBuild.origin();

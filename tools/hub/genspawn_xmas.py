@@ -1,4 +1,4 @@
-"""RELAPSEDMC hub, Christmas edition ("Midnight Christmas").
+"""RelapsedMC hub, Christmas edition ("Midnight Christmas").
 
 Takes the v4 hub (tools/hub/genspawn_v4.py: same gates, parkour, holograms, spawn) and dresses it for
 Christmas, then writes plugins/lag-core/src/main/resources/hub-spawn-christmas.txt.gz. The plugin picks it

@@ -1,7 +1,7 @@
 # The Relapse Codex: the book in every player's hub hotbar (slot 3). MiniMessage, one entry per page.
 # Book pages are parchment: use dark colours. About 19 characters per line, 14 lines per page.
 title: "The Relapse Codex"
-author: "RELAPSEDMC"
+author: "RelapsedMC"
 pages:
   - |-
 
@@ -152,7 +152,7 @@ pages:
     Prizes are earned,
     never bought.
 
-    The RELAPSEDMC
+    The RelapsedMC
     Client is free.
 
     <#7A6A90><italic>See you in there.
