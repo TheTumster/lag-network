@@ -579,6 +579,7 @@ def main():
     os.makedirs(os.path.join(DIST, "tools"), exist_ok=True)
     for f in os.listdir(os.path.join(ROOT, "windows_tools")):
         shutil.copy(os.path.join(ROOT, "windows_tools", f), os.path.join(DIST, "tools", f))
+    shutil.copy(os.path.join(ROOT, "linux", "lag.py"), os.path.join(DIST, "tools", "lag.py"))   # VPS control (linux/README.md)
     shutil.copy(os.path.join(ROOT, "network", "network.json"), os.path.join(DIST, "network.json"))
 
     log("== Update manifest")
@@ -589,6 +590,7 @@ def main():
     manage(".", os.path.join("tools", "start-lab.ps1"), RELEASE_DL + "start-lab.ps1")
     manage(".", os.path.join("tools", "stop.ps1"), RELEASE_DL + "stop.ps1")
     manage(".", os.path.join("tools", "tunnel.ps1"), RELEASE_DL + "tunnel.ps1")
+    manage(".", os.path.join("tools", "lag.py"), RELEASE_DL + "lag.py")
     build = os.environ.get("GITHUB_RUN_NUMBER", "dev")
     json.dump({"build": build, "servers": MANAGED}, open(os.path.join(ROOT, "dist", "update-manifest.json"), "w"), indent=1)
     for srv, files in MANAGED.items():
