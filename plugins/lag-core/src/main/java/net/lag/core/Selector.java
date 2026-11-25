@@ -47,16 +47,15 @@ public final class Selector implements Listener {
 		return pane;
 	}
 
-	/** Cyan-to-purple glass frame, black inside. */
+	/** Light-red glass frame, black inside (same as /help). */
 	static void border(Inventory inv) {
 		int size = inv.getSize(), rows = size / 9;
 		ItemStack inner = pane(Material.BLACK_STAINED_GLASS_PANE);
-		Material[] grad = {Material.LIGHT_BLUE_STAINED_GLASS_PANE, Material.CYAN_STAINED_GLASS_PANE, Material.BLUE_STAINED_GLASS_PANE,
-				Material.PURPLE_STAINED_GLASS_PANE, Material.MAGENTA_STAINED_GLASS_PANE};
+		Material[] grad = {Material.RED_STAINED_GLASS_PANE, Material.PINK_STAINED_GLASS_PANE};   // light-red brand frame
 		for (int i = 0; i < size; i++) {
 			int r = i / 9, c = i % 9;
 			boolean edge = r == 0 || r == rows - 1 || c == 0 || c == 8;
-			inv.setItem(i, edge ? pane(grad[Math.min(grad.length - 1, c * grad.length / 9)]) : inner);
+			inv.setItem(i, edge ? pane(grad[(r + c) % 2]) : inner);
 		}
 	}
 

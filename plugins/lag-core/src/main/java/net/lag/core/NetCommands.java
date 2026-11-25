@@ -20,8 +20,12 @@ final class NetCommands implements TabExecutor {
 	private final LagCore plugin;
 	static final String[] OWNED = {"help", "discord", "website", "store", "server"};
 
+	private final HelpMenu menu;
+
 	NetCommands(LagCore plugin) {
 		this.plugin = plugin;
+		this.menu = new HelpMenu(plugin);
+		plugin.getServer().getPluginManager().registerEvents(menu, plugin);
 		for (String c : OWNED) {
 			PluginCommand pc = plugin.getCommand(c);
 			if (pc != null) {
@@ -50,7 +54,10 @@ final class NetCommands implements TabExecutor {
 	@Override
 	public boolean onCommand(CommandSender s, Command cmd, String label, String[] args) {
 		switch (cmd.getName().toLowerCase(Locale.ROOT)) {
-			case "help" -> help(s);
+			case "help" -> {
+				if (s instanceof Player p && menu != null) menu.open(p);
+				else help(s);
+			}
 			case "discord" -> link(s, "discord", "Discord", "join the community, events and support");
 			case "website" -> link(s, "website", "Website", "news, rules and updates");
 			case "store" -> link(s, "store", "Store", "cosmetic ranks that support the server");
@@ -117,7 +124,7 @@ final class NetCommands implements TabExecutor {
 	private void section(CommandSender s, String accent, String title, List<String> lines) {
 		s.sendMessage(LagCore.mm("<" + accent + ">▌ <white><bold><u>" + title + "</u></bold>"));
 		for (String l : lines) {
-			String[] p = l.split("\\|", 2);
+			String[] p = l.split("\\|", 3);
 			String c = p[0].trim(), d = p.length > 1 ? p[1].trim() : "";
 			String run = c.split(" <| \\[")[0];
 			s.sendMessage(LagCore.mm("  <click:suggest_command:'" + run.replace("'", "") + " '><hover:show_text:'<#9AA3B8>" + LagCore.esc(d)
