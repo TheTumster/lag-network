@@ -161,6 +161,7 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 			getConfig().set("first-start-done", true);
 			saveConfig();
 		}, 200L);
+		new NetCommands(this);   // /help /discord /website /store /server: identical on every realm
 		if (getConfig().getBoolean("scoreboard.enabled", true)) {
 			Board board = new Board(this);
 			getServer().getPluginManager().registerEvents(board, this);
@@ -238,9 +239,6 @@ public final class LagCore extends JavaPlugin implements PluginMessageListener {
 					p.sendMessage(mm("<gray>Sending you to the hub..."));
 					send(p, "hub");
 				}
-			}
-			case "server" -> {
-				if (sender instanceof Player p) Selector.open(this, p);
 			}
 			case "setspawn" -> {
 				if (!(sender instanceof Player p)) return true;

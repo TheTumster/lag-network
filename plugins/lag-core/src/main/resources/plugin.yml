@@ -11,6 +11,18 @@ commands:
   server:
     description: Open the server selector
     aliases: [servers, realms, play]
+  help:
+    description: RelapsedMC help (same on every realm)
+    aliases: ["?"]
+  discord:
+    description: Our Discord
+    aliases: [dc]
+  website:
+    description: Our website
+    aliases: [site, web]
+  store:
+    description: The store (cosmetic ranks)
+    aliases: [donate]
   setspawn:
     description: Set this server's spawn point
     permission: lag.admin

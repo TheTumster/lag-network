@@ -69,12 +69,22 @@ final class Board implements Listener {
 		lines.add(Component.empty());
 		lines.add(LagCore.mm(sIcon + "<#FF6B6B><bold><u>" + sc("you")));
 		lines.add(LagCore.mm(pad + L + sc("rank") + " " + rank(p)));
+		String accent = plugin.getConfig().getString("help.accent." + role.toLowerCase(java.util.Locale.ROOT), "#FF6B6B");
 		boolean facBoard = "factions".equalsIgnoreCase(role) && Papi.present();
 		if (!facBoard) lines.add(LagCore.mm(pad + L + sc("ping") + " " + pingCol + ping + "ms")); // factions: room for the shield line
+		// realms with an economy show the wallet in YOU (scoreboard.money.<role>: "Label|symbol")
+		String money = plugin.getConfig().getString("scoreboard.money." + role.toLowerCase(java.util.Locale.ROOT), "");
+		if (!money.isEmpty()) {
+			Double bal = Money.balance(p);
+			if (bal != null) {
+				String[] mp = money.split("\\|", 2);
+				lines.add(LagCore.mm(pad + L + sc(mp[0]) + " " + V + (mp.length > 1 ? LagCore.esc(mp[1]) : "") + Money.fmt(bal)));
+			}
+		}
 		lines.add(Component.text(" "));
 		if (facBoard) {
 			String f = Papi.apply(p, "%factionsuuid_faction_name%").trim();
-			lines.add(LagCore.mm(tIcon + "<#FF4F64><bold><u>" + sc("faction")));
+			lines.add(LagCore.mm(tIcon + "<" + accent + "><bold><u>" + sc("faction")));
 			if (f.isEmpty() || f.toLowerCase(java.util.Locale.ROOT).contains("wilderness")) {
 				lines.add(LagCore.mm(pad + L + sc("none") + " " + D + "• " + V + "/f create"));
 				lines.add(LagCore.mm(pad + L + sc("power") + " " + V + Papi.apply(p, "%factionsuuid_player_power%")));
@@ -89,20 +99,27 @@ final class Board implements Listener {
 				if (!shield.isEmpty()) lines.add(LagCore.mm(pad + shield));
 			}
 			lines.add(Component.text("  "));
-			lines.add(LagCore.mm(bIcon + "<#A855FF><bold><u>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));
+			lines.add(LagCore.mm(bIcon + "<" + accent + "><bold><u>" + sc(plugin.getConfig().getString("map.name", "RELAPSE #1"))));
 			lines.add(LagCore.mm(pad + MapInfo.countdown(plugin)));
 		} else {
 			var realms = plugin.section("realms");
 			if (hubRole && realms != null) {
-				lines.add(LagCore.mm(bIcon + "<#A855FF><bold><u>" + sc("realms")));
+				lines.add(LagCore.mm(bIcon + "<" + accent + "><bold><u>" + sc("realms")));
 				for (String k : realms.getKeys(false)) {
 					String server = realms.getString(k + ".server", k);
-					lines.add(LagCore.mm(pad + L + sc(k) + " " + V + plugin.count(server)));
+					String c = plugin.getConfig().getString("help.accent." + k, "#9AA3B8");
+					lines.add(LagCore.mm(pad + "<" + c + ">" + sc(k) + " " + V + plugin.count(server)));
 				}
 			} else {
-				lines.add(LagCore.mm(pIcon + "<#A855FF><bold><u>" + sc("network")));
+				// this realm (its colour), then the network: same shape on every realm
+				lines.add(LagCore.mm(bIcon + "<" + accent + "><bold><u>" + sc(realm)));
+				lines.add(LagCore.mm(pad + L + sc("playing") + " " + V + Bukkit.getOnlinePlayers().size()));
+				for (String extra : plugin.getConfig().getStringList("scoreboard.realm-lines." + role.toLowerCase(java.util.Locale.ROOT))) {
+					lines.add(LagCore.mm(pad + extra.replace("{L}", L).replace("{V}", V).replace("{D}", D)));
+				}
+				lines.add(Component.text("  "));
+				lines.add(LagCore.mm(pIcon + "<#FF6B6B><bold><u>" + sc("network")));
 				lines.add(LagCore.mm(pad + L + sc("online") + " " + V + plugin.count("ALL")));
-				lines.add(LagCore.mm(pad + L + sc("realm") + " " + V + realm));
 			}
 		}
 		lines.add(Component.text("   "));

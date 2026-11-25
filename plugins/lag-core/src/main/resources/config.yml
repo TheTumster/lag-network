@@ -8,7 +8,7 @@ role: hub
 realms:
   skyblock:
     server: skyblock
-    name: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
+    name: "<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>"
     icon: GRASS_BLOCK
     slot: 10
     lore:
@@ -18,7 +18,7 @@ realms:
       - "<#FF6B6B>▶ Click to play"
   factions:
     server: factions
-    name: "<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient>"
+    name: "<#FF4F64><bold>FACTIONS</bold></#FF4F64>"
     icon: TNT
     slot: 12
     lore:
@@ -28,7 +28,7 @@ realms:
       - "<#FF6B6B>▶ Click to play"
   cannons:
     server: cannons
-    name: "<gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient>"
+    name: "<#FFAA45><bold>CANNONS</bold></#FFAA45>"
     icon: DISPENSER
     slot: 14
     lore:
@@ -38,7 +38,7 @@ realms:
       - "<#FF6B6B>▶ Click to play"
   smp:
     server: smp
-    name: "<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient>"
+    name: "<#45C8FF><bold>SMP</bold></#45C8FF>"
     icon: OAK_SAPLING
     slot: 16
     lore:
@@ -56,28 +56,28 @@ fresh-chat:
     factions:
       - "{logo}"
       - ""
-      - "{c}<gradient:#FF4D6D:#B040FF><bold>FACTIONS</bold></gradient> <dark_gray>•</dark_gray> <white>8-mans</white> <dark_gray>•</dark_gray> <gray>no allies <dark_gray>•</dark_gray> <gray>1.8 cannons"
+      - "{c}<#FF4F64><bold>FACTIONS</bold></#FF4F64> <dark_gray>•</dark_gray> <white>8-mans</white> <dark_gray>•</dark_gray> <gray>no allies <dark_gray>•</dark_gray> <gray>1.8 cannons"
       - ""
       - "{c}[[<#FF4D6D><bold>⚔ START</bold>|/f create|<gray>Make a faction: <white>/f create <name>]]   [[<#FFA19A><bold>☰ GUIDE</bold>|/spawn|<gray>Back to spawn: the kiosk explains everything]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     skyblock:
       - "{logo}"
       - ""
-      - "{c}<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient> <dark_gray>•</dark_gray> <gray>grind <dark_gray>•</dark_gray> <gray>spawners <dark_gray>•</dark_gray> <gray>monthly seasons"
+      - "{c}<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A> <dark_gray>•</dark_gray> <gray>grind <dark_gray>•</dark_gray> <gray>spawners <dark_gray>•</dark_gray> <gray>monthly seasons"
       - ""
       - "{c}[[<#7CFF6B><bold>⬢ ISLAND</bold>|/is|<gray>Create or go to your island]]   [[<#FFA19A><bold>◆ SELL</bold>|/sell|<gray>Sell everything to the Collector]]   [[<#FFD24D><bold>★ TOP</bold>|/is top|<gray>Island top]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     cannons:
       - "{logo}"
       - ""
-      - "{c}<gradient:#FF9F4D:#FF4D6D><bold>CANNONS</bold></gradient> <dark_gray>•</dark_gray> <gray>same jar as Factions <dark_gray>•</dark_gray> <gray>your own plot"
+      - "{c}<#FFAA45><bold>CANNONS</bold></#FFAA45> <dark_gray>•</dark_gray> <gray>same jar as Factions <dark_gray>•</dark_gray> <gray>your own plot"
       - ""
       - "{c}[[<#FF9F4D><bold>⬛ PLOT</bold>|/plot auto|<gray>Get your own plot]]   [[<#FF4D6D><bold>➹ HOME</bold>|/plot home|<gray>Back to your plot]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
     smp:
       - "{logo}"
       - ""
-      - "{c}<gradient:#7CFF6B:#38E0FF><bold>SMP</bold></gradient> <dark_gray>•</dark_gray> <gray>survival <dark_gray>•</dark_gray> <gray>land claims <dark_gray>•</dark_gray> <gray>never resets"
+      - "{c}<#45C8FF><bold>SMP</bold></#45C8FF> <dark_gray>•</dark_gray> <gray>survival <dark_gray>•</dark_gray> <gray>land claims <dark_gray>•</dark_gray> <gray>never resets"
       - ""
       - "{c}[[<#7CFF6B><bold>➹ WILD</bold>|/rtp|<gray>Random teleport into the wild]]   [[<#FFD24D><bold>⌂ HOME</bold>|/home|<gray>Go to your home]]   [[<#FF6B6B><bold>⌂ HUB</bold>|/hub|<gray>Back to the hub]]"
       - ""
@@ -87,6 +87,54 @@ links:
   discord: "https://discord.gg/G4pHKXDDru"
   website: "https://relapsedmc.com"
   store: ""
+
+# /help: the same on every realm. "/command|what it does". Shared block first, then the realm's own.
+help:
+  accent: {hub: "#FF6B6B", skyblock: "#5CFF8A", factions: "#FF4F64", cannons: "#FFAA45", smp: "#45C8FF"}
+  network:
+    - "/server|open the realm menu (or /server <realm>)"
+    - "/hub|back to the hub"
+    - "/spawn|this realm's spawn"
+    - "/team|your team, on every realm"
+    - "/tc <message>|team chat"
+    - "/discord|join our Discord"
+    - "/website|RelapsedMC.com"
+    - "/store|cosmetic ranks"
+  realm:
+    hub:
+      - "/server|pick a realm, or walk through a portal"
+    skyblock:
+      - "/is|your island (create, home, team)"
+      - "/sell|sell loot to the Collector"
+      - "/collector|loot prices"
+      - "/market|buy blocks, tools and more"
+      - "/spawners|the cage ladder"
+      - "/gen|your island's ore generator"
+      - "/istop|island top"
+      - "/season|this season's prizes and time left"
+      - "/warzone|PvP, envoys and KOTH"
+      - "/ah|auction house"
+      - "/isfly|island fly (rank perk)"
+    factions:
+      - "/f help|every faction command"
+      - "/f create <name>|start a faction (8 max)"
+      - "/f tnt|your faction's TNT bank"
+      - "/pv 1|your private vault"
+      - "/fps|hide TNT, sand and explosions"
+    cannons:
+      - "/plot auto|get your own plot"
+      - "/plot home|back to your plot"
+      - "/tntfill|fill dispensers with TNT (free)"
+      - "//upload <link>|load a schematic, then //schem load"
+      - "/fps|hide TNT, sand and explosions"
+    smp:
+      - "/claimhelp|land claims and trust menu"
+      - "/sethome|save a home (more with ranks)"
+      - "/home|go home"
+      - "/tpa <player>|ask to teleport"
+      - "/rtp|random teleport into the wild"
+      - "/shop|buy and sell items"
+      - "/sit|sit anywhere"
 
 # Ranks: how each one shows before a name (chat, tab, above heads, scoreboard). Order = tab order.
 # A player's rank: rank-players below, else the first LuckPerms group they're in (lp user <name> parent add <rank>).
@@ -206,7 +254,7 @@ spawns:
     holograms:
       - offset: [0.5, 5.4, -10.5]
         scale: 3
-        text: "<gradient:#7CFF6B:#FF5C5C:#FFA19A:{phase}><bold>SKYBLOCK</bold></gradient>"
+        text: "<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>"
       - offset: [0.5, 4.3, -10.5]
         scale: 0.9
         text: "<dark_gray><italic>When the Corrupted world collapsed, the pieces that didn't fall became islands.\n<dark_gray><italic>Every month the void takes them back."
@@ -246,7 +294,7 @@ spawns:
     holograms:
       - offset: [0.5, 4.6, -7.5]
         scale: 3
-        text: "<gradient:#FF9F4D:#FF4D6D:#FF9F4D:{phase}><bold>CANNONS</bold></gradient>"
+        text: "<#FFAA45><bold>CANNONS</bold></#FFAA45>"
       - offset: [0.5, 3.2, -7.5]
         scale: 1.1
         text: "<gray>Get your own plot: <white>/plot auto <dark_gray>• <white>/plot home <dark_gray>• <white>/plot add <player>\n<white>/tntfill <gray>free fill <dark_gray>• <white>//upload <link> <gray>then <white>//schem load <dark_gray>• <gray>same jar as Factions"
@@ -289,10 +337,10 @@ hub:
     fx: {sleigh: true, train: true, twinkle: true, fireworks: true, aurora: true}
     # holograms from the list above whose text contains one of these are left out (they move, see below)
     # ("=" in front: the whole text must match; otherwise any text containing it)
-    hide: ["{logo}", "walk through a gate", "=<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>", "=<white>{skyblock} <#B9A8D8>playing",
-           "=<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>", "=<white>{smp} <#B9A8D8>playing",
-           "=<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>", "=<white>{factions} <#B9A8D8>playing",
-           "=<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>", "=<white>{cannons} <#B9A8D8>playing"]
+    hide: ["{logo}", "walk through a gate", "=<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>", "=<white>{skyblock} <#B9A8D8>playing",
+           "=<#45C8FF><bold>SMP</bold></#45C8FF>", "=<white>{smp} <#B9A8D8>playing",
+           "=<#FF4F64><bold>FACTIONS</bold></#FF4F64>", "=<white>{factions} <#B9A8D8>playing",
+           "=<#FFAA45><bold>CANNONS</bold></#FFAA45>", "=<white>{cannons} <#B9A8D8>playing"]
     holograms:
       # the logo crowns the Great Tree, above its star
       - offset: [0.5, 107, -102.5]
@@ -311,13 +359,13 @@ hub:
         bob: false
         text: "<white>{online} <#C9B8E8>online  <#6A5A80>|  <#C9B8E8>follow a runner to a gate"
       # realm name + count, floating clear in front of each portal house (always facing you)
-      - {offset: [-27.91, 12.9, -34.96], scale: 2.4, bob: false, text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"}
+      - {offset: [-27.91, 12.9, -34.96], scale: 2.4, bob: false, text: "<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>"}
       - {offset: [-27.91, 12.15, -34.96], scale: 1.25, bob: false, text: "<white>{skyblock} <#B9A8D8>playing"}
-      - {offset: [-11.5, 12.9, -34.5], scale: 2.4, bob: false, text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>"}
+      - {offset: [-11.5, 12.9, -34.5], scale: 2.4, bob: false, text: "<#FF4F64><bold>FACTIONS</bold></#FF4F64>"}
       - {offset: [-11.5, 12.15, -34.5], scale: 1.25, bob: false, text: "<white>{factions} <#B9A8D8>playing"}
-      - {offset: [12.5, 12.9, -34.5], scale: 2.4, bob: false, text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>"}
+      - {offset: [12.5, 12.9, -34.5], scale: 2.4, bob: false, text: "<#FFAA45><bold>CANNONS</bold></#FFAA45>"}
       - {offset: [12.5, 12.15, -34.5], scale: 1.25, bob: false, text: "<white>{cannons} <#B9A8D8>playing"}
-      - {offset: [28.91, 12.9, -34.96], scale: 2.4, bob: false, text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"}
+      - {offset: [28.91, 12.9, -34.96], scale: 2.4, bob: false, text: "<#45C8FF><bold>SMP</bold></#45C8FF>"}
       - {offset: [28.91, 12.15, -34.96], scale: 1.25, bob: false, text: "<white>{smp} <#B9A8D8>playing"}
       # Santa's Workshop, at the end of the south street
       - offset: [0.5, 12.2, 40.5]
@@ -336,19 +384,19 @@ hub:
       - offset: [-22.93, 4.45, -34.53]
         scale: 1.25
         bob: false
-        text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>\n<white>{skyblock} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+        text: "<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>\n<white>{skyblock} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
       - offset: [-7.5, 4.45, -31.5]
         scale: 1.25
         bob: false
-        text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>\n<white>{factions} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+        text: "<#FF4F64><bold>FACTIONS</bold></#FF4F64>\n<white>{factions} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
       - offset: [8.5, 4.45, -31.5]
         scale: 1.25
         bob: false
-        text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>\n<white>{cannons} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+        text: "<#FFAA45><bold>CANNONS</bold></#FFAA45>\n<white>{cannons} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
       - offset: [23.93, 4.45, -34.53]
         scale: 1.25
         bob: false
-        text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>\n<white>{smp} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
+        text: "<#45C8FF><bold>SMP</bold></#45C8FF>\n<white>{smp} <#B9A8D8>playing <dark_gray>· <#F4C542>click"
     # Christmas swaps the hub's floating items for these (the gate icons sit in front of the houses; no crystal star)
     displays:
       - {offset: [-32.5, 3.4, -11.5], item: ECHO_SHARD, scale: 1.6, spin: -1}
@@ -391,7 +439,7 @@ hub:
       billboard: fixed
       yaw: 0
       bob: false
-      text: "<gradient:#7CFF6B:#38E0FF><bold>SKYBLOCK</bold></gradient>"
+      text: "<#5CFF8A><bold>SKYBLOCK</bold></#5CFF8A>"
     - offset: [-29.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
@@ -403,7 +451,7 @@ hub:
       billboard: fixed
       yaw: 0
       bob: false
-      text: "<gradient:#FF4D6D:#FF9F4D><bold>FACTIONS</bold></gradient>"
+      text: "<#FF4F64><bold>FACTIONS</bold></#FF4F64>"
     - offset: [-11.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
@@ -415,7 +463,7 @@ hub:
       billboard: fixed
       yaw: 0
       bob: false
-      text: "<gradient:#FF9F4D:#FFD24D><bold>CANNONS</bold></gradient>"
+      text: "<#FFAA45><bold>CANNONS</bold></#FFAA45>"
     - offset: [12.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
@@ -427,7 +475,7 @@ hub:
       billboard: fixed
       yaw: 0
       bob: false
-      text: "<gradient:#38E0FF:#7CFF6B><bold>SMP</bold></gradient>"
+      text: "<#45C8FF><bold>SMP</bold></#45C8FF>"
     - offset: [30.5, 12.0, -35.8]
       scale: 1.3
       billboard: fixed
@@ -481,6 +529,12 @@ hub:
 
 scoreboard:
   enabled: true
+  # same board on every realm; these are the small per-realm differences
+  money: {skyblock: "Shards|◆", smp: "Balance|$"}
+  realm-lines:
+    skyblock: ["{L}ɪꜱʟᴀɴᴅ {V}/is"]
+    smp: ["{L}ᴄʟᴀɪᴍꜱ {V}/claimhelp"]
+    cannons: ["{L}ᴘʟᴏᴛ {V}/plot home"]
   footer: "<gradient:#FF5C5C:#FFA19A>play.RelapsedMC.com</gradient>"
 
 # RelapsedMC Teams: one team across every realm, stored in <network>/shared/teams.db (shared by all servers).
